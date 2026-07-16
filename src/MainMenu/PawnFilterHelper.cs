@@ -280,11 +280,11 @@ namespace RimWorldAccess
 
             if (degree.statOffsets != null)
                 foreach (var so in degree.statOffsets)
-                    effects.Add(so.ToString());
+                    effects.Add($"{so.stat.LabelCap} {so.ValueToStringAsOffset}");
 
             if (degree.statFactors != null)
                 foreach (var sf in degree.statFactors)
-                    effects.Add(sf.ToString());
+                    effects.Add($"{sf.stat.LabelCap} {sf.ToStringAsFactor}");
 
             if (degree.skillGains != null)
                 foreach (var gain in degree.skillGains)
