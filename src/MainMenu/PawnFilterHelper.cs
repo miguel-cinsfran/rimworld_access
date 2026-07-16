@@ -444,8 +444,20 @@ namespace RimWorldAccess
                     {
                         try
                         {
+                            // Some translations (notably Spanish) use a {PAWN_gender ? masc : fem}
+                            // ternary for grammatical gender agreement that predates/bypasses
+                            // GrammarResolver entirely - it's not [RULE] syntax, so left alone it
+                            // either throws inside Resolve() or (as here) is never touched by the
+                            // simple {PAWN_x} conversion below, leaking the raw "{PAWN_gender ? o :
+                            // a}" text verbatim. Resolve it ourselves first, picking the branch that
+                            // matches the fake pawn's gender (Female) used below.
+                            string resolvedDesc = Regex.Replace(
+                                desc,
+                                @"\{PAWN_gender\s*\?([^:{}]*):([^{}]*)\}",
+                                m => m.Groups[2].Value.Trim());
+
                             // Convert {PAWN_*} to [PAWN_*] so GrammarResolver handles both formats
-                            string resolvedDesc = Regex.Replace(desc, @"\{(PAWN_\w+)\}", "[$1]");
+                            resolvedDesc = Regex.Replace(resolvedDesc, @"\{(PAWN_\w+)\}", "[$1]");
 
                             // Resolve using game's grammar system with generic female colonist
                             var request = default(GrammarRequest);
