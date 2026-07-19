@@ -272,6 +272,8 @@ namespace RimWorldAccess
                 || (CaravanFormationState.IsActive && !CaravanFormationState.IsChoosingDestination)
                 || LordJobDialogState.IsActive
                 || QuestMenuState.IsActive
+                // Colony Manager Redux (optional mod) manager window
+                || ColonyManagerState.IsActive
                 || NotificationMenuState.IsActive
                 || AssignMenuState.IsActive
                 || WorkMenuState.IsActive

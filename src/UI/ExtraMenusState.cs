@@ -314,6 +314,16 @@ namespace RimWorldAccess
                 }));
             }
 
+            // Colony Manager Redux (optional third-party mod). Its bottom-bar "manager" button
+            // ships with no hotkey, so this menu is the accessible keyboard way to open it.
+            if (ColonyManagerReflection.Available)
+            {
+                options.Add(new MenuOption("RimWorldAccess.ColonyManager.WindowOpened".Translate().ToString(), () =>
+                {
+                    ColonyManagerReflection.ToggleManagerWindow();
+                }));
+            }
+
             return options;
         }
 
