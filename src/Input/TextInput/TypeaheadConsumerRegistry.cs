@@ -174,6 +174,9 @@ namespace RimWorldAccess
             TypeaheadDispatcher.Register(0.33, () => LordJobDialogState.IsActive, c => LordJobDialogState.HandleTypeahead(c));
             TypeaheadDispatcher.Register(0.34, () => DryadCasteState.IsActive, c => DryadCasteState.HandleTypeahead(c));
             TypeaheadDispatcher.Register(4.62, () => EntityTabState.IsActive, c => EntityTabState.HandleTypeahead(c));
+            // Vanilla Psycasts Expanded psycast tab — opens OVER the inspection tree (4.806), which
+            // stays active beneath it, so register lower so its typeahead wins over the tree.
+            TypeaheadDispatcher.Register(4.615, () => VPEPsycastsState.IsActive, c => VPEPsycastsState.HandleTypeahead(c));
             // Prisoner/Slave tab opens OVER the inspection tree (which stays active at 4.806). Register
             // lower so its cross-section typeahead wins; otherwise the tree beneath steals the search.
             TypeaheadDispatcher.Register(4.61, () => PrisonerTabState.IsActive, c => PrisonerTabState.HandleTypeahead(c));

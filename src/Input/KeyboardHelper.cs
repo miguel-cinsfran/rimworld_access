@@ -302,6 +302,8 @@ namespace RimWorldAccess
                 // Pawn inspection tabs
                 || HealthTabState.IsActive
                 || PrisonerTabState.IsActive
+                // Third-party: Vanilla Psycasts Expanded psycast tab
+                || VPEPsycastsState.IsActive
                 // Filter navigation
                 || ThingFilterMenuState.IsActive
                 || ThingFilterNavigationState.IsActive
