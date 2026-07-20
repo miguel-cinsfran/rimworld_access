@@ -62,4 +62,10 @@
   <RimWorldAccess.VPEPsycasts.FocusLocked>{0} está bloqueado.</RimWorldAccess.VPEPsycasts.FocusLocked>
   <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0} está bloqueado: {1}.</RimWorldAccess.VPEPsycasts.FocusLockedReason>
   <RimWorldAccess.VPEPsycasts.FocusUnlocked>{0} desbloqueado. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
+
+  <!-- Detalles (Alt+I) y ayudas. -->
+  <RimWorldAccess.VPEPsycasts.DetailsHint>Pulsa Alt más I para ver detalles.</RimWorldAccess.VPEPsycasts.DetailsHint>
+  <RimWorldAccess.VPEPsycasts.NoDescription>No hay descripción disponible.</RimWorldAccess.VPEPsycasts.NoDescription>
+  <!-- {0} = lista de estadísticas. -->
+  <RimWorldAccess.VPEPsycasts.CurrentStats>Estadísticas actuales: {0}.</RimWorldAccess.VPEPsycasts.CurrentStats>
 </LanguageData>

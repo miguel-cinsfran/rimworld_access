@@ -121,15 +121,15 @@ namespace RimWorldAccess
                     break;
 
                 case View.Abilities:
-                    foreach (var a in VPEPsycastsReflection.GetPathAbilities(currentPath)
-                                 .OrderBy(VPEPsycastsReflection.GetAbilityLevel)
-                                 .ThenBy(VPEPsycastsReflection.GetAbilityOrder)
-                                 .ThenBy(a => a.label))
+                    foreach (var a in OrderAbilitiesLogically(currentPath))
                         items.Add(new Item { Kind = ItemKind.Ability, Ability = a });
                     break;
 
                 case View.Foci:
-                    foreach (var f in VPEPsycastsReflection.GetAllFoci())
+                    // Already-usable foci first, then by name — a predictable, stable order.
+                    foreach (var f in VPEPsycastsReflection.GetAllFoci()
+                                 .OrderByDescending(f => VPEPsycastsReflection.FocusCanPawnUse(f, pawn))
+                                 .ThenBy(f => f.label))
                         items.Add(new Item { Kind = ItemKind.Focus, Focus = f });
                     break;
             }
@@ -144,6 +144,15 @@ namespace RimWorldAccess
             if (!isActive || evt.type != EventType.KeyDown) return false;
 
             KeyCode key = evt.keyCode;
+
+            // Alt+I — read the current item's description/details on demand (RWA convention),
+            // so the fast navigation announcement stays terse. Checked before typeahead since
+            // Alt+letter never reaches the character dispatcher.
+            if (KeyboardHelper.IsAltHeld && key == KeyCode.I)
+            {
+                SpeakDetails();
+                return true;
+            }
 
             switch (key)
             {
@@ -160,6 +169,13 @@ namespace RimWorldAccess
                 case KeyCode.LeftArrow:
                     if (typeahead.HasActiveSearch && !typeahead.HasNoMatches) return true;
                     GoBack();
+                    return true;
+
+                case KeyCode.RightArrow:
+                    // Expand only — never commits an action. Drills into an unlocked path's
+                    // abilities; inert on anything else. Enter is the only key that spends points.
+                    if (typeahead.HasActiveSearch && !typeahead.HasNoMatches) return true;
+                    Expand();
                     return true;
 
                 case KeyCode.UpArrow:
@@ -200,7 +216,6 @@ namespace RimWorldAccess
 
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
-                case KeyCode.RightArrow:
                 case KeyCode.Space:
                     Activate();
                     return true;
@@ -333,7 +348,8 @@ namespace RimWorldAccess
             VPEPsycastsReflection.ImproveStats(hediff, 1);
             SoundDefOf.Tick_High.PlayOneShotOnCamera();
             BuildItems();
-            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.StatsImproved".Loc(VPEPsycastsReflection.GetPoints(hediff)).ToString());
+            string result = "RimWorldAccess.VPEPsycasts.StatsImproved".Loc(VPEPsycastsReflection.GetPoints(hediff)).ToString();
+            TolkHelper.SpeakData($"{result}. {BuildStatsDetails()}");
         }
 
         private static void ActivatePath(Def path)
@@ -442,6 +458,138 @@ namespace RimWorldAccess
             TolkHelper.Speak("RimWorldAccess.VPEPsycasts.NoPoints".Loc());
         }
 
+        /// <summary>
+        /// Right-arrow: expand/drill in only, never commits a point-spend. Enters a submenu from
+        /// the root, or an unlocked path's ability list; inert elsewhere (re-announces so silence
+        /// isn't mistaken for a missed keypress).
+        /// </summary>
+        private static void Expand()
+        {
+            if (items.Count == 0 || selectedIndex < 0 || selectedIndex >= items.Count) return;
+            var item = items[selectedIndex];
+            switch (item.Kind)
+            {
+                case ItemKind.GotoPaths:
+                    typeahead.ClearSearch();
+                    EnterView(View.Paths);
+                    return;
+                case ItemKind.GotoFoci:
+                    typeahead.ClearSearch();
+                    EnterView(View.Foci);
+                    return;
+                case ItemKind.Path:
+                    if (VPEPsycastsReflection.IsPathUnlocked(hediff, item.Path) &&
+                        VPEPsycastsReflection.PathHasAbilities(item.Path))
+                    {
+                        typeahead.ClearSearch();
+                        EnterView(View.Abilities, item.Path);
+                        return;
+                    }
+                    break;
+            }
+            AnnounceCurrent();
+        }
+
+        /// <summary>
+        /// Orders a path's abilities so prerequisites always precede the abilities that depend on
+        /// them (a topological sort), tie-broken by level, then VPE's own order, then name. This
+        /// fixes the confusing raw order where e.g. "Word of Serenity" preceded its own
+        /// prerequisite "Word of Love".
+        /// </summary>
+        private static List<Def> OrderAbilitiesLogically(Def path)
+        {
+            var abilities = VPEPsycastsReflection.GetPathAbilities(path);
+            var set = new HashSet<Def>(abilities);
+            var prereqs = new Dictionary<Def, List<Def>>();
+            foreach (var a in abilities)
+                prereqs[a] = VPEPsycastsReflection.GetAbilityPrerequisites(a).Where(set.Contains).ToList();
+
+            var result = new List<Def>();
+            var placed = new HashSet<Def>();
+            var remaining = new List<Def>(abilities);
+            while (remaining.Count > 0)
+            {
+                var ready = remaining
+                    .Where(a => prereqs[a].All(placed.Contains))
+                    .OrderBy(VPEPsycastsReflection.GetAbilityLevel)
+                    .ThenBy(VPEPsycastsReflection.GetAbilityOrder)
+                    .ThenBy(a => a.label)
+                    .ToList();
+                if (ready.Count == 0)
+                {
+                    // Prerequisite cycle (shouldn't happen with real data) — append the rest
+                    // deterministically so nothing is dropped.
+                    foreach (var a in remaining
+                                 .OrderBy(VPEPsycastsReflection.GetAbilityLevel)
+                                 .ThenBy(VPEPsycastsReflection.GetAbilityOrder)
+                                 .ThenBy(a => a.label))
+                        result.Add(a);
+                    break;
+                }
+                var next = ready[0];
+                result.Add(next);
+                placed.Add(next);
+                remaining.Remove(next);
+            }
+            return result;
+        }
+
+        // ===== DETAILS (Alt+I) =====
+
+        private static void SpeakDetails()
+        {
+            if (items.Count == 0 || selectedIndex < 0 || selectedIndex >= items.Count) return;
+            var item = items[selectedIndex];
+            string text;
+            switch (item.Kind)
+            {
+                case ItemKind.Ability: text = BuildDefDetails(item.Ability); break;
+                case ItemKind.Path: text = BuildPathDetails(item.Path); break;
+                case ItemKind.Focus: text = BuildDefDetails(item.Focus); break;
+                case ItemKind.ImproveStats: text = BuildStatsDetails(); break;
+                default: text = BuildItemAnnouncement(item); break;
+            }
+            if (string.IsNullOrEmpty(text))
+                text = "RimWorldAccess.VPEPsycasts.NoDescription".Loc().ToString();
+            TolkHelper.SpeakData(text, SpeechPriority.High);
+        }
+
+        private static string BuildDefDetails(Def def)
+        {
+            if (def == null) return "";
+            string desc = SanitizeText(def.description);
+            return string.IsNullOrEmpty(desc) ? def.LabelCap.ToString() : $"{def.LabelCap}. {desc}";
+        }
+
+        private static string BuildPathDetails(Def path)
+        {
+            if (path == null) return "";
+            string tip = SanitizeText(VPEPsycastsReflection.GetPathTooltip(path));
+            return string.IsNullOrEmpty(tip) ? path.LabelCap.ToString() : $"{path.LabelCap}. {tip}";
+        }
+
+        private static string BuildStatsDetails()
+        {
+            // The four psycaster stats a sighted user reads next to the Upgrade button.
+            var parts = new List<string>();
+            AppendStat(parts, StatDefOf.PsychicEntropyMax);
+            AppendStat(parts, StatDefOf.PsychicEntropyRecoveryRate);
+            AppendStat(parts, StatDefOf.PsychicSensitivity);
+            return "RimWorldAccess.VPEPsycasts.CurrentStats".Loc(string.Join(". ", parts)).ToString();
+        }
+
+        private static void AppendStat(List<string> parts, StatDef stat)
+        {
+            try { parts.Add($"{stat.LabelCap}: {stat.ValueToString(pawn.GetStatValue(stat))}"); }
+            catch { /* stat unavailable — skip */ }
+        }
+
+        private static string SanitizeText(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            return text.StripTags().Replace("\n\n", ". ").Replace("\n", " ").Trim();
+        }
+
         // ===== ANNOUNCEMENTS =====
 
         private static void AnnounceCurrentWithSearch()
@@ -470,7 +618,8 @@ namespace RimWorldAccess
             return $"{tabName}. {pawn.LabelShortCap}. " +
                    "RimWorldAccess.VPEPsycasts.Status".Loc(
                        VPEPsycastsReflection.GetLevel(hediff),
-                       VPEPsycastsReflection.GetPoints(hediff)).ToString();
+                       VPEPsycastsReflection.GetPoints(hediff)).ToString() +
+                   $" {"RimWorldAccess.VPEPsycasts.DetailsHint".Loc()}";
         }
 
         private static string BuildViewHeader()
