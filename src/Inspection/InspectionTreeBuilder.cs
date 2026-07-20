@@ -577,6 +577,12 @@ namespace RimWorldAccess
                     EntityTabState.Open(pawn);
                     return;
                 }
+                // Vanilla Psycasts Expanded psycast tab (third-party, reflection-gated).
+                if (category == "Psycasts")
+                {
+                    VPEPsycastsState.Open(pawn);
+                    return;
+                }
             }
 
             // Held-entity tab is also reachable when the inspected target is the holding platform itself.

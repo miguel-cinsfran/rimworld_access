@@ -109,6 +109,14 @@ namespace RimWorldAccess
                     Event.current.Use();
                 return;
             }
+
+            // Handle VPEPsycastsState (Vanilla Psycasts Expanded psycast tab - third-party)
+            if (VPEPsycastsState.IsActive)
+            {
+                if (VPEPsycastsState.HandleInput(Event.current))
+                    Event.current.Use();
+                return;
+            }
         }
 
         private static void HandleTempControlInput()

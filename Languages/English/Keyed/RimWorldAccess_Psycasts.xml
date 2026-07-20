@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!-- Vanilla Psycasts Expanded (VPE) psycast tab accessibility (VPEPsycastsState).
+       A point-spend tree surfaced on any player psycaster: spend points to improve stats,
+       unlock meditation foci, unlock paths, or learn abilities inside unlocked paths. -->
+
+  <!-- Shown when VPE isn't installed or the pawn has no psycast implant. -->
+  <RimWorldAccess.VPEPsycasts.Unavailable>Psycast information is not available for this pawn.</RimWorldAccess.VPEPsycasts.Unavailable>
+  <RimWorldAccess.VPEPsycasts.Closed>Closed psycasts.</RimWorldAccess.VPEPsycasts.Closed>
+  <RimWorldAccess.VPEPsycasts.NoPoints>Not enough psycast points.</RimWorldAccess.VPEPsycasts.NoPoints>
+
+  <!-- Opening header. {0} = level, {1} = points. -->
+  <RimWorldAccess.VPEPsycasts.Status>Level {0}. Points available: {1}.</RimWorldAccess.VPEPsycasts.Status>
+
+  <!-- Root menu items and their full announcements. -->
+  <RimWorldAccess.VPEPsycasts.Item.Status>Status</RimWorldAccess.VPEPsycasts.Item.Status>
+  <!-- {0} = level, {1} = points, {2} = experience, {3} = experience needed for next level. -->
+  <RimWorldAccess.VPEPsycasts.StatusFull>Level {0}. Points: {1}. Experience {2} of {3}.</RimWorldAccess.VPEPsycasts.StatusFull>
+  <RimWorldAccess.VPEPsycasts.Item.Paths>Psycast paths</RimWorldAccess.VPEPsycasts.Item.Paths>
+  <!-- {0} = unlocked, {1} = total. -->
+  <RimWorldAccess.VPEPsycasts.Item.PathsCount>Psycast paths. {0} of {1} unlocked.</RimWorldAccess.VPEPsycasts.Item.PathsCount>
+  <RimWorldAccess.VPEPsycasts.Item.Foci>Meditation focus types</RimWorldAccess.VPEPsycasts.Item.Foci>
+  <!-- {0} = unlocked, {1} = total. -->
+  <RimWorldAccess.VPEPsycasts.Item.FociCount>Meditation focus types. {0} of {1} unlocked.</RimWorldAccess.VPEPsycasts.Item.FociCount>
+  <RimWorldAccess.VPEPsycasts.Item.ImproveStats>Improve psycaster stats</RimWorldAccess.VPEPsycasts.Item.ImproveStats>
+  <RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>Improve psycaster stats. Costs one point.</RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>
+  <!-- {0} = remaining points. -->
+  <RimWorldAccess.VPEPsycasts.StatsImproved>Psycaster stats improved. {0} points left.</RimWorldAccess.VPEPsycasts.StatsImproved>
+
+  <!-- View headers. -->
+  <RimWorldAccess.VPEPsycasts.Header.Paths>Psycast paths.</RimWorldAccess.VPEPsycasts.Header.Paths>
+  <!-- {0} = path name. -->
+  <RimWorldAccess.VPEPsycasts.Header.Abilities>{0} abilities.</RimWorldAccess.VPEPsycasts.Header.Abilities>
+  <RimWorldAccess.VPEPsycasts.Header.Foci>Meditation focus types.</RimWorldAccess.VPEPsycasts.Header.Foci>
+
+  <!-- Path rows. {0} = path name, {1}/{2} = learned/total abilities, reason where noted. -->
+  <RimWorldAccess.VPEPsycasts.Path.Unlocked>{0}. Unlocked. {1} of {2} abilities learned.</RimWorldAccess.VPEPsycasts.Path.Unlocked>
+  <RimWorldAccess.VPEPsycasts.Path.Unlockable>{0}. Available to unlock, costs one point.</RimWorldAccess.VPEPsycasts.Path.Unlockable>
+  <RimWorldAccess.VPEPsycasts.Path.NoPoints>{0}. Not enough points to unlock.</RimWorldAccess.VPEPsycasts.Path.NoPoints>
+  <RimWorldAccess.VPEPsycasts.Path.Locked>{0}. Locked.</RimWorldAccess.VPEPsycasts.Path.Locked>
+  <RimWorldAccess.VPEPsycasts.Path.LockedReason>{0}. Locked: {1}.</RimWorldAccess.VPEPsycasts.Path.LockedReason>
+
+  <!-- Path activation results. -->
+  <RimWorldAccess.VPEPsycasts.PathUnlocked>Unlocked {0}. {1} points left.</RimWorldAccess.VPEPsycasts.PathUnlocked>
+  <RimWorldAccess.VPEPsycasts.PathLocked>{0} is locked.</RimWorldAccess.VPEPsycasts.PathLocked>
+  <RimWorldAccess.VPEPsycasts.PathLockedReason>{0} is locked: {1}.</RimWorldAccess.VPEPsycasts.PathLockedReason>
+  <RimWorldAccess.VPEPsycasts.PathNoAbilities>{0} has no abilities.</RimWorldAccess.VPEPsycasts.PathNoAbilities>
+
+  <!-- Ability rows. {0} = ability name, {1} = level, {2} = prerequisite list. -->
+  <RimWorldAccess.VPEPsycasts.Ability.Learned>{0}. Level {1}. Learned.</RimWorldAccess.VPEPsycasts.Ability.Learned>
+  <RimWorldAccess.VPEPsycasts.Ability.Unlockable>{0}. Level {1}. Available to learn, costs one point.</RimWorldAccess.VPEPsycasts.Ability.Unlockable>
+  <RimWorldAccess.VPEPsycasts.Ability.NoPoints>{0}. Level {1}. Not enough points.</RimWorldAccess.VPEPsycasts.Ability.NoPoints>
+  <RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>{0}. Level {1}. Requires: {2}.</RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>
+
+  <!-- Ability activation results. -->
+  <RimWorldAccess.VPEPsycasts.AbilityLearned>{0} is already learned.</RimWorldAccess.VPEPsycasts.AbilityLearned>
+  <RimWorldAccess.VPEPsycasts.AbilityUnlocked>Learned {0}. {1} points left.</RimWorldAccess.VPEPsycasts.AbilityUnlocked>
+
+  <!-- Meditation focus rows. {0} = focus name, {1} = reason where noted. -->
+  <RimWorldAccess.VPEPsycasts.Focus.Available>{0}. Already available.</RimWorldAccess.VPEPsycasts.Focus.Available>
+  <RimWorldAccess.VPEPsycasts.Focus.Unlockable>{0}. Available to unlock, costs one point.</RimWorldAccess.VPEPsycasts.Focus.Unlockable>
+  <RimWorldAccess.VPEPsycasts.Focus.NoPoints>{0}. Not enough points to unlock.</RimWorldAccess.VPEPsycasts.Focus.NoPoints>
+  <RimWorldAccess.VPEPsycasts.Focus.Locked>{0}. Locked.</RimWorldAccess.VPEPsycasts.Focus.Locked>
+  <RimWorldAccess.VPEPsycasts.Focus.LockedReason>{0}. Locked: {1}.</RimWorldAccess.VPEPsycasts.Focus.LockedReason>
+
+  <!-- Meditation focus activation results. -->
+  <RimWorldAccess.VPEPsycasts.FocusAvailable>{0} is already available.</RimWorldAccess.VPEPsycasts.FocusAvailable>
+  <RimWorldAccess.VPEPsycasts.FocusLocked>{0} is locked.</RimWorldAccess.VPEPsycasts.FocusLocked>
+  <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0} is locked: {1}.</RimWorldAccess.VPEPsycasts.FocusLockedReason>
+  <RimWorldAccess.VPEPsycasts.FocusUnlocked>Unlocked {0}. {1} points left.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
+</LanguageData>

@@ -83,6 +83,10 @@ namespace RimWorldAccess
             { "ITab_Genes", "Genes" },
             { "ITab_GenesPregnancy", "Pregnancy Genes" },
 
+            // Third-party: Vanilla Psycasts Expanded (labelKey "VPE.Psycasts" translates to the
+            // display name; this is only the English fallback for the dispatch token).
+            { "ITab_Pawn_Psycasts", "Psycasts" },
+
             // DLC tabs - Ideology/Anomaly
             { "ITab_Entity", "Entity" },
             { "ITab_StudyNotes", "Study Notes" },
@@ -136,6 +140,9 @@ namespace RimWorldAccess
             { "ITab_ContentsMapPortal", TabHandlerType.BasicInspectString },
             { "ITab_Genes", TabHandlerType.RichNavigation },
             { "ITab_GenesPregnancy", TabHandlerType.BasicInspectString },
+            // Vanilla Psycasts Expanded: an interactive point-spend tree, handled by its own
+            // dedicated overlay state (VPEPsycastsState) like the Anomaly Entity tab.
+            { "ITab_Pawn_Psycasts", TabHandlerType.Action },
             { "ITab_Entity", TabHandlerType.Action },
             { "ITab_StudyNotes", TabHandlerType.BasicInspectString },
             { "ITab_StudyNotesUnnaturalCorpse", TabHandlerType.BasicInspectString },
@@ -329,6 +336,7 @@ namespace RimWorldAccess
                 case "ITab_Pawn_Visitor": return "Guest";
                 case "ITab_ContentsTransporter": return "Contents";
                 case "ITab_Entity": return "Entity";
+                case "ITab_Pawn_Psycasts": return "Psycasts"; // l10n-exempt: dispatch token; display name comes from labelKey
                 default: return GetCategoryNameForTab(tab);
             }
         }

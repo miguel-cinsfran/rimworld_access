@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!-- Accesibilidad de la pestaña de psicasts de Vanilla Psycasts Expanded (VPEPsycastsState).
+       Árbol de gasto de puntos: gasta puntos para mejorar estadísticas, desbloquear focos de
+       meditación, desbloquear sendas o aprender habilidades dentro de sendas desbloqueadas. -->
+
+  <RimWorldAccess.VPEPsycasts.Unavailable>La información de psicasts no está disponible para este pawn.</RimWorldAccess.VPEPsycasts.Unavailable>
+  <RimWorldAccess.VPEPsycasts.Closed>Psicasts cerrado.</RimWorldAccess.VPEPsycasts.Closed>
+  <RimWorldAccess.VPEPsycasts.NoPoints>No hay puntos de psicast suficientes.</RimWorldAccess.VPEPsycasts.NoPoints>
+
+  <!-- Encabezado de apertura. {0} = nivel, {1} = puntos. -->
+  <RimWorldAccess.VPEPsycasts.Status>Nivel {0}. Puntos disponibles: {1}.</RimWorldAccess.VPEPsycasts.Status>
+
+  <RimWorldAccess.VPEPsycasts.Item.Status>Estado</RimWorldAccess.VPEPsycasts.Item.Status>
+  <!-- {0} = nivel, {1} = puntos, {2} = experiencia, {3} = experiencia para el siguiente nivel. -->
+  <RimWorldAccess.VPEPsycasts.StatusFull>Nivel {0}. Puntos: {1}. Experiencia {2} de {3}.</RimWorldAccess.VPEPsycasts.StatusFull>
+  <RimWorldAccess.VPEPsycasts.Item.Paths>Sendas de psicasts</RimWorldAccess.VPEPsycasts.Item.Paths>
+  <!-- {0} = desbloqueadas, {1} = total. -->
+  <RimWorldAccess.VPEPsycasts.Item.PathsCount>Sendas de psicasts. {0} de {1} desbloqueadas.</RimWorldAccess.VPEPsycasts.Item.PathsCount>
+  <RimWorldAccess.VPEPsycasts.Item.Foci>Tipos de foco de meditación</RimWorldAccess.VPEPsycasts.Item.Foci>
+  <!-- {0} = desbloqueados, {1} = total. -->
+  <RimWorldAccess.VPEPsycasts.Item.FociCount>Tipos de foco de meditación. {0} de {1} desbloqueados.</RimWorldAccess.VPEPsycasts.Item.FociCount>
+  <RimWorldAccess.VPEPsycasts.Item.ImproveStats>Mejorar estadísticas de psicaster</RimWorldAccess.VPEPsycasts.Item.ImproveStats>
+  <RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>Mejorar estadísticas de psicaster. Cuesta un punto.</RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>
+  <!-- {0} = puntos restantes. -->
+  <RimWorldAccess.VPEPsycasts.StatsImproved>Estadísticas de psicaster mejoradas. Quedan {0} puntos.</RimWorldAccess.VPEPsycasts.StatsImproved>
+
+  <RimWorldAccess.VPEPsycasts.Header.Paths>Sendas de psicasts.</RimWorldAccess.VPEPsycasts.Header.Paths>
+  <!-- {0} = nombre de la senda. -->
+  <RimWorldAccess.VPEPsycasts.Header.Abilities>Habilidades de {0}.</RimWorldAccess.VPEPsycasts.Header.Abilities>
+  <RimWorldAccess.VPEPsycasts.Header.Foci>Tipos de foco de meditación.</RimWorldAccess.VPEPsycasts.Header.Foci>
+
+  <!-- Filas de sendas. {0} = nombre, {1}/{2} = habilidades aprendidas/total, {1} razón donde aplica. -->
+  <RimWorldAccess.VPEPsycasts.Path.Unlocked>{0}. Desbloqueada. {1} de {2} habilidades aprendidas.</RimWorldAccess.VPEPsycasts.Path.Unlocked>
+  <RimWorldAccess.VPEPsycasts.Path.Unlockable>{0}. Disponible para desbloquear, cuesta un punto.</RimWorldAccess.VPEPsycasts.Path.Unlockable>
+  <RimWorldAccess.VPEPsycasts.Path.NoPoints>{0}. No hay puntos suficientes para desbloquear.</RimWorldAccess.VPEPsycasts.Path.NoPoints>
+  <RimWorldAccess.VPEPsycasts.Path.Locked>{0}. Bloqueada.</RimWorldAccess.VPEPsycasts.Path.Locked>
+  <RimWorldAccess.VPEPsycasts.Path.LockedReason>{0}. Bloqueada: {1}.</RimWorldAccess.VPEPsycasts.Path.LockedReason>
+
+  <RimWorldAccess.VPEPsycasts.PathUnlocked>{0} desbloqueada. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.PathUnlocked>
+  <RimWorldAccess.VPEPsycasts.PathLocked>{0} está bloqueada.</RimWorldAccess.VPEPsycasts.PathLocked>
+  <RimWorldAccess.VPEPsycasts.PathLockedReason>{0} está bloqueada: {1}.</RimWorldAccess.VPEPsycasts.PathLockedReason>
+  <RimWorldAccess.VPEPsycasts.PathNoAbilities>{0} no tiene habilidades.</RimWorldAccess.VPEPsycasts.PathNoAbilities>
+
+  <!-- Filas de habilidades. {0} = nombre, {1} = nivel, {2} = lista de requisitos. -->
+  <RimWorldAccess.VPEPsycasts.Ability.Learned>{0}. Nivel {1}. Aprendida.</RimWorldAccess.VPEPsycasts.Ability.Learned>
+  <RimWorldAccess.VPEPsycasts.Ability.Unlockable>{0}. Nivel {1}. Disponible para aprender, cuesta un punto.</RimWorldAccess.VPEPsycasts.Ability.Unlockable>
+  <RimWorldAccess.VPEPsycasts.Ability.NoPoints>{0}. Nivel {1}. No hay puntos suficientes.</RimWorldAccess.VPEPsycasts.Ability.NoPoints>
+  <RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>{0}. Nivel {1}. Requiere: {2}.</RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>
+
+  <RimWorldAccess.VPEPsycasts.AbilityLearned>{0} ya está aprendida.</RimWorldAccess.VPEPsycasts.AbilityLearned>
+  <RimWorldAccess.VPEPsycasts.AbilityUnlocked>{0} aprendida. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.AbilityUnlocked>
+
+  <!-- Filas de foco de meditación. {0} = nombre, {1} = razón donde aplica. -->
+  <RimWorldAccess.VPEPsycasts.Focus.Available>{0}. Ya disponible.</RimWorldAccess.VPEPsycasts.Focus.Available>
+  <RimWorldAccess.VPEPsycasts.Focus.Unlockable>{0}. Disponible para desbloquear, cuesta un punto.</RimWorldAccess.VPEPsycasts.Focus.Unlockable>
+  <RimWorldAccess.VPEPsycasts.Focus.NoPoints>{0}. No hay puntos suficientes para desbloquear.</RimWorldAccess.VPEPsycasts.Focus.NoPoints>
+  <RimWorldAccess.VPEPsycasts.Focus.Locked>{0}. Bloqueado.</RimWorldAccess.VPEPsycasts.Focus.Locked>
+  <RimWorldAccess.VPEPsycasts.Focus.LockedReason>{0}. Bloqueado: {1}.</RimWorldAccess.VPEPsycasts.Focus.LockedReason>
+
+  <RimWorldAccess.VPEPsycasts.FocusAvailable>{0} ya está disponible.</RimWorldAccess.VPEPsycasts.FocusAvailable>
+  <RimWorldAccess.VPEPsycasts.FocusLocked>{0} está bloqueado.</RimWorldAccess.VPEPsycasts.FocusLocked>
+  <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0} está bloqueado: {1}.</RimWorldAccess.VPEPsycasts.FocusLockedReason>
+  <RimWorldAccess.VPEPsycasts.FocusUnlocked>{0} desbloqueado. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
+</LanguageData>
