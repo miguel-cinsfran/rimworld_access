@@ -536,6 +536,27 @@ namespace RimWorldAccess
                 return;
             }
 
+            // Handle the android awakening letter (Vanilla Races Expanded - Android, optional
+            // mod). ChoiceLetter_AndroidAwakened extends ChoiceLetter but its Choices property
+            // throws NotImplementedException - same shape as ChoiceLetter_GrowthMoment above.
+            if (VREAndroidReflection.IsAndroidAwakenedLetter(letter))
+            {
+                bool archiveView = VREAndroidReflection.GetLetterArchiveView(letter);
+                string label = (archiveView
+                    ? "RimWorldAccess.Notifications.Button.ViewChoices"
+                    : "RimWorldAccess.VREAndroid.Awakened.OpenButton").Translate();
+                buttons.Add(new ButtonInfo
+                {
+                    Label = label,
+                    Action = () => {
+                        Close();
+                        letter.OpenLetter();
+                    },
+                    IsDisabled = false
+                });
+                return;
+            }
+
             // Extract buttons from ChoiceLetter
             if (letter is ChoiceLetter choiceLetter)
             {

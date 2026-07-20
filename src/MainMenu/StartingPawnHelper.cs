@@ -973,6 +973,27 @@ namespace RimWorldAccess
             }));
             infoCardDefs.Add(null);
 
+            // Vanilla Races Expanded - Android (optional mod): its own chargen xenotype editor.
+            // The mod injects this as a bottom button / vanilla FloatMenu option via Harmony
+            // transpilers (Page_ConfigureStartingPawns_DrawXenotypeEditorButton_Patch,
+            // CharacterCardUtility_LifestageAndXenotypeOptions_Patch) - neither of which RWA's
+            // own windowless replacement menu reads, so it needs its own entry here.
+            if (VREAndroidReflection.Available)
+            {
+                options.Add(new FloatMenuOption("VREA.AndroidEditor".Translate() + "...", () =>
+                {
+                    Window androidWindow = VREAndroidReflection.CreateAndroidXenotypeWindow(pawnIndex, () =>
+                    {
+                        CharacterCardUtility.cachedCustomXenotypes = null;
+                        StartingPawnUtility.RandomizePawn(pawnIndex);
+                        rebuildCallback?.Invoke();
+                    });
+                    if (androidWindow != null)
+                        Find.WindowStack.Add(androidWindow);
+                }));
+                infoCardDefs.Add(null);
+            }
+
             // Standard xenotypes
             foreach (var xenotype in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => x.displayPriority))
             {

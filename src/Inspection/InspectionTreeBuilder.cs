@@ -3033,32 +3033,56 @@ namespace RimWorldAccess
                 // Group by body part, sorted by vanilla's height/coverage priority
                 var hediffsByPart = visibleHediffs
                     .GroupBy(h => h.Part)
-                    .OrderByDescending(g => HealthTabHelper.GetHediffListPriority(g.Key));
+                    .OrderByDescending(g => HealthTabHelper.GetHediffListPriority(g.Key))
+                    .ToList();
+
+                // Vanilla Races Expanded - Android (optional mod) gives every body part its own
+                // Hediff_AndroidPart (one per toe/finger/organ/etc, ~60 for a full android), which
+                // would otherwise flood this flat list with near-identical entries. Bundle any body
+                // part whose hediffs are ALL android-hardware replacements into one collapsed
+                // summary node, at the position of the first one, instead of one top-level node
+                // per part; parts with a mix of android hardware and something else (an actual
+                // injury on top of the replacement) are left alone.
+                bool summaryInserted = false;
+                List<InspectionTreeItem> androidPartItems = null;
 
                 foreach (var group in hediffsByPart)
                 {
-                    var part = group.Key;
                     var partHediffs = group.ToList();
-                    string partLabel = part != null ? part.LabelCap.ToString() : "WholeBody".Translate().ToString();
 
-                    var bodyPartItem = new InspectionTreeItem
+                    if (partHediffs.All(VREAndroidReflection.IsAndroidPartHediff))
                     {
-                        Type = InspectionTreeItem.ItemType.Item,
-                        Label = partLabel,
-                        ExpandedLabel = partLabel,
-                        IndentLevel = parentItem.IndentLevel + 1,
-                        IsExpandable = true,
-                        IsExpanded = false
-                    };
-                    // Build children eagerly so collapsed labels include full content immediately
-                    BuildBodyPartHediffChildren(bodyPartItem, pawn, part, partHediffs);
-                    // Fold the subtree into the collapsed label (matching capacities/hediff
-                    // groups) so navigating to — or typeahead-matching — a collapsed body
-                    // part speaks its full content. ExpandedLabel stays the short name.
-                    var partChildLabels = bodyPartItem.Children.Select(c => c.Label).ToList();
-                    if (partChildLabels.Count > 0)
-                        bodyPartItem.Label += $": {string.Join(". ", partChildLabels)}";
-                    AddChild(parentItem, bodyPartItem);
+                        if (androidPartItems == null) androidPartItems = new List<InspectionTreeItem>();
+                        androidPartItems.Add(BuildBodyPartItem(pawn, group.Key, partHediffs, parentItem.IndentLevel + 2));
+                        continue;
+                    }
+
+                    if (androidPartItems != null && androidPartItems.Count > 1 && !summaryInserted)
+                    {
+                        AddChild(parentItem, BuildAndroidHardwareSummaryItem(androidPartItems, parentItem.IndentLevel + 1));
+                        summaryInserted = true;
+                    }
+                    else if (androidPartItems != null)
+                    {
+                        // Only one android-hardware part collected (or summary already placed
+                        // once for an earlier run) - not worth collapsing, add it normally.
+                        foreach (var item in androidPartItems)
+                            AddChild(parentItem, item);
+                        androidPartItems = null;
+                    }
+
+                    AddChild(parentItem, BuildBodyPartItem(pawn, group.Key, partHediffs, parentItem.IndentLevel + 1));
+                }
+
+                // Trailing run of android-hardware parts (or the pawn is a pure android with no
+                // other hediffs at all, so the loop above never hit a non-android group).
+                if (androidPartItems != null)
+                {
+                    if (androidPartItems.Count > 1)
+                        AddChild(parentItem, BuildAndroidHardwareSummaryItem(androidPartItems, parentItem.IndentLevel + 1));
+                    else
+                        foreach (var item in androidPartItems)
+                            AddChild(parentItem, item);
                 }
             }
             else
@@ -3097,6 +3121,51 @@ namespace RimWorldAccess
                     AddChild(parentItem, capacitiesItem);
                 }
             }
+        }
+
+        /// <summary>
+        /// Builds a single top-level body-part node (label + eagerly-built children folded into
+        /// the collapsed label), extracted so it can be reused both inline in the flat body-part
+        /// list and nested one level deeper under the android-hardware summary node.
+        /// </summary>
+        private static InspectionTreeItem BuildBodyPartItem(Pawn pawn, BodyPartRecord part, List<Hediff> partHediffs, int indentLevel)
+        {
+            string partLabel = part != null ? part.LabelCap.ToString() : "WholeBody".Translate().ToString();
+
+            var bodyPartItem = new InspectionTreeItem
+            {
+                Type = InspectionTreeItem.ItemType.Item,
+                Label = partLabel,
+                ExpandedLabel = partLabel,
+                IndentLevel = indentLevel,
+                IsExpandable = true,
+                IsExpanded = false
+            };
+            BuildBodyPartHediffChildren(bodyPartItem, pawn, part, partHediffs);
+            var partChildLabels = bodyPartItem.Children.Select(c => c.Label).ToList();
+            if (partChildLabels.Count > 0)
+                bodyPartItem.Label += $": {string.Join(". ", partChildLabels)}";
+            return bodyPartItem;
+        }
+
+        /// <summary>
+        /// Collapses a run of android-hardware-only body-part nodes into one summary node
+        /// (see the Android-mod comment above this method's call site).
+        /// </summary>
+        private static InspectionTreeItem BuildAndroidHardwareSummaryItem(List<InspectionTreeItem> androidPartItems, int indentLevel)
+        {
+            var summaryItem = new InspectionTreeItem
+            {
+                Type = InspectionTreeItem.ItemType.SubCategory,
+                Label = "RimWorldAccess.VREAndroid.Health.HardwareSummary".Translate(androidPartItems.Count),
+                ExpandedLabel = "RimWorldAccess.VREAndroid.Health.HardwareSummaryShort".Translate(),
+                IndentLevel = indentLevel,
+                IsExpandable = true,
+                IsExpanded = false
+            };
+            foreach (var item in androidPartItems)
+                AddChild(summaryItem, item);
+            return summaryItem;
         }
 
         /// <summary>

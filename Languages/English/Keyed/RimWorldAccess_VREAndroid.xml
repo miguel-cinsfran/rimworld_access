@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!--
+    VREAndroid module strings (src/VREAndroid/). Accessibility for the optional third-party mod
+    Vanilla Races Expanded - Android. Only strings RimWorld Access itself introduces live here -
+    gene names, category labels, dialog headers, button labels and biostat terms mostly come from
+    the mod's own translated keys (VREA.*) or vanilla keys via .Translate(), reused directly so
+    terminology stays in sync with whatever the mod ships. See Biotech/RimWorldAccess_Biotech.xml
+    for the many shared XenotypeEditor-family keys (GeneAdded, GeneRemoved, OpeningSummary,
+    TabSummary*, NameWithValue, NameNone, LoadedSummaryMany, ...) reused unchanged here.
+
+    Placeholders follow string.Format ({0}, {1}, ...).
+  -->
+
+  <!-- AndroidCreationState.cs -->
+  <RimWorldAccess.VREAndroid.TextInput.LabelAndroidType>android type name</RimWorldAccess.VREAndroid.TextInput.LabelAndroidType>
+  <RimWorldAccess.VREAndroid.Creation.CannotRemoveHardware>{0} is required android hardware and cannot be removed</RimWorldAccess.VREAndroid.Creation.CannotRemoveHardware>
+  <RimWorldAccess.VREAndroid.Creation.MandatorySuffix>(mandatory)</RimWorldAccess.VREAndroid.Creation.MandatorySuffix>
+  <RimWorldAccess.VREAndroid.Creation.PowerEfficiency>power efficiency</RimWorldAccess.VREAndroid.Creation.PowerEfficiency>
+
+  <!-- AndroidAwakenedState.cs -->
+  <RimWorldAccess.VREAndroid.Awakened.Opening>{0}'s android is awakening.</RimWorldAccess.VREAndroid.Awakened.Opening>
+  <RimWorldAccess.VREAndroid.Awakened.Selected>selected</RimWorldAccess.VREAndroid.Awakened.Selected>
+  <RimWorldAccess.VREAndroid.Awakened.NotSelected>not selected</RimWorldAccess.VREAndroid.Awakened.NotSelected>
+  <RimWorldAccess.VREAndroid.Awakened.PassionLimitReached>You can only select {0} passions. Deselect one first.</RimWorldAccess.VREAndroid.Awakened.PassionLimitReached>
+  <RimWorldAccess.VREAndroid.Awakened.Confirmed>Choices confirmed.</RimWorldAccess.VREAndroid.Awakened.Confirmed>
+  <RimWorldAccess.VREAndroid.Awakened.Postponed>Postponed.</RimWorldAccess.VREAndroid.Awakened.Postponed>
+  <RimWorldAccess.VREAndroid.Awakened.OpenButton>Open awakening choices</RimWorldAccess.VREAndroid.Awakened.OpenButton>
+
+  <!-- InspectionTreeBuilder.cs (Inspection module) - android body-part hediff summary -->
+  <RimWorldAccess.VREAndroid.Health.HardwareSummary>Android hardware installed ({0} parts)</RimWorldAccess.VREAndroid.Health.HardwareSummary>
+  <RimWorldAccess.VREAndroid.Health.HardwareSummaryShort>Android hardware</RimWorldAccess.VREAndroid.Health.HardwareSummaryShort>
+</LanguageData>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!-- VREAndroid module strings (src/VREAndroid/). Ver RimWorldAccess_Biotech.xml para las claves
+       compartidas de la familia XenotypeEditor reutilizadas aquí sin cambios. -->
+
+  <!-- AndroidCreationState.cs -->
+  <RimWorldAccess.VREAndroid.TextInput.LabelAndroidType>nombre del tipo de androide</RimWorldAccess.VREAndroid.TextInput.LabelAndroidType>
+  <RimWorldAccess.VREAndroid.Creation.CannotRemoveHardware>{0} es hardware obligatorio del androide y no se puede quitar</RimWorldAccess.VREAndroid.Creation.CannotRemoveHardware>
+  <RimWorldAccess.VREAndroid.Creation.MandatorySuffix>(obligatorio)</RimWorldAccess.VREAndroid.Creation.MandatorySuffix>
+  <RimWorldAccess.VREAndroid.Creation.PowerEfficiency>eficiencia energética</RimWorldAccess.VREAndroid.Creation.PowerEfficiency>
+
+  <!-- AndroidAwakenedState.cs -->
+  <RimWorldAccess.VREAndroid.Awakened.Opening>El androide de {0} está despertando.</RimWorldAccess.VREAndroid.Awakened.Opening>
+  <RimWorldAccess.VREAndroid.Awakened.Selected>seleccionado</RimWorldAccess.VREAndroid.Awakened.Selected>
+  <RimWorldAccess.VREAndroid.Awakened.NotSelected>no seleccionado</RimWorldAccess.VREAndroid.Awakened.NotSelected>
+  <RimWorldAccess.VREAndroid.Awakened.PassionLimitReached>Solo se pueden seleccionar {0} pasiones. Primero hay que deseleccionar una.</RimWorldAccess.VREAndroid.Awakened.PassionLimitReached>
+  <RimWorldAccess.VREAndroid.Awakened.Confirmed>Elecciones confirmadas.</RimWorldAccess.VREAndroid.Awakened.Confirmed>
+  <RimWorldAccess.VREAndroid.Awakened.Postponed>Pospuesto.</RimWorldAccess.VREAndroid.Awakened.Postponed>
+  <RimWorldAccess.VREAndroid.Awakened.OpenButton>Abrir elecciones de despertar</RimWorldAccess.VREAndroid.Awakened.OpenButton>
+
+  <!-- InspectionTreeBuilder.cs (módulo Inspection) - resumen de hardware de androide -->
+  <RimWorldAccess.VREAndroid.Health.HardwareSummary>Hardware de androide instalado ({0} partes)</RimWorldAccess.VREAndroid.Health.HardwareSummary>
+  <RimWorldAccess.VREAndroid.Health.HardwareSummaryShort>Hardware de androide</RimWorldAccess.VREAndroid.Health.HardwareSummaryShort>
+</LanguageData>

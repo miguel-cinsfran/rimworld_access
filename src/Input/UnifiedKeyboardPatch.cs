@@ -801,6 +801,28 @@ namespace RimWorldAccess
                 }
             }
 
+            // ===== PRIORITY -0.204: Handle Android Creation dialog if active =====
+            // Vanilla Races Expanded - Android: gene creation/modification windows (optional mod)
+            if (AndroidCreationState.IsActive)
+            {
+                if (AndroidCreationState.HandleInput(Event.current))
+                {
+                    Event.current.Use();
+                    return;
+                }
+            }
+
+            // ===== PRIORITY -0.203: Handle Android Awakened Choices dialog if active =====
+            // Vanilla Races Expanded - Android: awakening passion/trait choice letter (optional mod)
+            if (AndroidAwakenedState.IsActive)
+            {
+                if (AndroidAwakenedState.HandleInput(Event.current))
+                {
+                    Event.current.Use();
+                    return;
+                }
+            }
+
             // ===== PRIORITY -0.22: Handle Faction Landing dialog if active =====
             // Faction relations is a modal dialog opened from starting site selection (F key)
             if (FactionLandingState.IsActive)
