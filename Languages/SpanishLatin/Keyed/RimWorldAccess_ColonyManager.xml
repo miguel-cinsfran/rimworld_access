@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!--
+    Cadenas del módulo Colony Manager (src/ColonyManager/). Soporte de accesibilidad para
+    el mod opcional de terceros Colony Manager Redux (ilyvion.colonymanagerredux). Su
+    ventana se dibuja con un framework IMGUI propio, así que navegamos el modelo del propio
+    mod (Manager -> pestañas -> trabajos) y lo anunciamos aquí. Los nombres de pestañas,
+    de trabajos y las etiquetas de objetivo vienen del mod y se inyectan como marcadores.
+  -->
+
+  <RimWorldAccess.ColonyManager.WindowOpened>Gestor de colonia</RimWorldAccess.ColonyManager.WindowOpened>
+  <RimWorldAccess.ColonyManager.Closed>Gestor de colonia cerrado</RimWorldAccess.ColonyManager.Closed>
+  <RimWorldAccess.ColonyManager.BackToTabs>Pestañas</RimWorldAccess.ColonyManager.BackToTabs>
+
+  <!-- Lista de pestañas (nivel 1). {0} etiqueta, {1} cantidad de trabajos, {2} posición ("3 de 10") -->
+  <RimWorldAccess.ColonyManager.TabItem>{0}, {1} trabajos, {2}</RimWorldAccess.ColonyManager.TabItem>
+  <RimWorldAccess.ColonyManager.TabItemDisabled>{0}, deshabilitada, {1}</RimWorldAccess.ColonyManager.TabItemDisabled>
+  <RimWorldAccess.ColonyManager.TabDisabled>{0} está deshabilitada: {1}</RimWorldAccess.ColonyManager.TabDisabled>
+  <RimWorldAccess.ColonyManager.TabDisabledNoReason>{0} está deshabilitada</RimWorldAccess.ColonyManager.TabDisabledNoReason>
+
+  <!-- Al entrar en una pestaña. {0} etiqueta de la pestaña, {1} cantidad de trabajos -->
+  <RimWorldAccess.ColonyManager.EnteredTab>{0}, {1} trabajos.</RimWorldAccess.ColonyManager.EnteredTab>
+  <RimWorldAccess.ColonyManager.EnteredTabEmpty>{0}, sin trabajos.</RimWorldAccess.ColonyManager.EnteredTabEmpty>
+
+  <!-- Pistas de acción agregadas al entrar (convención de hints localizados de RWA) -->
+  <RimWorldAccess.ColonyManager.HintNewJob>Pulsa Control N para crear una tarea.</RimWorldAccess.ColonyManager.HintNewJob>
+  <RimWorldAccess.ColonyManager.HintDetail>Izquierda y Derecha ajustan el valor; Enter abre una lista o alterna; Escape vuelve.</RimWorldAccess.ColonyManager.HintDetail>
+
+  <!-- Lista de trabajos (nivel 2). {0} etiqueta, {1} etiqueta de objetivo, {2} posición -->
+  <RimWorldAccess.ColonyManager.JobItem>{0}, {1}, {2}</RimWorldAccess.ColonyManager.JobItem>
+  <RimWorldAccess.ColonyManager.NoJobs>No hay trabajos en esta pestaña. Pulsa Escape o Izquierda para volver a las pestañas.</RimWorldAccess.ColonyManager.NoJobs>
+  <RimWorldAccess.ColonyManager.StatusSuspended>suspendido</RimWorldAccess.ColonyManager.StatusSuspended>
+  <RimWorldAccess.ColonyManager.StatusCompleted>objetivo alcanzado</RimWorldAccess.ColonyManager.StatusCompleted>
+
+  <!-- Acciones de trabajo. {0} etiqueta del trabajo -->
+  <RimWorldAccess.ColonyManager.JobSelected>{0} seleccionado</RimWorldAccess.ColonyManager.JobSelected>
+  <RimWorldAccess.ColonyManager.JobSuspendedNow>{0} suspendido</RimWorldAccess.ColonyManager.JobSuspendedNow>
+  <RimWorldAccess.ColonyManager.JobResumedNow>{0} reanudado</RimWorldAccess.ColonyManager.JobResumedNow>
+
+  <!-- Crear / borrar / reordenar. {0} etiqueta del trabajo -->
+  <RimWorldAccess.ColonyManager.NewJobCreated>Trabajo nuevo creado: {0}. Pulsa Enter para configurarlo.</RimWorldAccess.ColonyManager.NewJobCreated>
+  <RimWorldAccess.ColonyManager.NewJobFailed>No se pudo crear un trabajo nuevo</RimWorldAccess.ColonyManager.NewJobFailed>
+  <RimWorldAccess.ColonyManager.JobDeleted>{0} eliminado</RimWorldAccess.ColonyManager.JobDeleted>
+
+  <!-- Nivel de detalle del trabajo. {0} etiqueta del trabajo -->
+  <RimWorldAccess.ColonyManager.EnteredJob>Ajustes de {0}</RimWorldAccess.ColonyManager.EnteredJob>
+  <RimWorldAccess.ColonyManager.JobSelectedNoSettings>{0} seleccionado. Todavía no hay ajustes editables aquí.</RimWorldAccess.ColonyManager.JobSelectedNoSettings>
+  <RimWorldAccess.ColonyManager.BackToJobs>Trabajos</RimWorldAccess.ColonyManager.BackToJobs>
+
+  <!-- Ajustes editables. Objetivo = umbral "cuánto querés". Izquierda/Derecha ajusta. -->
+  <RimWorldAccess.ColonyManager.SettingTarget>Cantidad objetivo</RimWorldAccess.ColonyManager.SettingTarget>
+  <!-- {0} etiqueta del ajuste, {1} valor, {2} posición -->
+  <RimWorldAccess.ColonyManager.SettingInt>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingInt>
+  <!-- {0} etiqueta del ajuste, {1} valor, {2} máximo, {3} posición -->
+  <RimWorldAccess.ColonyManager.SettingIntWithMax>{0}: {1} de {2}, {3}</RimWorldAccess.ColonyManager.SettingIntWithMax>
+
+  <!-- ===== Fase 3: ajustes de detalle por pestaña ===== -->
+
+  <!-- Palabras de estado para toggles -->
+  <RimWorldAccess.ColonyManager.On>activado</RimWorldAccess.ColonyManager.On>
+  <RimWorldAccess.ColonyManager.Off>desactivado</RimWorldAccess.ColonyManager.Off>
+
+  <!-- Formatos de anuncio. {0} etiqueta, luego valor(es), luego posición -->
+  <RimWorldAccess.ColonyManager.SettingToggle>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingToggle>
+  <RimWorldAccess.ColonyManager.SettingArea2>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingArea2>
+  <!-- {0} etiqueta, {1} cantidad permitida, {2} total, {3} posición -->
+  <RimWorldAccess.ColonyManager.SettingDefList>{0}: {1} de {2} seleccionados, {3}. Pulsa Enter para cambiar.</RimWorldAccess.ColonyManager.SettingDefList>
+  <RimWorldAccess.ColonyManager.AreaUnrestricted>sin restricción</RimWorldAccess.ColonyManager.AreaUnrestricted>
+
+  <!-- Sub-nivel de lista -->
+  <RimWorldAccess.ColonyManager.EnteredDefList>{0}, {1} opciones. Espacio alterna, Escape vuelve.</RimWorldAccess.ColonyManager.EnteredDefList>
+  <RimWorldAccess.ColonyManager.BackToSettings>Ajustes</RimWorldAccess.ColonyManager.BackToSettings>
+  <RimWorldAccess.ColonyManager.Allowed>seleccionado</RimWorldAccess.ColonyManager.Allowed>
+  <RimWorldAccess.ColonyManager.NotAllowed>no seleccionado</RimWorldAccess.ColonyManager.NotAllowed>
+  <!-- {0} etiqueta del def, {1} estado, {2} posición -->
+  <RimWorldAccess.ColonyManager.DefItem>{0}, {1}, {2}</RimWorldAccess.ColonyManager.DefItem>
+
+  <!-- Etiquetas de ajustes (por tipo de trabajo) -->
+  <RimWorldAccess.ColonyManager.SettingWhatToHunt>Animales a cazar</RimWorldAccess.ColonyManager.SettingWhatToHunt>
+  <RimWorldAccess.ColonyManager.SettingWhatToChop>Árboles a talar</RimWorldAccess.ColonyManager.SettingWhatToChop>
+  <RimWorldAccess.ColonyManager.SettingWhatToForage>Plantas a recolectar</RimWorldAccess.ColonyManager.SettingWhatToForage>
+  <RimWorldAccess.ColonyManager.SettingWhatToMine>Minerales a extraer</RimWorldAccess.ColonyManager.SettingWhatToMine>
+  <RimWorldAccess.ColonyManager.SettingArea>Área de operación</RimWorldAccess.ColonyManager.SettingArea>
+  <RimWorldAccess.ColonyManager.SettingInvertArea>Invertir área</RimWorldAccess.ColonyManager.SettingInvertArea>
+  <RimWorldAccess.ColonyManager.SettingLockedToMap>Fijar lista al mapa actual</RimWorldAccess.ColonyManager.SettingLockedToMap>
+  <RimWorldAccess.ColonyManager.SettingUnforbidCorpses>Desprohibir cadáveres</RimWorldAccess.ColonyManager.SettingUnforbidCorpses>
+  <RimWorldAccess.ColonyManager.SettingAllowSaplings>Talar también retoños</RimWorldAccess.ColonyManager.SettingAllowSaplings>
+  <RimWorldAccess.ColonyManager.SettingFullyMatureOnly>Solo plantas maduras</RimWorldAccess.ColonyManager.SettingFullyMatureOnly>
+  <RimWorldAccess.ColonyManager.SettingAllowMining>Permitir minería</RimWorldAccess.ColonyManager.SettingAllowMining>
+  <RimWorldAccess.ColonyManager.SettingHaulMinedChunks>Transportar bloques extraídos</RimWorldAccess.ColonyManager.SettingHaulMinedChunks>
+  <RimWorldAccess.ColonyManager.SettingCheckRoofSupport>Verificar soporte del techo</RimWorldAccess.ColonyManager.SettingCheckRoofSupport>
+  <RimWorldAccess.ColonyManager.SettingCheckRoomDivision>Verificar división de salas</RimWorldAccess.ColonyManager.SettingCheckRoomDivision>
+  <RimWorldAccess.ColonyManager.SettingMineThickRoofs>Minar bajo techos gruesos</RimWorldAccess.ColonyManager.SettingMineThickRoofs>
+</LanguageData>

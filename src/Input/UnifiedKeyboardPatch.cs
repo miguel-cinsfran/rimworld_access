@@ -1126,6 +1126,33 @@ namespace RimWorldAccess
                 }
             }
 
+            // ===== PRIORITY 0.285: Colony Manager Redux window (optional third-party mod) =====
+            // Windowless keyboard menu overlaid on ColonyManagerRedux.MainTabWindow_Manager while
+            // it is open (see ColonyManagerState). Placed ahead of map navigation and gameplay
+            // shortcuts so arrow/typeahead keys drive the manager menu, not the map, whenever the
+            // manager window owns the screen. Inactive (and zero-cost) when the mod isn't loaded.
+            if (ColonyManagerState.IsActive)
+            {
+                // Safety net: if the manager window vanished without our PreClose patch firing,
+                // tear the state down and let this key fall through rather than swallow it.
+                if (!ColonyManagerState.BoundWindowStillOpen())
+                {
+                    ColonyManagerState.Close();
+                }
+                else
+                {
+                    bool shift = Event.current.shift;
+                    bool ctrl = Event.current.control;
+                    bool alt = KeyboardHelper.IsAltHeld;
+
+                    if (ColonyManagerState.HandleInput(key, shift, ctrl, alt))
+                    {
+                        Event.current.Use();
+                        return;
+                    }
+                }
+            }
+
             // ===== PRIORITY 0.29: Handle area selection menu if active =====
             // This prompts for area selection when an area designator is chosen from Architect
             if (AreaSelectionMenuState.IsActive)
@@ -6560,6 +6587,8 @@ namespace RimWorldAccess
             }
 
             // ===== PRIORITY 7.56: Open extra menus with F12 key =====
+            // (Colony Manager Redux's window is opened from inside this menu — see
+            // ExtraMenusState.BuildMenuOptions — since its main-tab button has no hotkey.)
             if (key == KeyCode.F12)
             {
                 if (Current.ProgramState == ProgramState.Playing &&

@@ -37,6 +37,10 @@ namespace RimWorldAccess
             // 0.0-0.5: Modal browsers
             TypeaheadDispatcher.Register(0.0, () => SettlementBrowserState.IsActive, c => SettlementBrowserState.HandleTypeahead(c));
 
+            // 0.285: Colony Manager Redux window (optional mod). Matches its UnifiedKeyboardPatch
+            // dispatch priority; searches the current tab list or job list by label.
+            TypeaheadDispatcher.Register(0.285, () => ColonyManagerState.IsTypeaheadActive(), c => ColonyManagerState.HandleCharacterInput(c));
+
             // 1.0-3.0: Menus
             TypeaheadDispatcher.Register(1.5, () => SellableItemsState.IsActive, c => SellableItemsState.ProcessTypeaheadCharacter(c));
             // Save menu has two focus zones (text-name field + existing-saves list).
@@ -145,6 +149,7 @@ namespace RimWorldAccess
             TypeaheadDispatcher.Register(4.5, () => GizmoNavigationState.IsActive, c => GizmoNavigationState.HandleTypeahead(c));
             TypeaheadDispatcher.Register(4.6, () => PawnAreaMenuState.IsActive, c => PawnAreaMenuState.HandleTypeahead(c));
             TypeaheadDispatcher.Register(4.7, () => ModListState.IsActive, c => ModListState.HandleTypeahead(c));
+            TypeaheadDispatcher.Register(4.71, () => ModSettingsMenuState.IsActive, c => ModSettingsMenuState.HandleTypeahead(c));
             TypeaheadDispatcher.Register(4.8, () => AreaSelectionMenuState.IsActive, c => AreaSelectionMenuState.HandleTypeahead(c));
             TypeaheadDispatcher.Register(4.85, () => ShapeSelectionMenuState.IsActive, c => ShapeSelectionMenuState.HandleTypeahead(c));
             TypeaheadDispatcher.Register(4.9, () => MenuNavigationState.IsActive, c => MenuNavigationState.HandleTypeahead(c));

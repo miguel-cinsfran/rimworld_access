@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!--
+    Colony Manager module strings (src/ColonyManager/). Accessibility support for the
+    optional third-party mod Colony Manager Redux (ilyvion.colonymanagerredux). Its
+    manager window is drawn with a custom IMGUI framework, so we navigate the mod's own
+    Manager -> Tabs -> jobs model and announce it here. Tab names, job names and target
+    labels come from the mod itself and are injected as placeholders.
+  -->
+
+  <RimWorldAccess.ColonyManager.WindowOpened>Colony Manager</RimWorldAccess.ColonyManager.WindowOpened>
+  <RimWorldAccess.ColonyManager.Closed>Colony Manager closed</RimWorldAccess.ColonyManager.Closed>
+  <RimWorldAccess.ColonyManager.BackToTabs>Tabs</RimWorldAccess.ColonyManager.BackToTabs>
+
+  <!-- Tab list (level 1). {0} label, {1} job count, {2} position ("3 of 10") -->
+  <RimWorldAccess.ColonyManager.TabItem>{0}, {1} jobs, {2}</RimWorldAccess.ColonyManager.TabItem>
+  <RimWorldAccess.ColonyManager.TabItemDisabled>{0}, disabled, {1}</RimWorldAccess.ColonyManager.TabItemDisabled>
+  <RimWorldAccess.ColonyManager.TabDisabled>{0} is disabled: {1}</RimWorldAccess.ColonyManager.TabDisabled>
+  <RimWorldAccess.ColonyManager.TabDisabledNoReason>{0} is disabled</RimWorldAccess.ColonyManager.TabDisabledNoReason>
+
+  <!-- Entering a tab. {0} tab label, {1} job count -->
+  <RimWorldAccess.ColonyManager.EnteredTab>{0}, {1} jobs.</RimWorldAccess.ColonyManager.EnteredTab>
+  <RimWorldAccess.ColonyManager.EnteredTabEmpty>{0}, no jobs.</RimWorldAccess.ColonyManager.EnteredTabEmpty>
+
+  <!-- Action hints appended on entry (RWA localized-hint convention) -->
+  <RimWorldAccess.ColonyManager.HintNewJob>Press Control N to create a job.</RimWorldAccess.ColonyManager.HintNewJob>
+  <RimWorldAccess.ColonyManager.HintDetail>Left and Right adjust the setting; Enter opens a list or flips a switch; Escape goes back.</RimWorldAccess.ColonyManager.HintDetail>
+
+  <!-- Job list (level 2). {0} label, {1} target label, {2} position -->
+  <RimWorldAccess.ColonyManager.JobItem>{0}, {1}, {2}</RimWorldAccess.ColonyManager.JobItem>
+  <RimWorldAccess.ColonyManager.NoJobs>No jobs in this tab. Press Escape or Left to go back to tabs.</RimWorldAccess.ColonyManager.NoJobs>
+  <RimWorldAccess.ColonyManager.StatusSuspended>suspended</RimWorldAccess.ColonyManager.StatusSuspended>
+  <RimWorldAccess.ColonyManager.StatusCompleted>target met</RimWorldAccess.ColonyManager.StatusCompleted>
+
+  <!-- Job actions. {0} job label -->
+  <RimWorldAccess.ColonyManager.JobSelected>{0} selected</RimWorldAccess.ColonyManager.JobSelected>
+  <RimWorldAccess.ColonyManager.JobSuspendedNow>{0} suspended</RimWorldAccess.ColonyManager.JobSuspendedNow>
+  <RimWorldAccess.ColonyManager.JobResumedNow>{0} resumed</RimWorldAccess.ColonyManager.JobResumedNow>
+
+  <!-- Create / delete / reorder. {0} job label -->
+  <RimWorldAccess.ColonyManager.NewJobCreated>New job created: {0}. Press Enter to configure it.</RimWorldAccess.ColonyManager.NewJobCreated>
+  <RimWorldAccess.ColonyManager.NewJobFailed>Could not create a new job</RimWorldAccess.ColonyManager.NewJobFailed>
+  <RimWorldAccess.ColonyManager.JobDeleted>{0} deleted</RimWorldAccess.ColonyManager.JobDeleted>
+
+  <!-- Job detail level. {0} job label -->
+  <RimWorldAccess.ColonyManager.EnteredJob>{0} settings</RimWorldAccess.ColonyManager.EnteredJob>
+  <RimWorldAccess.ColonyManager.JobSelectedNoSettings>{0} selected. No editable settings here yet.</RimWorldAccess.ColonyManager.JobSelectedNoSettings>
+  <RimWorldAccess.ColonyManager.BackToJobs>Jobs</RimWorldAccess.ColonyManager.BackToJobs>
+
+  <!-- Editable settings. Target = threshold "how much you want". Left/Right adjusts. -->
+  <RimWorldAccess.ColonyManager.SettingTarget>Target amount</RimWorldAccess.ColonyManager.SettingTarget>
+  <!-- {0} setting label, {1} value, {2} position -->
+  <RimWorldAccess.ColonyManager.SettingInt>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingInt>
+  <!-- {0} setting label, {1} value, {2} max, {3} position -->
+  <RimWorldAccess.ColonyManager.SettingIntWithMax>{0}: {1} of {2}, {3}</RimWorldAccess.ColonyManager.SettingIntWithMax>
+
+  <!-- ===== Phase 3: per-tab detail settings ===== -->
+
+  <!-- On/off state words for toggles -->
+  <RimWorldAccess.ColonyManager.On>on</RimWorldAccess.ColonyManager.On>
+  <RimWorldAccess.ColonyManager.Off>off</RimWorldAccess.ColonyManager.Off>
+
+  <!-- Announcement formats. {0} setting label, then value(s), then position -->
+  <RimWorldAccess.ColonyManager.SettingToggle>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingToggle>
+  <RimWorldAccess.ColonyManager.SettingArea2>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingArea2>
+  <!-- {0} label, {1} allowed count, {2} total, {3} position -->
+  <RimWorldAccess.ColonyManager.SettingDefList>{0}: {1} of {2} selected, {3}. Press Enter to change.</RimWorldAccess.ColonyManager.SettingDefList>
+  <RimWorldAccess.ColonyManager.AreaUnrestricted>unrestricted</RimWorldAccess.ColonyManager.AreaUnrestricted>
+
+  <!-- Def-list sub-level -->
+  <RimWorldAccess.ColonyManager.EnteredDefList>{0}, {1} options. Space toggles, Escape goes back.</RimWorldAccess.ColonyManager.EnteredDefList>
+  <RimWorldAccess.ColonyManager.BackToSettings>Settings</RimWorldAccess.ColonyManager.BackToSettings>
+  <RimWorldAccess.ColonyManager.Allowed>selected</RimWorldAccess.ColonyManager.Allowed>
+  <RimWorldAccess.ColonyManager.NotAllowed>not selected</RimWorldAccess.ColonyManager.NotAllowed>
+  <!-- {0} def label, {1} state, {2} position -->
+  <RimWorldAccess.ColonyManager.DefItem>{0}, {1}, {2}</RimWorldAccess.ColonyManager.DefItem>
+
+  <!-- Setting labels (per job type) -->
+  <RimWorldAccess.ColonyManager.SettingWhatToHunt>Animals to hunt</RimWorldAccess.ColonyManager.SettingWhatToHunt>
+  <RimWorldAccess.ColonyManager.SettingWhatToChop>Trees to chop</RimWorldAccess.ColonyManager.SettingWhatToChop>
+  <RimWorldAccess.ColonyManager.SettingWhatToForage>Plants to forage</RimWorldAccess.ColonyManager.SettingWhatToForage>
+  <RimWorldAccess.ColonyManager.SettingWhatToMine>Minerals to mine</RimWorldAccess.ColonyManager.SettingWhatToMine>
+  <RimWorldAccess.ColonyManager.SettingArea>Area of operation</RimWorldAccess.ColonyManager.SettingArea>
+  <RimWorldAccess.ColonyManager.SettingInvertArea>Invert area</RimWorldAccess.ColonyManager.SettingInvertArea>
+  <RimWorldAccess.ColonyManager.SettingLockedToMap>Lock list to current map</RimWorldAccess.ColonyManager.SettingLockedToMap>
+  <RimWorldAccess.ColonyManager.SettingUnforbidCorpses>Unforbid corpses</RimWorldAccess.ColonyManager.SettingUnforbidCorpses>
+  <RimWorldAccess.ColonyManager.SettingAllowSaplings>Cut saplings too</RimWorldAccess.ColonyManager.SettingAllowSaplings>
+  <RimWorldAccess.ColonyManager.SettingFullyMatureOnly>Only fully grown plants</RimWorldAccess.ColonyManager.SettingFullyMatureOnly>
+  <RimWorldAccess.ColonyManager.SettingAllowMining>Allow mining</RimWorldAccess.ColonyManager.SettingAllowMining>
+  <RimWorldAccess.ColonyManager.SettingHaulMinedChunks>Haul mined chunks</RimWorldAccess.ColonyManager.SettingHaulMinedChunks>
+  <RimWorldAccess.ColonyManager.SettingCheckRoofSupport>Check roof support</RimWorldAccess.ColonyManager.SettingCheckRoofSupport>
+  <RimWorldAccess.ColonyManager.SettingCheckRoomDivision>Check room division</RimWorldAccess.ColonyManager.SettingCheckRoomDivision>
+  <RimWorldAccess.ColonyManager.SettingMineThickRoofs>Mine under thick roofs</RimWorldAccess.ColonyManager.SettingMineThickRoofs>
+</LanguageData>
