@@ -38,10 +38,21 @@ Root ─┬─ Status (level / points / experience — read-only)
       └─ Improve psycaster stats (Enter spends one point)
 ```
 
-Keys: Up/Down/Home/End navigate, typeahead searches, **Enter/Space/Right** activate or drill in,
-**Left** goes back one level, **Escape** goes back one level (and closes from Root), Backspace edits
-the search. All point-spends re-announce the remaining point count and rebuild the current list so
-newly-eligible siblings appear immediately.
+Keys:
+- **Up/Down/Home/End** navigate; typeahead searches by name.
+- **Enter / Space** = the only keys that commit an action (unlock path/focus, learn ability, improve
+  stats) or enter a submenu / drill into an unlocked path. Right-arrow deliberately does NOT commit —
+  a learner accidentally spent a point on it during testing.
+- **Right** = expand only (enter a submenu, or drill into an unlocked path's abilities); inert on
+  anything that can't be expanded. Mirrors the inventory tree (Right expands, Enter is the action).
+- **Left** = collapse / go back one level. **Escape** = back one level, and closes from Root.
+- **Alt+I** = read the current item's description/details on demand (ability/path/focus description,
+  or the current psycaster stat values on "Improve stats"). Keeps fast navigation terse.
+- **Backspace** edits the active search.
+
+Ability lists are **topologically ordered** (prerequisites always precede their dependents), and all
+point-spends re-announce the remaining point count and rebuild the list so newly-eligible siblings
+appear immediately.
 
 ## Integration points
 - **TabRegistry.cs** — `ITab_Pawn_Psycasts` registered as `TabHandlerType.Action`; dispatch token
