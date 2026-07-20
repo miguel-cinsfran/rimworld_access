@@ -115,8 +115,14 @@ namespace RimWorldAccess
             }
             catch (Exception ex)
             {
+                // If we couldn't build an accessible view, don't leave the user trapped in a
+                // silent modal they can't navigate - close the window and announce, so keyboard
+                // control returns to the game with speech instead of a mute freeze.
                 Log.Error($"[RimWorld Access] Error in AndroidCreationState.Open: {ex}");
+                var stuckWindow = BoundWindow;
                 Close();
+                stuckWindow?.Close(doCloseSound: false);
+                TolkHelper.Speak("Close".Loc());
             }
         }
 
@@ -140,7 +146,13 @@ namespace RimWorldAccess
             if (!isActive || ev.type != EventType.KeyDown)
                 return false;
 
-            if (WindowlessFloatMenuState.IsActive)
+            // Yield to anything layered on top of the creation window so it isn't stolen here
+            // (UnifiedKeyboardPatch runs before those windows' own DoWindowContents handlers and
+            // would otherwise consume the event first): the LoadPremade float menu, the
+            // save/load project picker (self-routed via Dialog_FileList.DoWindowContents), and any
+            // windowless message-box / confirmation (e.g. the picker's delete prompt).
+            if (WindowlessFloatMenuState.IsActive || AndroidProjectListState.IsActive
+                || WindowlessConfirmationState.IsActive || WindowlessDialogState.IsActive)
                 return false;
 
             KeyCode key = ev.keyCode;

@@ -3038,13 +3038,35 @@ namespace RimWorldAccess
 
                 // Vanilla Races Expanded - Android (optional mod) gives every body part its own
                 // Hediff_AndroidPart (one per toe/finger/organ/etc, ~60 for a full android), which
-                // would otherwise flood this flat list with near-identical entries. Bundle any body
-                // part whose hediffs are ALL android-hardware replacements into one collapsed
-                // summary node, at the position of the first one, instead of one top-level node
-                // per part; parts with a mix of android hardware and something else (an actual
-                // injury on top of the replacement) are left alone.
-                bool summaryInserted = false;
-                List<InspectionTreeItem> androidPartItems = null;
+                // would otherwise flood this flat list with near-identical entries. Bundle any
+                // run of consecutive body parts whose hediffs are ALL android-hardware
+                // replacements into one collapsed summary node, instead of one top-level node per
+                // part; parts with a mix of android hardware and something else (an actual injury
+                // on top of the replacement) are left as their own normal node, and a run of just
+                // one android part isn't worth collapsing either.
+                var androidRun = new List<KeyValuePair<BodyPartRecord, List<Hediff>>>();
+
+                // Flushes the pending android-only run: a summary when it spans several parts, a
+                // plain node when it's a single part, then clears it so subsequent runs (and the
+                // trailing flush) start fresh - the earlier version never reset this, so an
+                // android with any non-android hediff got its whole hardware list twice.
+                void FlushAndroidRun()
+                {
+                    if (androidRun.Count == 0)
+                        return;
+                    if (androidRun.Count > 1)
+                    {
+                        var parts = androidRun
+                            .Select(kv => BuildBodyPartItem(pawn, kv.Key, kv.Value, parentItem.IndentLevel + 2))
+                            .ToList();
+                        AddChild(parentItem, BuildAndroidHardwareSummaryItem(parts, parentItem.IndentLevel + 1));
+                    }
+                    else
+                    {
+                        AddChild(parentItem, BuildBodyPartItem(pawn, androidRun[0].Key, androidRun[0].Value, parentItem.IndentLevel + 1));
+                    }
+                    androidRun.Clear();
+                }
 
                 foreach (var group in hediffsByPart)
                 {
@@ -3052,38 +3074,15 @@ namespace RimWorldAccess
 
                     if (partHediffs.All(VREAndroidReflection.IsAndroidPartHediff))
                     {
-                        if (androidPartItems == null) androidPartItems = new List<InspectionTreeItem>();
-                        androidPartItems.Add(BuildBodyPartItem(pawn, group.Key, partHediffs, parentItem.IndentLevel + 2));
+                        androidRun.Add(new KeyValuePair<BodyPartRecord, List<Hediff>>(group.Key, partHediffs));
                         continue;
                     }
 
-                    if (androidPartItems != null && androidPartItems.Count > 1 && !summaryInserted)
-                    {
-                        AddChild(parentItem, BuildAndroidHardwareSummaryItem(androidPartItems, parentItem.IndentLevel + 1));
-                        summaryInserted = true;
-                    }
-                    else if (androidPartItems != null)
-                    {
-                        // Only one android-hardware part collected (or summary already placed
-                        // once for an earlier run) - not worth collapsing, add it normally.
-                        foreach (var item in androidPartItems)
-                            AddChild(parentItem, item);
-                        androidPartItems = null;
-                    }
-
+                    FlushAndroidRun();
                     AddChild(parentItem, BuildBodyPartItem(pawn, group.Key, partHediffs, parentItem.IndentLevel + 1));
                 }
 
-                // Trailing run of android-hardware parts (or the pawn is a pure android with no
-                // other hediffs at all, so the loop above never hit a non-android group).
-                if (androidPartItems != null)
-                {
-                    if (androidPartItems.Count > 1)
-                        AddChild(parentItem, BuildAndroidHardwareSummaryItem(androidPartItems, parentItem.IndentLevel + 1));
-                    else
-                        foreach (var item in androidPartItems)
-                            AddChild(parentItem, item);
-                }
+                FlushAndroidRun();
             }
             else
             {

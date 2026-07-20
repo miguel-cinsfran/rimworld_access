@@ -69,8 +69,13 @@ namespace RimWorldAccess
             }
             catch (System.Exception ex)
             {
+                // Don't leave the user trapped in a silent modal we failed to build - close the
+                // window and announce so keyboard control returns to the game with speech.
                 Log.Error($"[RimWorld Access] Error in AndroidAwakenedState.Open: {ex}");
+                var stuckWindow = BoundWindow;
                 Close();
+                stuckWindow?.Close(doCloseSound: false);
+                TolkHelper.Speak("Close".Loc());
             }
         }
 
