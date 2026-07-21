@@ -30,15 +30,20 @@ namespace RimWorldAccess
     /// </summary>
     public static class VPEPsycastsState
     {
-        private enum View { Root, Paths, Abilities, Foci }
-        private enum ItemKind { Status, GotoPaths, GotoFoci, ImproveStats, Path, Ability, Focus }
+        private enum View { Root, Paths, Abilities, Foci, Psysets, PsysetEdit }
+        private enum ItemKind
+        {
+            Status, GotoPaths, GotoFoci, GotoPsysets, ImproveStats,
+            Path, Ability, Focus, Psyset, PsysetCreate, PsysetAbility
+        }
 
         private class Item
         {
             public ItemKind Kind;
             public Def Path;                 // Path / current-path payload
-            public Def Ability;              // Ability payload
+            public Def Ability;              // Ability / psyset-ability payload
             public MeditationFocusDef Focus; // Focus payload
+            public object Psyset;            // Psyset payload (VPE PsySet instance)
         }
 
         private static bool isActive;
@@ -47,7 +52,8 @@ namespace RimWorldAccess
         private static object comp;     // VEF CompAbilities
 
         private static View view;
-        private static Def currentPath; // when view == Abilities
+        private static Def currentPath;    // when view == Abilities
+        private static object currentPsyset; // when view == PsysetEdit
         private static List<Item> items = new List<Item>();
         private static int selectedIndex;
         private static readonly TypeaheadSearchHelper typeahead = new TypeaheadSearchHelper();
@@ -94,6 +100,7 @@ namespace RimWorldAccess
             hediff = null;
             comp = null;
             currentPath = null;
+            currentPsyset = null;
             items.Clear();
             typeahead.ClearSearch();
         }
@@ -109,6 +116,8 @@ namespace RimWorldAccess
                     items.Add(new Item { Kind = ItemKind.Status });
                     items.Add(new Item { Kind = ItemKind.GotoPaths });
                     items.Add(new Item { Kind = ItemKind.GotoFoci });
+                    if (VPEPsycastsReflection.PsysetsAvailable)
+                        items.Add(new Item { Kind = ItemKind.GotoPsysets });
                     items.Add(new Item { Kind = ItemKind.ImproveStats });
                     break;
 
@@ -132,6 +141,20 @@ namespace RimWorldAccess
                                  .ThenBy(f => f.label))
                         items.Add(new Item { Kind = ItemKind.Focus, Focus = f });
                     break;
+
+                case View.Psysets:
+                    var psysets = VPEPsycastsReflection.GetPsysets(hediff);
+                    if (psysets != null)
+                        foreach (var ps in psysets)
+                            items.Add(new Item { Kind = ItemKind.Psyset, Psyset = ps });
+                    items.Add(new Item { Kind = ItemKind.PsysetCreate });
+                    break;
+
+                case View.PsysetEdit:
+                    foreach (var a in VPEPsycastsReflection.GetLearnedPsycastAbilities(comp)
+                                 .OrderBy(a => a.label))
+                        items.Add(new Item { Kind = ItemKind.PsysetAbility, Ability = a });
+                    break;
             }
 
             if (selectedIndex >= items.Count) selectedIndex = System.Math.Max(0, items.Count - 1);
@@ -142,6 +165,10 @@ namespace RimWorldAccess
         public static bool HandleInput(Event evt)
         {
             if (!isActive || evt.type != EventType.KeyDown) return false;
+
+            // Defer entirely while a modal text session owns input (our psyset rename dialog):
+            // let UnifiedKeyboardPatch's -1.6 text dispatch handle every key instead of stealing them.
+            if (TextInputManager.IsActive) return false;
 
             KeyCode key = evt.keyCode;
 
@@ -221,6 +248,14 @@ namespace RimWorldAccess
                     Activate();
                     return true;
 
+                case KeyCode.Delete:
+                    DeleteCurrentPsyset();
+                    return true;
+
+                case KeyCode.F2:
+                    RenameCurrentPsyset();
+                    return true;
+
                 default:
                     return true; // modal: swallow everything else; typeahead arrives via TypeaheadDispatcher
             }
@@ -274,8 +309,13 @@ namespace RimWorldAccess
                     view = View.Paths;
                     currentPath = null;
                     break;
+                case View.PsysetEdit:
+                    view = View.Psysets;
+                    currentPsyset = null;
+                    break;
                 case View.Paths:
                 case View.Foci:
+                case View.Psysets:
                     view = View.Root;
                     break;
                 case View.Root:
@@ -321,6 +361,10 @@ namespace RimWorldAccess
                     EnterView(View.Foci);
                     return;
 
+                case ItemKind.GotoPsysets:
+                    EnterView(View.Psysets);
+                    return;
+
                 case ItemKind.ImproveStats:
                     DoImproveStats();
                     return;
@@ -335,6 +379,19 @@ namespace RimWorldAccess
 
                 case ItemKind.Focus:
                     ActivateFocus(item.Focus);
+                    return;
+
+                case ItemKind.Psyset:
+                    currentPsyset = item.Psyset;
+                    EnterView(View.PsysetEdit);
+                    return;
+
+                case ItemKind.PsysetCreate:
+                    CreatePsyset();
+                    return;
+
+                case ItemKind.PsysetAbility:
+                    TogglePsysetAbility(item.Ability);
                     return;
             }
         }
@@ -459,6 +516,60 @@ namespace RimWorldAccess
             TolkHelper.Speak("RimWorldAccess.VPEPsycasts.NoPoints".Loc());
         }
 
+        // ===== Psyset actions =====
+
+        private static void CreatePsyset()
+        {
+            int n = (VPEPsycastsReflection.GetPsysets(hediff)?.Count ?? 0) + 1;
+            string name = "RimWorldAccess.VPEPsycasts.Psyset.DefaultName".Loc(n).ToString();
+            var ps = VPEPsycastsReflection.CreatePsyset(hediff, name);
+            if (ps == null)
+            {
+                SoundDefOf.ClickReject.PlayOneShotOnCamera();
+                return;
+            }
+            SoundDefOf.Tick_High.PlayOneShotOnCamera();
+            currentPsyset = ps;
+            EnterView(View.PsysetEdit);
+            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.Psyset.Created".Loc(name).ToString(), SpeechPriority.High);
+        }
+
+        private static void TogglePsysetAbility(Def ability)
+        {
+            if (currentPsyset == null || ability == null) return;
+            bool nowIn = VPEPsycastsReflection.PsysetToggle(currentPsyset, ability);
+            (nowIn ? SoundDefOf.Tick_High : SoundDefOf.Tick_Low).PlayOneShotOnCamera();
+            TolkHelper.SpeakData((nowIn
+                ? "RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded".Loc(ability.LabelCap)
+                : "RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved".Loc(ability.LabelCap)).ToString());
+        }
+
+        private static void DeleteCurrentPsyset()
+        {
+            if (view != View.Psysets || items.Count == 0 || selectedIndex < 0 || selectedIndex >= items.Count)
+                return;
+            var item = items[selectedIndex];
+            if (item.Kind != ItemKind.Psyset) { AnnounceCurrent(); return; }
+
+            string name = VPEPsycastsReflection.GetPsysetName(item.Psyset);
+            VPEPsycastsReflection.RemovePsyset(hediff, item.Psyset);
+            SoundDefOf.Tick_Low.PlayOneShotOnCamera();
+            BuildItems();
+            if (selectedIndex >= items.Count) selectedIndex = System.Math.Max(0, items.Count - 1);
+            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.Psyset.Deleted".Loc(name ?? "").ToString(), SpeechPriority.High);
+        }
+
+        private static void RenameCurrentPsyset()
+        {
+            if (view != View.Psysets || items.Count == 0 || selectedIndex < 0 || selectedIndex >= items.Count)
+                return;
+            var item = items[selectedIndex];
+            if (item.Kind != ItemKind.Psyset) return;
+            // Opens VPE's Dialog_RenamePsyset (a vanilla Dialog_Rename<PsySet>), which RWA's text-input
+            // pipeline makes accessible; our HandleInput defers while that session is active.
+            VPEPsycastsReflection.OpenRenamePsysetDialog(item.Psyset);
+        }
+
         /// <summary>
         /// Right-arrow: expand/drill in only, never commits a point-spend. Enters a submenu from
         /// the root, or an unlocked path's ability list; inert elsewhere (re-announces so silence
@@ -477,6 +588,15 @@ namespace RimWorldAccess
                 case ItemKind.GotoFoci:
                     typeahead.ClearSearch();
                     EnterView(View.Foci);
+                    return;
+                case ItemKind.GotoPsysets:
+                    typeahead.ClearSearch();
+                    EnterView(View.Psysets);
+                    return;
+                case ItemKind.Psyset:
+                    typeahead.ClearSearch();
+                    currentPsyset = item.Psyset;
+                    EnterView(View.PsysetEdit);
                     return;
                 case ItemKind.Path:
                     if (VPEPsycastsReflection.IsPathUnlocked(hediff, item.Path) &&
@@ -553,6 +673,7 @@ namespace RimWorldAccess
             switch (item.Kind)
             {
                 case ItemKind.Ability: def = item.Ability; break;
+                case ItemKind.PsysetAbility: def = item.Ability; break;
                 case ItemKind.Path: def = item.Path; break;
                 case ItemKind.Focus: def = item.Focus; break;
             }
@@ -626,6 +747,8 @@ namespace RimWorldAccess
                 case View.Paths: return "RimWorldAccess.VPEPsycasts.Header.Paths".Loc().ToString();
                 case View.Abilities: return "RimWorldAccess.VPEPsycasts.Header.Abilities".Loc(currentPath?.LabelCap ?? "").ToString();
                 case View.Foci: return "RimWorldAccess.VPEPsycasts.Header.Foci".Loc().ToString();
+                case View.Psysets: return "RimWorldAccess.VPEPsycasts.Header.Psysets".Loc().ToString();
+                case View.PsysetEdit: return "RimWorldAccess.VPEPsycasts.Header.PsysetEdit".Loc(VPEPsycastsReflection.GetPsysetName(currentPsyset) ?? "").ToString();
                 default: return "VPE.Psycasts".Translate();
             }
         }
@@ -637,10 +760,14 @@ namespace RimWorldAccess
                 case ItemKind.Status: return "RimWorldAccess.VPEPsycasts.Item.Status".Loc().ToString();
                 case ItemKind.GotoPaths: return "RimWorldAccess.VPEPsycasts.Item.Paths".Loc().ToString();
                 case ItemKind.GotoFoci: return "RimWorldAccess.VPEPsycasts.Item.Foci".Loc().ToString();
+                case ItemKind.GotoPsysets: return "RimWorldAccess.VPEPsycasts.Item.Psysets".Loc().ToString();
                 case ItemKind.ImproveStats: return "RimWorldAccess.VPEPsycasts.Item.ImproveStats".Loc().ToString();
                 case ItemKind.Path: return item.Path?.LabelCap;
                 case ItemKind.Ability: return item.Ability?.LabelCap;
                 case ItemKind.Focus: return item.Focus?.LabelCap;
+                case ItemKind.Psyset: return VPEPsycastsReflection.GetPsysetName(item.Psyset);
+                case ItemKind.PsysetCreate: return "RimWorldAccess.VPEPsycasts.Item.PsysetCreate".Loc().ToString();
+                case ItemKind.PsysetAbility: return item.Ability?.LabelCap;
                 default: return "";
             }
         }
@@ -670,12 +797,33 @@ namespace RimWorldAccess
                     return "RimWorldAccess.VPEPsycasts.Item.FociCount".Loc(unlocked, total).ToString();
                 }
 
+                case ItemKind.GotoPsysets:
+                    return "RimWorldAccess.VPEPsycasts.Item.PsysetsCount".Loc(
+                        VPEPsycastsReflection.GetPsysets(hediff)?.Count ?? 0).ToString();
+
                 case ItemKind.ImproveStats:
                     return "RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull".Loc().ToString();
 
                 case ItemKind.Path: return BuildPathAnnouncement(item.Path);
                 case ItemKind.Ability: return BuildAbilityAnnouncement(item.Ability);
                 case ItemKind.Focus: return BuildFocusAnnouncement(item.Focus);
+
+                case ItemKind.Psyset:
+                    return "RimWorldAccess.VPEPsycasts.Psyset.Row".Loc(
+                        VPEPsycastsReflection.GetPsysetName(item.Psyset) ?? "",
+                        VPEPsycastsReflection.GetPsysetAbilityCount(item.Psyset)).ToString();
+
+                case ItemKind.PsysetCreate:
+                    return "RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull".Loc().ToString();
+
+                case ItemKind.PsysetAbility:
+                {
+                    string state = (VPEPsycastsReflection.PsysetContains(currentPsyset, item.Ability)
+                        ? "RimWorldAccess.VPEPsycasts.Psyset.InSet".Loc()
+                        : "RimWorldAccess.VPEPsycasts.Psyset.NotInSet".Loc()).ToString();
+                    return "RimWorldAccess.VPEPsycasts.PsysetAbility".Loc(item.Ability.LabelCap, state).ToString();
+                }
+
                 default: return "";
             }
         }

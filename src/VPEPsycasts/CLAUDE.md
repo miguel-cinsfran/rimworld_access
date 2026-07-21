@@ -35,8 +35,15 @@ Root ─┬─ Status (level / points / experience — read-only)
       ├─ Psycast paths      → per-path list; Enter unlocks a locked path or drills into abilities
       │     └─ Abilities    → per-ability list; Enter learns an unlockable ability
       ├─ Meditation focus types → per-focus list; Enter unlocks an eligible focus
+      ├─ Psycast sets (psysets) → per-set list; Enter edits, F2 renames, Delete removes, plus Create
+      │     └─ Set editor   → learned-ability list; Enter toggles each in/out of the set
       └─ Improve psycaster stats (Enter spends one point)
 ```
+
+The psyset (loadout) rows appear only when `VPEPsycastsReflection.PsysetsAvailable`. Rename opens
+VPE's `Dialog_RenamePsyset` (a vanilla `Dialog_Rename<PsySet>`, made accessible by RWA's text-input
+pipeline); `HandleInput` defers entirely while `TextInputManager.IsActive` so it never steals keys
+from that text session.
 
 Keys:
 - **Up/Down/Home/End** navigate; typeahead searches by name.
@@ -66,11 +73,21 @@ appear immediately.
 - **TypeaheadConsumerRegistry** — registered at 4.615 (below the inspection tree at 4.806 so its
   typeahead wins while open).
 
+## Casting (separate module)
+Learning an ability is only useful if it can be cast. VPE psycasts use `VEF.Abilities.Verb_CastAbility`
+(extends `Verse.Verb` directly — NOT `RimWorld.Verb_CastAbility`, and does not implement `IAbilityVerb`),
+so RWA's specialized `AbilityTargetingState` doesn't recognize them; they fall to `GenericTargetingState`.
+That path gives range + line-of-sight (R key) and now an AOE affected-targets preview (T key) — the
+latter relies on a by-name reflection fallback in `GenericTargetingState.ExtractAoeRadius` that reads
+`ability.def.radius` when the verb doesn't override `HighlightFieldRadiusAroundTarget` (which VEF's
+doesn't). Reaching the gizmo is via the normal `GizmoNavigationState` (G key); combat psycasts only show
+their gizmo while the pawn is drafted (vanilla behavior).
+
 ## Scope / follow-ups
-Implemented: stat upgrades, foci, paths, and ability learning — everything that consumes points.
-**Deferred:** psyset (ability loadout) management from the same tab — those are casting-time
-loadouts for the psychic-status gizmo, only useful after abilities are learned, so a natural
-second pass.
+Implemented: stat upgrades, foci, paths, ability learning, and psyset (loadout) management. A remaining
+polish would be teaching `AbilityTargetingState` to consume VEF abilities directly (VEF's `Ability` is a
+different type from `RimWorld.Ability`) for the richest per-tile targeting feedback — a broader VEF
+integration that would benefit every VEF-based ability mod, not just VPE.
 
 ## Testing checklist
 - [ ] "Psíquico" appears in a player psycaster's inspection tree; Enter opens the overlay.

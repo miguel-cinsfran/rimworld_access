@@ -68,4 +68,27 @@
   <RimWorldAccess.VPEPsycasts.NoDescription>No hay descripción disponible.</RimWorldAccess.VPEPsycasts.NoDescription>
   <!-- {0} = lista de estadísticas. -->
   <RimWorldAccess.VPEPsycasts.CurrentStats>Estadísticas actuales: {0}.</RimWorldAccess.VPEPsycasts.CurrentStats>
+
+  <!-- Psysets (conjuntos de casteo). -->
+  <RimWorldAccess.VPEPsycasts.Item.Psysets>Conjuntos de psicasts</RimWorldAccess.VPEPsycasts.Item.Psysets>
+  <!-- {0} = cantidad de conjuntos. -->
+  <RimWorldAccess.VPEPsycasts.Item.PsysetsCount>Conjuntos de psicasts. {0} definidos.</RimWorldAccess.VPEPsycasts.Item.PsysetsCount>
+  <RimWorldAccess.VPEPsycasts.Item.PsysetCreate>Crear conjunto nuevo</RimWorldAccess.VPEPsycasts.Item.PsysetCreate>
+  <RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>Crear conjunto nuevo. Intro para crear y editar.</RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>
+  <RimWorldAccess.VPEPsycasts.Header.Psysets>Conjuntos de psicasts. Intro para editar un conjunto, F2 para renombrar, Suprimir para borrar.</RimWorldAccess.VPEPsycasts.Header.Psysets>
+  <!-- {0} = nombre del conjunto. -->
+  <RimWorldAccess.VPEPsycasts.Header.PsysetEdit>Editando el conjunto {0}. Intro agrega o quita una habilidad.</RimWorldAccess.VPEPsycasts.Header.PsysetEdit>
+  <!-- {0} = nombre del conjunto, {1} = cantidad de habilidades. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.Row>{0}. {1} habilidades.</RimWorldAccess.VPEPsycasts.Psyset.Row>
+  <!-- {0} = número secuencial. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.DefaultName>Conjunto {0}</RimWorldAccess.VPEPsycasts.Psyset.DefaultName>
+  <RimWorldAccess.VPEPsycasts.Psyset.Created>Conjunto {0} creado.</RimWorldAccess.VPEPsycasts.Psyset.Created>
+  <RimWorldAccess.VPEPsycasts.Psyset.Deleted>Conjunto {0} eliminado.</RimWorldAccess.VPEPsycasts.Psyset.Deleted>
+  <!-- {0} = nombre de la habilidad. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>{0} agregada al conjunto.</RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>
+  <RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>{0} quitada del conjunto.</RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>
+  <RimWorldAccess.VPEPsycasts.Psyset.InSet>en el conjunto</RimWorldAccess.VPEPsycasts.Psyset.InSet>
+  <RimWorldAccess.VPEPsycasts.Psyset.NotInSet>fuera del conjunto</RimWorldAccess.VPEPsycasts.Psyset.NotInSet>
+  <!-- {0} = nombre de la habilidad, {1} = estado de pertenencia. -->
+  <RimWorldAccess.VPEPsycasts.PsysetAbility>{0}. {1}.</RimWorldAccess.VPEPsycasts.PsysetAbility>
 </LanguageData>
