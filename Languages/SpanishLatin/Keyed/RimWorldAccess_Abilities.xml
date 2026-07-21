@@ -206,6 +206,7 @@
   <RimWorldAccess.Abilities.Generic.ExplosionRadius>, radio de explosión: {0}</RimWorldAccess.Abilities.Generic.ExplosionRadius>
   <RimWorldAccess.Abilities.Generic.RangeOnly>Rango: {0} cuadros</RimWorldAccess.Abilities.Generic.RangeOnly>
   <RimWorldAccess.Abilities.Generic.NoRangeInfo>Sin información de rango</RimWorldAccess.Abilities.Generic.NoRangeInfo>
+  <RimWorldAccess.Abilities.Generic.NoTargetAtCursor>No hay objetivo en el cursor</RimWorldAccess.Abilities.Generic.NoTargetAtCursor>
 
   <!-- AbilityTargetingState.BuildDestinationCellAnnouncement (Skip / dual-
        target abilities). Terrain is the terrain label at the cursor;
