@@ -145,12 +145,13 @@ namespace RimWorldAccess
 
             KeyCode key = evt.keyCode;
 
-            // Alt+I — read the current item's description/details on demand (RWA convention),
-            // so the fast navigation announcement stays terse. Checked before typeahead since
-            // Alt+letter never reaches the character dispatcher.
+            // Alt+I — open the RimWorld info card for the current element (ability/path/focus, or
+            // the pawn for the stat rows). This is RWA's universal Alt+I convention: a navigable
+            // Dialog_InfoCard (handled by InfoCardState), NOT a spoken description. Checked before
+            // typeahead since Alt+letter never reaches the character dispatcher.
             if (KeyboardHelper.IsAltHeld && key == KeyCode.I)
             {
-                SpeakDetails();
+                OpenInfoCard();
                 return true;
             }
 
@@ -534,38 +535,40 @@ namespace RimWorldAccess
             return result;
         }
 
-        // ===== DETAILS (Alt+I) =====
+        // ===== INFO CARD (Alt+I) =====
 
-        private static void SpeakDetails()
+        /// <summary>
+        /// Opens the RimWorld info card for the focused element — the same navigable
+        /// <see cref="Dialog_InfoCard"/> that Alt+I opens everywhere else in RWA (handled by
+        /// InfoCardState). Ability/path/focus rows card their own def (description + stats,
+        /// including cast cost); the status and improve-stats rows card the pawn (whose stat
+        /// list includes the psycaster stats).
+        /// </summary>
+        private static void OpenInfoCard()
         {
             if (items.Count == 0 || selectedIndex < 0 || selectedIndex >= items.Count) return;
             var item = items[selectedIndex];
-            string text;
+
+            Def def = null;
             switch (item.Kind)
             {
-                case ItemKind.Ability: text = BuildDefDetails(item.Ability); break;
-                case ItemKind.Path: text = BuildPathDetails(item.Path); break;
-                case ItemKind.Focus: text = BuildDefDetails(item.Focus); break;
-                case ItemKind.ImproveStats: text = BuildStatsDetails(); break;
-                default: text = BuildItemAnnouncement(item); break;
+                case ItemKind.Ability: def = item.Ability; break;
+                case ItemKind.Path: def = item.Path; break;
+                case ItemKind.Focus: def = item.Focus; break;
             }
-            if (string.IsNullOrEmpty(text))
-                text = "RimWorldAccess.VPEPsycasts.NoDescription".Loc().ToString();
-            TolkHelper.SpeakData(text, SpeechPriority.High);
-        }
-
-        private static string BuildDefDetails(Def def)
-        {
-            if (def == null) return "";
-            string desc = SanitizeText(def.description);
-            return string.IsNullOrEmpty(desc) ? def.LabelCap.ToString() : $"{def.LabelCap}. {desc}";
-        }
-
-        private static string BuildPathDetails(Def path)
-        {
-            if (path == null) return "";
-            string tip = SanitizeText(VPEPsycastsReflection.GetPathTooltip(path));
-            return string.IsNullOrEmpty(tip) ? path.LabelCap.ToString() : $"{path.LabelCap}. {tip}";
+            if (def != null)
+            {
+                Find.WindowStack.Add(new Dialog_InfoCard(def));
+                return;
+            }
+            if (item.Kind == ItemKind.Status || item.Kind == ItemKind.ImproveStats)
+            {
+                Find.WindowStack.Add(new Dialog_InfoCard(pawn));
+                return;
+            }
+            // Category rows (paths/foci) have no card of their own — re-announce so the keypress
+            // isn't silently swallowed.
+            AnnounceCurrent();
         }
 
         private static string BuildStatsDetails()
@@ -582,12 +585,6 @@ namespace RimWorldAccess
         {
             try { parts.Add($"{stat.LabelCap}: {stat.ValueToString(pawn.GetStatValue(stat))}"); }
             catch { /* stat unavailable — skip */ }
-        }
-
-        private static string SanitizeText(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return "";
-            return text.StripTags().Replace("\n\n", ". ").Replace("\n", " ").Trim();
         }
 
         // ===== ANNOUNCEMENTS =====

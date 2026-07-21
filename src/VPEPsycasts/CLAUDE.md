@@ -46,8 +46,10 @@ Keys:
 - **Right** = expand only (enter a submenu, or drill into an unlocked path's abilities); inert on
   anything that can't be expanded. Mirrors the inventory tree (Right expands, Enter is the action).
 - **Left** = collapse / go back one level. **Escape** = back one level, and closes from Root.
-- **Alt+I** = read the current item's description/details on demand (ability/path/focus description,
-  or the current psycaster stat values on "Improve stats"). Keeps fast navigation terse.
+- **Alt+I** = open the RimWorld info card (`Dialog_InfoCard`) for the current element — the same
+  navigable card Alt+I opens everywhere else in RWA (via InfoCardState). Ability/path/focus rows
+  card their own def (description + stats, incl. cast cost); the status/improve-stats rows card the
+  pawn (whose stat list carries the psycaster stats). Keeps fast navigation terse.
 - **Backspace** edits the active search.
 
 Ability lists are **topologically ordered** (prerequisites always precede their dependents), and all
