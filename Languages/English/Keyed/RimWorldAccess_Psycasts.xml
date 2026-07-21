@@ -74,4 +74,27 @@
   <RimWorldAccess.VPEPsycasts.NoDescription>No description available.</RimWorldAccess.VPEPsycasts.NoDescription>
   <!-- {0} = stat list. -->
   <RimWorldAccess.VPEPsycasts.CurrentStats>Current stats: {0}.</RimWorldAccess.VPEPsycasts.CurrentStats>
+
+  <!-- Psysets (casting loadouts). -->
+  <RimWorldAccess.VPEPsycasts.Item.Psysets>Psycast sets</RimWorldAccess.VPEPsycasts.Item.Psysets>
+  <!-- {0} = number of psysets. -->
+  <RimWorldAccess.VPEPsycasts.Item.PsysetsCount>Psycast sets. {0} defined.</RimWorldAccess.VPEPsycasts.Item.PsysetsCount>
+  <RimWorldAccess.VPEPsycasts.Item.PsysetCreate>Create new set</RimWorldAccess.VPEPsycasts.Item.PsysetCreate>
+  <RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>Create new set. Enter to create and edit.</RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>
+  <RimWorldAccess.VPEPsycasts.Header.Psysets>Psycast sets. Enter to edit a set, F2 to rename, Delete to remove.</RimWorldAccess.VPEPsycasts.Header.Psysets>
+  <!-- {0} = set name. -->
+  <RimWorldAccess.VPEPsycasts.Header.PsysetEdit>Editing set {0}. Enter toggles an ability in or out.</RimWorldAccess.VPEPsycasts.Header.PsysetEdit>
+  <!-- {0} = set name, {1} = ability count. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.Row>{0}. {1} abilities.</RimWorldAccess.VPEPsycasts.Psyset.Row>
+  <!-- {0} = sequential number. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.DefaultName>Set {0}</RimWorldAccess.VPEPsycasts.Psyset.DefaultName>
+  <RimWorldAccess.VPEPsycasts.Psyset.Created>Created set {0}.</RimWorldAccess.VPEPsycasts.Psyset.Created>
+  <RimWorldAccess.VPEPsycasts.Psyset.Deleted>Removed set {0}.</RimWorldAccess.VPEPsycasts.Psyset.Deleted>
+  <!-- {0} = ability name. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>{0} added to set.</RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>
+  <RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>{0} removed from set.</RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>
+  <RimWorldAccess.VPEPsycasts.Psyset.InSet>in set</RimWorldAccess.VPEPsycasts.Psyset.InSet>
+  <RimWorldAccess.VPEPsycasts.Psyset.NotInSet>not in set</RimWorldAccess.VPEPsycasts.Psyset.NotInSet>
+  <!-- {0} = ability name, {1} = membership state. -->
+  <RimWorldAccess.VPEPsycasts.PsysetAbility>{0}. {1}.</RimWorldAccess.VPEPsycasts.PsysetAbility>
 </LanguageData>

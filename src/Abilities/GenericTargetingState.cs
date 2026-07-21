@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using HarmonyLib;
 using RimWorld;
@@ -76,7 +78,63 @@ namespace RimWorldAccess
                 AnnounceRangeInfo();
                 return true;
             }
+            if (key == KeyCode.T && !shift && !ctrl && !alt)
+            {
+                AnnounceAffectedTargets();
+                return true;
+            }
             return false;
+        }
+
+        /// <summary>
+        /// T-key affected-targets preview, mirroring <see cref="AbilityTargetingState"/>: for an
+        /// AOE source, lists the pawns within the effect radius of the cursor; otherwise names the
+        /// single thing under the cursor. Works for modded ability verbs (VEF psycasts, etc.) whose
+        /// radius is only reachable via the ability-def fallback in <see cref="ExtractAoeRadius"/>.
+        /// </summary>
+        public static void AnnounceAffectedTargets()
+        {
+            if (!isActive)
+            {
+                TolkHelper.Speak("RimWorldAccess.Abilities.Generic.NoTargetingActive".Loc());
+                return;
+            }
+            IntVec3 cursor = MapNavigationState.CurrentCursorPosition;
+            if (!cursor.IsValid || casterMap == null)
+            {
+                TolkHelper.Speak("RimWorldAccess.Guard.InvalidCursorPosition".Loc());
+                return;
+            }
+
+            if (aoeRadius > 0f)
+            {
+                var pawns = new System.Collections.Generic.List<Pawn>();
+                foreach (var c in GenRadial.RadialCellsAround(cursor, aoeRadius, useCenter: true))
+                {
+                    if (!c.InBounds(casterMap)) continue;
+                    foreach (var t in c.GetThingList(casterMap))
+                        if (t is Pawn p && !pawns.Contains(p)) pawns.Add(p);
+                }
+                if (pawns.Count == 0)
+                {
+                    TolkHelper.Speak("RimWorldAccess.Abilities.Affected.NoPawnsInRadius".Loc());
+                    return;
+                }
+                const int max = 6;
+                string list = string.Join(", ", pawns.Take(max).Select(p => (string)p.LabelShort));
+                string ann = "RimWorldAccess.Abilities.Affected.CountPrefix".Loc(pawns.Count, list).ToString();
+                if (pawns.Count > max)
+                    ann += "RimWorldAccess.Abilities.Affected.AndMore".Loc(pawns.Count - max).ToString();
+                TolkHelper.SpeakData(ann);
+            }
+            else
+            {
+                Thing thing = cursor.GetFirstPawn(casterMap) ?? (Thing)cursor.GetFirstBuilding(casterMap);
+                if (thing != null)
+                    TolkHelper.SpeakData("RimWorldAccess.Abilities.Affected.TargetOne".Loc(thing.LabelShort).ToString());
+                else
+                    TolkHelper.Speak("RimWorldAccess.Abilities.Generic.NoTargetAtCursor".Loc());
+            }
         }
 
         public static void AnnounceRangeInfo()
@@ -247,9 +305,48 @@ namespace RimWorldAccess
         {
             try
             {
-                return source.GetVerb?.HighlightFieldRadiusAroundTarget(out _) ?? 0f;
+                float r = source.GetVerb?.HighlightFieldRadiusAroundTarget(out _) ?? 0f;
+                if (r > 0f) return r;
+                // Ability-framework verbs (VEF psycasts, other modded ability verbs) often don't
+                // override the highlight hook but carry the radius on their ability def. Resolve it
+                // by member name so we never hard-reference any specific mod's types.
+                return ExtractAbilityDefRadius(source);
             }
             catch { return 0f; }
+        }
+
+        /// <summary>
+        /// Reflection fallback: source (or its verb) → an <c>ability</c> member → its <c>def</c> →
+        /// a float radius field (<c>EffectRadius</c> for vanilla, <c>radius</c> for VEF-style defs).
+        /// Guards against the "no radius" sentinel (float.MaxValue) some defs use.
+        /// </summary>
+        private static float ExtractAbilityDefRadius(ITargetingSource source)
+        {
+            try
+            {
+                object ability = GetMemberValue(source, "ability")
+                                 ?? GetMemberValue(source.GetVerb, "ability")
+                                 ?? GetMemberValue(source.GetVerb, "Ability");
+                object def = ability != null ? GetMemberValue(ability, "def") : null;
+                if (def == null) return 0f;
+                foreach (var name in new[] { "EffectRadius", "radius" })
+                {
+                    if (GetMemberValue(def, name) is float f && f > 0f && f < 900000f)
+                        return f;
+                }
+            }
+            catch { /* best-effort */ }
+            return 0f;
+        }
+
+        private static object GetMemberValue(object obj, string name)
+        {
+            if (obj == null) return null;
+            var t = obj.GetType();
+            var field = AccessTools.Field(t, name);
+            if (field != null) return field.GetValue(obj);
+            var prop = AccessTools.Property(t, name);
+            return prop != null ? prop.GetValue(obj) : null;
         }
     }
 }

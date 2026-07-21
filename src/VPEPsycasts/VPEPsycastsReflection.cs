@@ -54,6 +54,13 @@ namespace RimWorldAccess
         // ===== MeditationFocusDef (vanilla) + VPE CanUnlock extension =====
         private static MethodInfo mCanPawnUse, mCanUnlock;
 
+        // ===== Psysets (loadout management) — optional; gated on PsysetsAvailable =====
+        private static Type psySetType, dialogRenamePsysetType;
+        private static FieldInfo fPsysets, fPsysetName, fPsysetAbilities;
+        private static MethodInfo mRemovePsySet;
+        private static MethodInfo mSetAdd, mSetRemove, mSetContains; // HashSet<AbilityDef> members
+        public static bool PsysetsAvailable { get; private set; }
+
         // Path defs are immutable after load; cache the list on first request.
         private static List<Def> allPathsCache;
 
@@ -113,6 +120,19 @@ namespace RimWorldAccess
             mCanPawnUse = AccessTools.Method(typeof(MeditationFocusDef), "CanPawnUse", new[] { typeof(Pawn) });
             if (meditationUtilsType != null)
                 mCanUnlock = AccessTools.Method(meditationUtilsType, "CanUnlock");
+
+            // Psysets (optional — a mod update could drop them without breaking the rest).
+            psySetType = AccessTools.TypeByName("VanillaPsycastsExpanded.PsySet");
+            dialogRenamePsysetType = AccessTools.TypeByName("VanillaPsycastsExpanded.UI.Dialog_RenamePsyset");
+            fPsysets = AccessTools.Field(hediffType, "psysets");
+            if (psySetType != null)
+            {
+                fPsysetName = AccessTools.Field(psySetType, "Name");
+                fPsysetAbilities = AccessTools.Field(psySetType, "Abilities");
+                mRemovePsySet = AccessTools.Method(hediffType, "RemovePsySet", new[] { psySetType });
+            }
+            PsysetsAvailable = psySetType != null && fPsysets != null && fPsysetName != null &&
+                               fPsysetAbilities != null && mRemovePsySet != null;
 
             Available =
                 fPoints != null && fLevel != null && fUnlockedPaths != null &&
@@ -395,6 +415,116 @@ namespace RimWorldAccess
                 return result;
             }
             catch (Exception ex) { LogOnce("FocusCanUnlock", ex); return false; }
+        }
+
+        // ===== Psyset accessors =====
+
+        public static IList GetPsysets(object hediff)
+        {
+            try { return fPsysets?.GetValue(hediff) as IList; }
+            catch { return null; }
+        }
+
+        public static string GetPsysetName(object psyset)
+        {
+            try { return fPsysetName?.GetValue(psyset) as string; }
+            catch { return null; }
+        }
+
+        public static int GetPsysetAbilityCount(object psyset)
+        {
+            try
+            {
+                if (fPsysetAbilities?.GetValue(psyset) is IEnumerable set)
+                {
+                    int n = 0;
+                    foreach (var _ in set) n++;
+                    return n;
+                }
+            }
+            catch { }
+            return 0;
+        }
+
+        /// <summary>Learned psycast abilities that a psyset may contain — path abilities the pawn owns.</summary>
+        public static List<Def> GetLearnedPsycastAbilities(object comp)
+        {
+            var result = new List<Def>();
+            try
+            {
+                foreach (var path in GetAllPaths())
+                    foreach (var ab in GetPathAbilities(path))
+                        if (HasAbility(comp, ab)) result.Add(ab);
+            }
+            catch (Exception ex) { LogOnce("GetLearnedPsycastAbilities", ex); }
+            return result;
+        }
+
+        public static bool PsysetContains(object psyset, Def abilityDef)
+        {
+            try
+            {
+                var set = fPsysetAbilities?.GetValue(psyset);
+                if (set == null) return false;
+                EnsureSetMethods(set);
+                return mSetContains != null && (bool)mSetContains.Invoke(set, new object[] { abilityDef });
+            }
+            catch (Exception ex) { LogOnce("PsysetContains", ex); return false; }
+        }
+
+        /// <summary>Toggles an ability def in/out of the psyset. Returns the new membership state.</summary>
+        public static bool PsysetToggle(object psyset, Def abilityDef)
+        {
+            try
+            {
+                var set = fPsysetAbilities?.GetValue(psyset);
+                if (set == null) return false;
+                EnsureSetMethods(set);
+                bool has = mSetContains != null && (bool)mSetContains.Invoke(set, new object[] { abilityDef });
+                if (has) mSetRemove?.Invoke(set, new object[] { abilityDef });
+                else mSetAdd?.Invoke(set, new object[] { abilityDef });
+                return !has;
+            }
+            catch (Exception ex) { LogOnce("PsysetToggle", ex); return false; }
+        }
+
+        public static object CreatePsyset(object hediff, string name)
+        {
+            try
+            {
+                var ps = Activator.CreateInstance(psySetType);
+                fPsysetName.SetValue(ps, name);
+                (fPsysets.GetValue(hediff) as IList)?.Add(ps);
+                return ps;
+            }
+            catch (Exception ex) { LogOnce("CreatePsyset", ex); return null; }
+        }
+
+        public static void RemovePsyset(object hediff, object psyset)
+        {
+            try { mRemovePsySet.Invoke(hediff, new[] { psyset }); }
+            catch (Exception ex) { LogOnce("RemovePsyset", ex); }
+        }
+
+        /// <summary>Opens VPE's rename dialog (a vanilla Dialog_Rename&lt;T&gt;, already made accessible by RWA).</summary>
+        public static void OpenRenamePsysetDialog(object psyset)
+        {
+            try
+            {
+                if (dialogRenamePsysetType == null) return;
+                if (Activator.CreateInstance(dialogRenamePsysetType, psyset) is Window w)
+                    Find.WindowStack.Add(w);
+            }
+            catch (Exception ex) { LogOnce("OpenRenamePsysetDialog", ex); }
+        }
+
+        private static void EnsureSetMethods(object set)
+        {
+            if (mSetAdd != null || set == null) return;
+            var t = set.GetType();
+            mSetAdd = AccessTools.Method(t, "Add");
+            mSetRemove = AccessTools.Method(t, "Remove");
+            mSetContains = AccessTools.Method(t, "Contains");
         }
 
         // ===== Internals =====
