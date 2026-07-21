@@ -65,7 +65,6 @@
 
   <!-- Detalles (Alt+I) y ayudas. -->
   <RimWorldAccess.VPEPsycasts.DetailsHint>Pulsa Alt más I para la ficha de información.</RimWorldAccess.VPEPsycasts.DetailsHint>
-  <RimWorldAccess.VPEPsycasts.NoDescription>No hay descripción disponible.</RimWorldAccess.VPEPsycasts.NoDescription>
   <!-- {0} = lista de estadísticas. -->
   <RimWorldAccess.VPEPsycasts.CurrentStats>Estadísticas actuales: {0}.</RimWorldAccess.VPEPsycasts.CurrentStats>
 

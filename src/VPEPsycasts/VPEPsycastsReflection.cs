@@ -42,7 +42,7 @@ namespace RimWorldAccess
         private static MethodInfo mSpentPoints, mImproveStats, mUnlockPath, mUnlockFocus, mExpRequired;
 
         // ===== PsycasterPathDef members =====
-        private static FieldInfo fAbilities, fLockedReason, fPathOrder, fHasAbilities, fPathTooltip;
+        private static FieldInfo fAbilities, fLockedReason, fPathOrder, fHasAbilities;
         private static MethodInfo mCanPawnUnlock;
 
         // ===== AbilityExtension_Psycast members =====
@@ -104,7 +104,6 @@ namespace RimWorldAccess
             fLockedReason = AccessTools.Field(pathDefType, "lockedReason");
             fPathOrder = AccessTools.Field(pathDefType, "order");
             fHasAbilities = AccessTools.Field(pathDefType, "HasAbilities");
-            fPathTooltip = AccessTools.Field(pathDefType, "tooltip");
             mCanPawnUnlock = AccessTools.Method(pathDefType, "CanPawnUnlock", new[] { typeof(Pawn) });
 
             fPrereqs = AccessTools.Field(psycastExtType, "prerequisites");
@@ -289,17 +288,6 @@ namespace RimWorldAccess
         {
             try { return fLockedReason?.GetValue(path) as string; }
             catch { return null; }
-        }
-
-        /// <summary>VPE's own rich path tooltip; falls back to the def description.</summary>
-        public static string GetPathTooltip(Def path)
-        {
-            try
-            {
-                string tip = fPathTooltip?.GetValue(path) as string;
-                return string.IsNullOrEmpty(tip) ? path?.description : tip;
-            }
-            catch { return path?.description; }
         }
 
         public static int GetPathOrder(Def path)
