@@ -71,7 +71,6 @@
 
   <!-- Details (Alt+I) and hints. -->
   <RimWorldAccess.VPEPsycasts.DetailsHint>Press Alt plus I for the info card.</RimWorldAccess.VPEPsycasts.DetailsHint>
-  <RimWorldAccess.VPEPsycasts.NoDescription>No description available.</RimWorldAccess.VPEPsycasts.NoDescription>
   <!-- {0} = stat list. -->
   <RimWorldAccess.VPEPsycasts.CurrentStats>Current stats: {0}.</RimWorldAccess.VPEPsycasts.CurrentStats>
 
