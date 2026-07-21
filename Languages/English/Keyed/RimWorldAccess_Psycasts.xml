@@ -69,10 +69,19 @@
   <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0} is locked: {1}.</RimWorldAccess.VPEPsycasts.FocusLockedReason>
   <RimWorldAccess.VPEPsycasts.FocusUnlocked>Unlocked {0}. {1} points left.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
 
-  <!-- Details (Alt+I) and hints. -->
-  <RimWorldAccess.VPEPsycasts.DetailsHint>Press Alt plus I for the info card.</RimWorldAccess.VPEPsycasts.DetailsHint>
+  <!-- On-demand info shortcuts and hints. -->
+  <RimWorldAccess.VPEPsycasts.DetailsHint>Press Alt plus D for the description, Alt plus C for cast data.</RimWorldAccess.VPEPsycasts.DetailsHint>
+  <RimWorldAccess.VPEPsycasts.NoDescription>No description available.</RimWorldAccess.VPEPsycasts.NoDescription>
+  <RimWorldAccess.VPEPsycasts.NoData>No data available.</RimWorldAccess.VPEPsycasts.NoData>
   <!-- {0} = stat list. -->
   <RimWorldAccess.VPEPsycasts.CurrentStats>Current stats: {0}.</RimWorldAccess.VPEPsycasts.CurrentStats>
+  <!-- Alt+C cast data. {0} = value; Prefix {0} = ability name, {1} = data list. -->
+  <RimWorldAccess.VPEPsycasts.Data.Prefix>{0}. {1}.</RimWorldAccess.VPEPsycasts.Data.Prefix>
+  <RimWorldAccess.VPEPsycasts.Data.Psyfocus>Psyfocus cost {0}</RimWorldAccess.VPEPsycasts.Data.Psyfocus>
+  <RimWorldAccess.VPEPsycasts.Data.NeuralHeat>Neural heat {0}</RimWorldAccess.VPEPsycasts.Data.NeuralHeat>
+  <RimWorldAccess.VPEPsycasts.Data.Level>Level {0}</RimWorldAccess.VPEPsycasts.Data.Level>
+  <RimWorldAccess.VPEPsycasts.Data.Range>Range {0}</RimWorldAccess.VPEPsycasts.Data.Range>
+  <RimWorldAccess.VPEPsycasts.Data.Radius>Area radius {0}</RimWorldAccess.VPEPsycasts.Data.Radius>
 
   <!-- Psysets (casting loadouts). -->
   <RimWorldAccess.VPEPsycasts.Item.Psysets>Psycast sets</RimWorldAccess.VPEPsycasts.Item.Psysets>

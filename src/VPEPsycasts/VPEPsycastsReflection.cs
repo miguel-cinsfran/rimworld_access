@@ -47,6 +47,7 @@ namespace RimWorldAccess
 
         // ===== AbilityExtension_Psycast members =====
         private static FieldInfo fPrereqs, fAbLevel, fAbOrder;
+        private static MethodInfo mGetPsyfocusUsed, mGetEntropyUsed;
 
         // ===== CompAbilities members =====
         private static MethodInfo mHasAbility, mGiveAbility;
@@ -109,6 +110,8 @@ namespace RimWorldAccess
             fPrereqs = AccessTools.Field(psycastExtType, "prerequisites");
             fAbLevel = AccessTools.Field(psycastExtType, "level");
             fAbOrder = AccessTools.Field(psycastExtType, "order");
+            mGetPsyfocusUsed = AccessTools.Method(psycastExtType, "GetPsyfocusUsedByPawn", new[] { typeof(Pawn) });
+            mGetEntropyUsed = AccessTools.Method(psycastExtType, "GetEntropyUsedByPawn", new[] { typeof(Pawn) });
 
             // Name-only lookups: single overloads in VEF, and the AbilityDef param is VEF.Abilities.AbilityDef.
             mHasAbility = AccessTools.Method(compAbilitiesType, "HasAbility");
@@ -328,6 +331,41 @@ namespace RimWorldAccess
                 return ext != null && fAbOrder != null ? (int)fAbOrder.GetValue(ext) : 0;
             }
             catch { return 0; }
+        }
+
+        /// <summary>Psyfocus fraction this ability costs the pawn to cast (stat-scaled).</summary>
+        public static float GetAbilityPsyfocusCost(Def abilityDef, Pawn pawn)
+        {
+            try
+            {
+                var ext = GetPsycastExt(abilityDef);
+                return ext != null && mGetPsyfocusUsed != null ? (float)mGetPsyfocusUsed.Invoke(ext, new object[] { pawn }) : 0f;
+            }
+            catch { return 0f; }
+        }
+
+        /// <summary>Neural heat (entropy) this ability generates when cast (stat-scaled).</summary>
+        public static float GetAbilityNeuralHeat(Def abilityDef, Pawn pawn)
+        {
+            try
+            {
+                var ext = GetPsycastExt(abilityDef);
+                return ext != null && mGetEntropyUsed != null ? (float)mGetEntropyUsed.Invoke(ext, new object[] { pawn }) : 0f;
+            }
+            catch { return 0f; }
+        }
+
+        public static float GetAbilityRange(Def abilityDef) => GetDefFloat(abilityDef, "range");
+        public static float GetAbilityRadius(Def abilityDef) => GetDefFloat(abilityDef, "radius");
+
+        private static float GetDefFloat(Def def, string name)
+        {
+            try
+            {
+                var f = AccessTools.Field(def.GetType(), name);
+                return f != null && f.GetValue(def) is float v ? v : 0f;
+            }
+            catch { return 0f; }
         }
 
         /// <summary>Prerequisite ability defs for an ability (may be empty).</summary>

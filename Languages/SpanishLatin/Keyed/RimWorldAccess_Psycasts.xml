@@ -63,10 +63,19 @@
   <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0} está bloqueado: {1}.</RimWorldAccess.VPEPsycasts.FocusLockedReason>
   <RimWorldAccess.VPEPsycasts.FocusUnlocked>{0} desbloqueado. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
 
-  <!-- Detalles (Alt+I) y ayudas. -->
-  <RimWorldAccess.VPEPsycasts.DetailsHint>Pulsa Alt más I para la ficha de información.</RimWorldAccess.VPEPsycasts.DetailsHint>
+  <!-- Atajos de info bajo demanda y ayudas. -->
+  <RimWorldAccess.VPEPsycasts.DetailsHint>Pulsa Alt más D para la descripción, Alt más C para los datos de casteo.</RimWorldAccess.VPEPsycasts.DetailsHint>
+  <RimWorldAccess.VPEPsycasts.NoDescription>No hay descripción disponible.</RimWorldAccess.VPEPsycasts.NoDescription>
+  <RimWorldAccess.VPEPsycasts.NoData>No hay datos disponibles.</RimWorldAccess.VPEPsycasts.NoData>
   <!-- {0} = lista de estadísticas. -->
   <RimWorldAccess.VPEPsycasts.CurrentStats>Estadísticas actuales: {0}.</RimWorldAccess.VPEPsycasts.CurrentStats>
+  <!-- Datos de casteo (Alt+C). {0} = valor; Prefix {0} = nombre de la habilidad, {1} = lista de datos. -->
+  <RimWorldAccess.VPEPsycasts.Data.Prefix>{0}. {1}.</RimWorldAccess.VPEPsycasts.Data.Prefix>
+  <RimWorldAccess.VPEPsycasts.Data.Psyfocus>Coste de psicofoco {0}</RimWorldAccess.VPEPsycasts.Data.Psyfocus>
+  <RimWorldAccess.VPEPsycasts.Data.NeuralHeat>Calor neural {0}</RimWorldAccess.VPEPsycasts.Data.NeuralHeat>
+  <RimWorldAccess.VPEPsycasts.Data.Level>Nivel {0}</RimWorldAccess.VPEPsycasts.Data.Level>
+  <RimWorldAccess.VPEPsycasts.Data.Range>Rango {0}</RimWorldAccess.VPEPsycasts.Data.Range>
+  <RimWorldAccess.VPEPsycasts.Data.Radius>Radio de área {0}</RimWorldAccess.VPEPsycasts.Data.Radius>
 
   <!-- Psysets (conjuntos de casteo). -->
   <RimWorldAccess.VPEPsycasts.Item.Psysets>Conjuntos de psicasts</RimWorldAccess.VPEPsycasts.Item.Psysets>

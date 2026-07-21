@@ -172,13 +172,18 @@ namespace RimWorldAccess
 
             KeyCode key = evt.keyCode;
 
-            // Alt+I — open the RimWorld info card for the current element (ability/path/focus, or
-            // the pawn for the stat rows). This is RWA's universal Alt+I convention: a navigable
-            // Dialog_InfoCard (handled by InfoCardState), NOT a spoken description. Checked before
-            // typeahead since Alt+letter never reaches the character dispatcher.
-            if (KeyboardHelper.IsAltHeld && key == KeyCode.I)
+            // Alt+D speaks the focused element's description; Alt+C speaks its numeric data (cast
+            // cost, neural heat, level, range, AOE, or the pawn's psycaster stats). VPE's own info
+            // card carries no numeric data for its ability defs, so terse on-demand spoken shortcuts
+            // beat a heavy Dialog_InfoCard here. Checked before typeahead — Alt+letter never reaches it.
+            if (KeyboardHelper.IsAltHeld && key == KeyCode.D)
             {
-                OpenInfoCard();
+                AnnounceDescription();
+                return true;
+            }
+            if (KeyboardHelper.IsAltHeld && key == KeyCode.C)
+            {
+                AnnounceData();
                 return true;
             }
 
@@ -655,41 +660,75 @@ namespace RimWorldAccess
             return result;
         }
 
-        // ===== INFO CARD (Alt+I) =====
+        // ===== ON-DEMAND INFO (Alt+D description / Alt+C data) =====
 
-        /// <summary>
-        /// Opens the RimWorld info card for the focused element — the same navigable
-        /// <see cref="Dialog_InfoCard"/> that Alt+I opens everywhere else in RWA (handled by
-        /// InfoCardState). Ability/path/focus rows card their own def (description + stats,
-        /// including cast cost); the status and improve-stats rows card the pawn (whose stat
-        /// list includes the psycaster stats).
-        /// </summary>
-        private static void OpenInfoCard()
+        /// <summary>Def under the current row that carries a description / cast data.</summary>
+        private static Def CurrentDef()
+        {
+            if (items.Count == 0 || selectedIndex < 0 || selectedIndex >= items.Count) return null;
+            var item = items[selectedIndex];
+            switch (item.Kind)
+            {
+                case ItemKind.Ability:
+                case ItemKind.PsysetAbility: return item.Ability;
+                case ItemKind.Path: return item.Path;
+                case ItemKind.Focus: return item.Focus;
+                default: return null;
+            }
+        }
+
+        /// <summary>Alt+D — speak the focused element's description.</summary>
+        private static void AnnounceDescription()
+        {
+            var def = CurrentDef();
+            if (def == null) { AnnounceCurrent(); return; }
+            string desc = SanitizeText(def.description);
+            TolkHelper.SpeakData(string.IsNullOrEmpty(desc)
+                ? "RimWorldAccess.VPEPsycasts.NoDescription".Loc().ToString()
+                : $"{def.LabelCap}. {desc}", SpeechPriority.High);
+        }
+
+        /// <summary>Alt+C — speak the focused element's numeric data (cast cost, level, range, AOE).</summary>
+        private static void AnnounceData()
         {
             if (items.Count == 0 || selectedIndex < 0 || selectedIndex >= items.Count) return;
             var item = items[selectedIndex];
-
-            Def def = null;
             switch (item.Kind)
             {
-                case ItemKind.Ability: def = item.Ability; break;
-                case ItemKind.PsysetAbility: def = item.Ability; break;
-                case ItemKind.Path: def = item.Path; break;
-                case ItemKind.Focus: def = item.Focus; break;
+                case ItemKind.Ability:
+                case ItemKind.PsysetAbility:
+                    TolkHelper.SpeakData(BuildAbilityData(item.Ability), SpeechPriority.High);
+                    return;
+                case ItemKind.Status:
+                case ItemKind.ImproveStats:
+                    TolkHelper.SpeakData(BuildStatsDetails(), SpeechPriority.High);
+                    return;
+                default:
+                    TolkHelper.Speak("RimWorldAccess.VPEPsycasts.NoData".Loc());
+                    return;
             }
-            if (def != null)
-            {
-                Find.WindowStack.Add(new Dialog_InfoCard(def));
-                return;
-            }
-            if (item.Kind == ItemKind.Status || item.Kind == ItemKind.ImproveStats)
-            {
-                Find.WindowStack.Add(new Dialog_InfoCard(pawn));
-                return;
-            }
-            // Category rows (paths/foci) have no card of their own — re-announce so the keypress
-            // isn't silently swallowed.
-            AnnounceCurrent();
+        }
+
+        private static string BuildAbilityData(Def ability)
+        {
+            if (ability == null) return "RimWorldAccess.VPEPsycasts.NoData".Loc().ToString();
+            var parts = new List<string>();
+            float psy = VPEPsycastsReflection.GetAbilityPsyfocusCost(ability, pawn);
+            if (psy > 0.0001f) parts.Add("RimWorldAccess.VPEPsycasts.Data.Psyfocus".Loc(psy.ToStringPercent()).ToString());
+            float heat = VPEPsycastsReflection.GetAbilityNeuralHeat(ability, pawn);
+            if (heat > 0.0001f) parts.Add("RimWorldAccess.VPEPsycasts.Data.NeuralHeat".Loc(heat.ToString("0.#")).ToString());
+            parts.Add("RimWorldAccess.VPEPsycasts.Data.Level".Loc(VPEPsycastsReflection.GetAbilityLevel(ability)).ToString());
+            float range = VPEPsycastsReflection.GetAbilityRange(ability);
+            if (range > 0f && range < 1000f) parts.Add("RimWorldAccess.VPEPsycasts.Data.Range".Loc(range.ToString("0")).ToString());
+            float radius = VPEPsycastsReflection.GetAbilityRadius(ability);
+            if (radius > 0f) parts.Add("RimWorldAccess.VPEPsycasts.Data.Radius".Loc(radius.ToString("0")).ToString());
+            return "RimWorldAccess.VPEPsycasts.Data.Prefix".Loc(ability.LabelCap, string.Join(". ", parts)).ToString();
+        }
+
+        private static string SanitizeText(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            return text.StripTags().Replace("\n\n", ". ").Replace("\n", " ").Trim();
         }
 
         private static string BuildStatsDetails()

@@ -53,10 +53,12 @@ Keys:
 - **Right** = expand only (enter a submenu, or drill into an unlocked path's abilities); inert on
   anything that can't be expanded. Mirrors the inventory tree (Right expands, Enter is the action).
 - **Left** = collapse / go back one level. **Escape** = back one level, and closes from Root.
-- **Alt+I** = open the RimWorld info card (`Dialog_InfoCard`) for the current element — the same
-  navigable card Alt+I opens everywhere else in RWA (via InfoCardState). Ability/path/focus rows
-  card their own def (description + stats, incl. cast cost); the status/improve-stats rows card the
-  pawn (whose stat list carries the psycaster stats). Keeps fast navigation terse.
+- **Alt+D / Alt+C** = speak, on demand, the focused element's description (D) or its numeric cast
+  data (C — psyfocus cost, neural heat, level, range, AOE radius; on the status/improve-stats rows,
+  the current psycaster stats). Keeps fast navigation terse. This **deliberately departs** from RWA's
+  usual Alt+I → `Dialog_InfoCard` convention: VPE's ability defs are `VEF.Abilities.AbilityDef`, not
+  vanilla `AbilityDef`s, so their info card carries no numeric data — spoken shortcuts are what
+  actually surface the cost here (confirmed empty via the dev bridge).
 - **Backspace** edits the active search.
 
 Ability lists are **topologically ordered** (prerequisites always precede their dependents), and all
