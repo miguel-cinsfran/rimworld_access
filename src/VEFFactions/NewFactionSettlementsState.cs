@@ -146,6 +146,13 @@ namespace RimWorldAccess
             if (!IsActive || ev.type != EventType.KeyDown || items.Count == 0)
                 return false;
 
+            // Safety net — see NewFactionSpawningState.HandleInput.
+            if (dialog == null || Find.WindowStack == null || !Find.WindowStack.Windows.Contains(dialog))
+            {
+                Close();
+                return false;
+            }
+
             KeyCode key = ev.keyCode;
 
             if (key == KeyCode.UpArrow)

@@ -46,6 +46,15 @@ namespace RimWorldAccess
         /// </summary>
         public static MethodInfo DialogOnAcceptKeyPressed => mDialogOnAcceptKeyPressed;
 
+        private static MethodInfo mDialogPostClose;
+
+        /// <summary>
+        /// VEF's <c>Dialog_NewFactionSpawning.PostClose</c> override, or null. It does **not** call
+        /// <c>base.PostClose()</c>, so a Harmony patch on <c>Window.PostClose</c> never fires for
+        /// this dialog — our state would stay bound to a window that has already closed.
+        /// </summary>
+        public static MethodInfo DialogPostClose => mDialogPostClose;
+
         // ===== ForcedFactionData members =====
         private static FieldInfo fForcePlayerToAdd;
 
@@ -86,6 +95,7 @@ namespace RimWorldAccess
                 mSkip = AccessTools.Method(dialogType, "Skip");
                 mIgnore = AccessTools.Method(dialogType, "Ignore");
                 mDialogOnAcceptKeyPressed = AccessTools.Method(dialogType, "OnAcceptKeyPressed");
+                mDialogPostClose = AccessTools.Method(dialogType, "PostClose");
             }
 
             if (settlementsDialogType != null)

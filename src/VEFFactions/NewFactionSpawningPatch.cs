@@ -39,8 +39,8 @@ namespace RimWorldAccess
                 // faction prompt underneath, which must stay active.
                 if (VEFFactionsReflection.IsSettlementsDialog(__instance) && NewFactionSettlementsState.IsActive)
                     NewFactionSettlementsState.Close();
-                else if (VEFFactionsReflection.IsNewFactionDialog(__instance) && NewFactionSpawningState.IsActive)
-                    NewFactionSpawningState.Close();
+                else if (VEFFactionsReflection.IsNewFactionDialog(__instance))
+                    NewFactionSpawningState.NotifyDialogClosed(__instance);
             }
         }
 
@@ -59,6 +59,31 @@ namespace RimWorldAccess
         /// Resolved dynamically (<see cref="Prepare"/> skips the patch entirely when VEF is absent)
         /// so RimWorld Access still never hard-references the framework.
         /// </summary>
+        /// <summary>
+        /// Releases our state when the faction prompt closes.
+        ///
+        /// The <c>Window.PostClose</c> postfix above never fires for this dialog: VEF **overrides**
+        /// <c>PostClose</c> and does not call <c>base.PostClose()</c>, so the patched base method is
+        /// never reached. Left unhandled, the state stayed bound to a closed window and kept reading
+        /// the prompt aloud on every keypress — indistinguishable, to a screen-reader user, from the
+        /// question reappearing after they had already answered it.
+        ///
+        /// Runs as a postfix so VEF's own body (which opens the next faction's prompt, rebinding our
+        /// state) goes first; <c>NotifyDialogClosed</c> then only releases if we are still bound to
+        /// the window that closed.
+        /// </summary>
+        [HarmonyPatch]
+        public static class Dialog_PostClose_Patch
+        {
+            public static bool Prepare() => VEFFactionsReflection.DialogPostClose != null;
+
+            public static MethodBase TargetMethod() => VEFFactionsReflection.DialogPostClose;
+
+            [HarmonyPostfix]
+            public static void Postfix(Window __instance)
+                => NewFactionSpawningState.NotifyDialogClosed(__instance);
+        }
+
         [HarmonyPatch]
         public static class Dialog_OnAcceptKeyPressed_Patch
         {

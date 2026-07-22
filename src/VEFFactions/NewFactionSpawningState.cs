@@ -84,6 +84,19 @@ namespace RimWorldAccess
             }
         }
 
+        /// <summary>
+        /// Releases the state only if it is still bound to <paramref name="window"/>.
+        ///
+        /// VEF's <c>PostClose</c> opens the next faction's prompt *before* our postfix runs, and that
+        /// reopen rebinds us to the new window. Closing unconditionally here would therefore kill the
+        /// state of the prompt that just opened.
+        /// </summary>
+        public static void NotifyDialogClosed(Window window)
+        {
+            if (IsActive && dialog == window)
+                Close();
+        }
+
         public static void Close()
         {
             IsActive = false;
@@ -261,6 +274,15 @@ namespace RimWorldAccess
         {
             if (!IsActive || ev.type != EventType.KeyDown || items.Count == 0)
                 return false;
+
+            // Safety net: never keep answering for a window that is already gone. VEF's overridden
+            // PostClose makes lifecycle hooks easy to miss, and a stale state would go on reading the
+            // prompt aloud after the dialog closed — which reads exactly like the question reappearing.
+            if (dialog == null || Find.WindowStack == null || !Find.WindowStack.Windows.Contains(dialog))
+            {
+                Close();
+                return false;
+            }
 
             // The settlements follow-up owns the keyboard while it is up.
             if (NewFactionSettlementsState.IsActive)
