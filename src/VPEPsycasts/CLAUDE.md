@@ -99,6 +99,28 @@ directly. The status readout also appends the psycaster's VPE **level and experi
 `VPEPsycastsReflection`), mirroring the psycast tab's status row; it is a no-op for vanilla Royalty
 psychic pawns, which have no VPE hediff.
 
+The readout further includes, for both vanilla and VPE:
+- **Heat recovery rate + time to cool** — `tracker.RecoveryRate` is entropy per second, so
+  `EntropyValue / RecoveryRate` is the seconds left; vanilla's own tooltip shows the same pair.
+- **Pain recovery bonus** — read off the `StatPart_Pain` attached to `PsychicEntropyRecoveryRate`
+  (the green bonus VPE draws on its gizmo), announced only when the factor actually exceeds 1.
+- **Psyfocus max cast level** — `tracker.MaxAbilityLevel`, but **vanilla-only on purpose**: in
+  vanilla the psyfocus band is a real gate (`MaxAbilityLevelPerPsyfocusBand`), while VPE never
+  references it and instead gates on each ability's psyfocus *cost* (`SufficientPsyfocusPresent`).
+  Announcing a level cap to a VPE psycaster would state a rule the mod does not enforce.
+
+## VEF ability gizmos (cost / range / cooldown)
+`GizmoNavigationState.GetVefAbilityInfo` gives Vanilla Expanded Framework ability gizmos the same
+readout vanilla abilities get, reusing the existing `Gizmo.Ability.*` keys. This is needed because
+VEF is a parallel hierarchy: `VEF.Abilities.Command_Ability` extends `Command_Action` (not
+`RimWorld.Command_Ability`) and carries a `VEF.Abilities.Ability` with its own `def`, so the vanilla
+`gizmo is Command_Ability` block never matched and VPE psycasts announced no cost, range or cooldown
+in the G menu at all. Cooldown comes from VEF's `Ability.cooldown` (an absolute end tick — remaining
+= `cooldown - TicksGame`), and the ability is announced as **Ready** when nothing remains, so "off
+cooldown" is distinguishable from "unreadable". The VEF accessors in `VPEPsycastsReflection` are
+gated on their own `VefAbilitiesAvailable` flag and resolved *before* the VPE bail-out, so this works
+for any VEF-based ability mod even when VPE itself is absent.
+
 ## Scope / follow-ups
 Implemented: stat upgrades, foci, paths, ability learning, and psyset (loadout) management. A remaining
 polish would be teaching `AbilityTargetingState` to consume VEF abilities directly (VEF's `Ability` is a

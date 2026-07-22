@@ -55,6 +55,13 @@ namespace RimWorldAccess
         // ===== MeditationFocusDef (vanilla) + VPE CanUnlock extension =====
         private static MethodInfo mCanPawnUse, mCanUnlock;
 
+        // ===== VEF ability instances (gizmo cost/cooldown readout) — gated on VefAbilitiesAvailable =====
+        // Independent of VPE: any Vanilla Expanded Framework ability mod uses these, so they are
+        // resolved before the VPE-specific bail-out below.
+        private static Type vefAbilityType, vefCommandAbilityType;
+        private static FieldInfo fVefCmdAbility, fVefAbilityDef, fVefAbilityCooldown, fVefAbilityPawn;
+        public static bool VefAbilitiesAvailable { get; private set; }
+
         // ===== Psysets (loadout management) — optional; gated on PsysetsAvailable =====
         private static Type psySetType, dialogRenamePsysetType;
         private static FieldInfo fPsysets, fPsysetName, fPsysetAbilities;
@@ -85,6 +92,21 @@ namespace RimWorldAccess
             psycastExtType = AccessTools.TypeByName("VanillaPsycastsExpanded.AbilityExtension_Psycast");
             compAbilitiesType = AccessTools.TypeByName("VEF.Abilities.CompAbilities");
             meditationUtilsType = AccessTools.TypeByName("VanillaPsycastsExpanded.MeditationUtilities");
+
+            // VEF ability instances. Resolved first and gated separately, because these power the
+            // gizmo cost/cooldown readout for ANY VEF-based ability mod — VPE itself may be absent.
+            vefAbilityType = AccessTools.TypeByName("VEF.Abilities.Ability");
+            vefCommandAbilityType = AccessTools.TypeByName("VEF.Abilities.Command_Ability");
+            if (vefAbilityType != null)
+            {
+                fVefAbilityDef = AccessTools.Field(vefAbilityType, "def");
+                fVefAbilityCooldown = AccessTools.Field(vefAbilityType, "cooldown");
+                fVefAbilityPawn = AccessTools.Field(vefAbilityType, "pawn");
+            }
+            if (vefCommandAbilityType != null)
+                fVefCmdAbility = AccessTools.Field(vefCommandAbilityType, "ability");
+            VefAbilitiesAvailable = vefCommandAbilityType != null && fVefCmdAbility != null
+                                    && fVefAbilityDef != null && fVefAbilityCooldown != null;
 
             // Core types absent → mod not installed; stay unavailable and no-op everywhere.
             if (hediffType == null || pathDefType == null || psycastExtType == null || compAbilitiesType == null)
@@ -160,6 +182,54 @@ namespace RimWorldAccess
             }
             catch (Exception ex) { LogOnce("GetPsycastHediff", ex); }
             return null;
+        }
+
+        // ===== VEF ability instances (gizmo cost/cooldown readout) =====
+
+        /// <summary>
+        /// Returns the <c>VEF.Abilities.Ability</c> carried by a VEF ability gizmo
+        /// (<c>VEF.Abilities.Command_Ability</c>), or null for any other gizmo. VEF's command type
+        /// is a parallel hierarchy to vanilla's (it extends <c>Command_Action</c>, not
+        /// <c>RimWorld.Command_Ability</c>), so vanilla ability handling never matches it.
+        /// </summary>
+        public static object GetVefAbilityFromGizmo(Gizmo gizmo)
+        {
+            if (!VefAbilitiesAvailable || gizmo == null) return null;
+            try
+            {
+                return vefCommandAbilityType.IsInstanceOfType(gizmo) ? fVefCmdAbility.GetValue(gizmo) : null;
+            }
+            catch (Exception ex) { LogOnce("GetVefAbilityFromGizmo", ex); return null; }
+        }
+
+        /// <summary>The ability's def (a <c>VEF.Abilities.AbilityDef</c>), or null.</summary>
+        public static Def GetVefAbilityDef(object ability)
+        {
+            try { return ability != null ? fVefAbilityDef?.GetValue(ability) as Def : null; }
+            catch { return null; }
+        }
+
+        /// <summary>The pawn casting the ability, or null.</summary>
+        public static Pawn GetVefAbilityPawn(object ability)
+        {
+            try { return ability != null ? fVefAbilityPawn?.GetValue(ability) as Pawn : null; }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// Cooldown ticks still remaining, or 0 when the ability is ready. VEF stores
+        /// <c>cooldown</c> as the absolute game tick the cooldown ends on.
+        /// </summary>
+        public static int GetVefAbilityCooldownTicksRemaining(object ability)
+        {
+            try
+            {
+                if (ability == null || fVefAbilityCooldown == null) return 0;
+                int endTick = (int)fVefAbilityCooldown.GetValue(ability);
+                int now = Find.TickManager?.TicksGame ?? 0;
+                return endTick > now ? endTick - now : 0;
+            }
+            catch { return 0; }
         }
 
         /// <summary>Returns the pawn's VEF CompAbilities, or null.</summary>

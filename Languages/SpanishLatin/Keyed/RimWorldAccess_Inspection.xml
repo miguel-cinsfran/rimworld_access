@@ -729,6 +729,10 @@
   <RimWorldAccess.Inspection.Gizmo.Status.PsyfocusTarget>Objetivo: {0}%</RimWorldAccess.Inspection.Gizmo.Status.PsyfocusTarget>
   <RimWorldAccess.Inspection.Gizmo.Status.LimiterStatus>Limitador: {0}</RimWorldAccess.Inspection.Gizmo.Status.LimiterStatus>
   <RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp>Nivel {0}, experiencia {1} de {2}</RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp>
+  <RimWorldAccess.Inspection.Gizmo.Status.HeatRecoveryRate>Recuperación: {0} por segundo</RimWorldAccess.Inspection.Gizmo.Status.HeatRecoveryRate>
+  <RimWorldAccess.Inspection.Gizmo.Status.HeatTimeToClear>Se enfría en {0}</RimWorldAccess.Inspection.Gizmo.Status.HeatTimeToClear>
+  <RimWorldAccess.Inspection.Gizmo.Status.PsyfocusMaxCastLevel>Permite psicasts hasta nivel {0}</RimWorldAccess.Inspection.Gizmo.Status.PsyfocusMaxCastLevel>
+  <RimWorldAccess.Inspection.Gizmo.Status.PainRecoveryBonus>Bono de recuperación por dolor: {0}</RimWorldAccess.Inspection.Gizmo.Status.PainRecoveryBonus>
 
   <!-- =================================================================
        Growth tier rich status (GetGrowthTierStatus / FormatTierRewards).
@@ -792,6 +796,7 @@
   <RimWorldAccess.Inspection.Gizmo.Ability.EffectRadiusSuffix>, radio de {0} cuadros</RimWorldAccess.Inspection.Gizmo.Ability.EffectRadiusSuffix>
 
   <RimWorldAccess.Inspection.Gizmo.Ability.CooldownLine>{0}: {1}</RimWorldAccess.Inspection.Gizmo.Ability.CooldownLine>
+  <RimWorldAccess.Inspection.Gizmo.Ability.Ready>Lista</RimWorldAccess.Inspection.Gizmo.Ability.Ready>
 
   <!-- =================================================================
        Disabled-launch context (GetDisabledGizmoContext for transport

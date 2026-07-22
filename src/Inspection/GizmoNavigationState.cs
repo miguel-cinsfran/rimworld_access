@@ -1524,6 +1524,14 @@ namespace RimWorldAccess
                 if (!string.IsNullOrEmpty(description))
                     announcement += (announcement.EndsWith(".") ? " " : ". ") + description;
             }
+            else
+            {
+                // VEF-framework abilities (VPE psycasts and friends) are a parallel hierarchy the
+                // vanilla block above cannot match; give them the same cost/range/cooldown readout.
+                string vefAbilityInfo = GetVefAbilityInfo(gizmo);
+                if (!string.IsNullOrEmpty(vefAbilityInfo))
+                    announcement += (announcement.EndsWith(".") ? " " : ". ") + vefAbilityInfo;
+            }
 
             // Add disabled status if applicable
             if (gizmo.Disabled)
@@ -2043,6 +2051,30 @@ namespace RimWorldAccess
                         (psyfocus * 100).ToString("F0")),
                 };
 
+                var pawn = tracker.GetType().GetProperty("Pawn")?.GetValue(tracker) as Pawn;
+                bool isVpePsycaster = GetVpePsycastHediff(pawn) != null;
+
+                // Recovery rate and time until the heat is fully dissipated. Vanilla's own tooltip
+                // shows both (PawnTooltipPsychicEntropyStats); RecoveryRate is entropy per second,
+                // so entropy / rate is the seconds left — the most actionable "when can I cast again".
+                var recoveryProp = tracker.GetType().GetProperty("RecoveryRate");
+                if (recoveryProp != null)
+                {
+                    float recoveryRate = (float)recoveryProp.GetValue(tracker);
+                    if (recoveryRate > 0.0001f)
+                    {
+                        parts.Add("RimWorldAccess.Inspection.Gizmo.Status.HeatRecoveryRate".Translate(
+                            recoveryRate.ToString("0.#")));
+                        if (entropy > 0.0001f)
+                        {
+                            float secondsToClear = entropy / recoveryRate;
+                            parts.Add("RimWorldAccess.Inspection.Gizmo.Status.HeatTimeToClear".Translate(
+                                secondsToClear.SecondsToTicks().ToStringTicksToPeriod(
+                                    allowSeconds: true, shortForm: false, canUseDecimals: true, allowYears: false)));
+                        }
+                    }
+                }
+
                 // Add psyfocus target (sighted players see a target indicator on the bar)
                 var targetPsyfocusProp = tracker.GetType().GetProperty("TargetPsyfocus");
                 if (targetPsyfocusProp != null)
@@ -2051,6 +2083,26 @@ namespace RimWorldAccess
                     parts.Add("RimWorldAccess.Inspection.Gizmo.Status.PsyfocusTarget".Translate(
                         (target * 100).ToString("F0")));
                 }
+
+                // Psyfocus band: sighted players read the threshold marks drawn on the psyfocus bar.
+                // In vanilla the band is a real gate — it caps the psycast level the pawn may cast
+                // (MaxAbilityLevelPerPsyfocusBand). VPE does NOT use that gate (it checks psyfocus
+                // *cost* per ability instead), so announcing a level cap there would be a lie.
+                if (!isVpePsycaster)
+                {
+                    var maxAbilityLevelProp = tracker.GetType().GetProperty("MaxAbilityLevel");
+                    if (maxAbilityLevelProp != null)
+                    {
+                        int maxLevel = (int)maxAbilityLevelProp.GetValue(tracker);
+                        parts.Add("RimWorldAccess.Inspection.Gizmo.Status.PsyfocusMaxCastLevel".Translate(maxLevel));
+                    }
+                }
+
+                // Pain speeds up neural heat recovery (StatPart_Pain on PsychicEntropyRecoveryRate).
+                // Sighted players see this as a green bonus percentage on the gizmo.
+                string painBonus = GetPsychicPainBonus(pawn);
+                if (!string.IsNullOrEmpty(painBonus))
+                    parts.Add(painBonus);
 
                 // Add limiter state
                 if (limitField != null)
@@ -2065,7 +2117,6 @@ namespace RimWorldAccess
                 // Vanilla Psycasts Expanded psycasters also track a level and experience toward the
                 // next level; append it so the gizmo surfaces the same progression the psycast tab
                 // shows. No-op for vanilla Royalty pawns (they have no VPE hediff).
-                var pawn = tracker.GetType().GetProperty("Pawn")?.GetValue(tracker) as Pawn;
                 string vpeProgress = GetVpePsycasterProgress(pawn);
                 if (!string.IsNullOrEmpty(vpeProgress))
                     parts.Add(vpeProgress);
@@ -2082,15 +2133,55 @@ namespace RimWorldAccess
         /// </summary>
         private static string GetVpePsycasterProgress(Pawn pawn)
         {
-            if (pawn == null || !VPEPsycastsReflection.Available)
-                return "";
-            var hediff = VPEPsycastsReflection.GetPsycastHediff(pawn);
+            var hediff = GetVpePsycastHediff(pawn);
             if (hediff == null)
                 return "";
             int level = VPEPsycastsReflection.GetLevel(hediff);
             int exp = Mathf.RoundToInt(VPEPsycastsReflection.GetExperience(hediff));
             int needed = VPEPsycastsReflection.GetExperienceRequiredForLevel(level + 1);
             return "RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp".Translate(level, exp, needed);
+        }
+
+        /// <summary>
+        /// The pawn's Vanilla Psycasts Expanded psycast hediff, or null when VPE is absent or the
+        /// pawn is a plain Royalty psycaster. Doubles as the "is this a VPE psycaster" test.
+        /// </summary>
+        private static object GetVpePsycastHediff(Pawn pawn)
+        {
+            if (pawn == null || !VPEPsycastsReflection.Available)
+                return null;
+            return VPEPsycastsReflection.GetPsycastHediff(pawn);
+        }
+
+        /// <summary>
+        /// Neural heat recovery bonus granted by pain, as a spoken percentage, or "" when the pawn
+        /// gets none. Mirrors the green bonus VPE draws on its psychic status gizmo: the bonus comes
+        /// from the <c>StatPart_Pain</c> attached to <c>PsychicEntropyRecoveryRate</c>, so it is read
+        /// off that stat part rather than assumed.
+        /// </summary>
+        private static string GetPsychicPainBonus(Pawn pawn)
+        {
+            if (pawn == null)
+                return "";
+            try
+            {
+                var parts = RimWorld.StatDefOf.PsychicEntropyRecoveryRate?.parts;
+                if (parts == null)
+                    return "";
+                foreach (var part in parts)
+                {
+                    if (!(part is StatPart_Pain painPart))
+                        continue;
+                    float factor = painPart.PainFactor(pawn);
+                    // Only a real speed-up is worth announcing; 1x means pain isn't helping.
+                    if (factor <= 1.0001f)
+                        return "";
+                    return "RimWorldAccess.Inspection.Gizmo.Status.PainRecoveryBonus".Translate(
+                        (factor - 1f).ToStringPercent("F0"));
+                }
+            }
+            catch { }
+            return "";
         }
 
         /// <summary>
@@ -2326,6 +2417,66 @@ namespace RimWorldAccess
                     effectRadius.ToString("F0"));
 
             return rangeText;
+        }
+
+        /// <summary>
+        /// Cost, range and cooldown for a Vanilla Expanded Framework ability gizmo, mirroring what
+        /// <see cref="GetAbilityCostInfo"/> / <see cref="GetAbilityRangeInfo"/> /
+        /// <see cref="GetAbilityCooldownInfo"/> give vanilla abilities, and reusing their keys.
+        ///
+        /// VEF defines a parallel ability hierarchy — <c>VEF.Abilities.Command_Ability</c> extends
+        /// <c>Command_Action</c>, not <c>RimWorld.Command_Ability</c>, and its ability/def types are
+        /// VEF's own — so the vanilla ability block never matches these and VPE psycasts previously
+        /// announced no cost, range or cooldown at all in the G menu. Returns null for any other
+        /// gizmo, and degrades part-by-part: a VEF ability from a non-psycast mod simply has no
+        /// psyfocus/heat extension, so only its range and cooldown are spoken.
+        /// </summary>
+        private static string GetVefAbilityInfo(Gizmo gizmo)
+        {
+            object vefAbility = VPEPsycastsReflection.GetVefAbilityFromGizmo(gizmo);
+            if (vefAbility == null)
+                return null;
+
+            Def abilityDef = VPEPsycastsReflection.GetVefAbilityDef(vefAbility);
+            if (abilityDef == null)
+                return null;
+
+            Pawn caster = VPEPsycastsReflection.GetVefAbilityPawn(vefAbility);
+            var parts = new List<string>();
+
+            // Costs are pawn-scaled (psyfocus cost factor, entropy stats), so pass the caster.
+            float psyfocusCost = VPEPsycastsReflection.GetAbilityPsyfocusCost(abilityDef, caster);
+            if (psyfocusCost > 0.0001f)
+                parts.Add("RimWorldAccess.Inspection.Gizmo.Ability.PsyfocusCost".Translate(
+                    (psyfocusCost * 100f).ToString("F0")));
+
+            float neuralHeat = VPEPsycastsReflection.GetAbilityNeuralHeat(abilityDef, caster);
+            if (neuralHeat > 0.0001f)
+                parts.Add("RimWorldAccess.Inspection.Gizmo.Ability.NeuralHeatGain".Translate(
+                    neuralHeat.ToString("F0")));
+
+            float range = VPEPsycastsReflection.GetAbilityRange(abilityDef);
+            if (range > 0f && range < 1000f)
+            {
+                string rangeText = "RimWorldAccess.Inspection.Gizmo.Ability.RangeTiles".Translate(
+                    range.ToString("F0"));
+                float radius = VPEPsycastsReflection.GetAbilityRadius(abilityDef);
+                if (radius > 0f)
+                    rangeText += "RimWorldAccess.Inspection.Gizmo.Ability.EffectRadiusSuffix".Translate(
+                        radius.ToString("F0"));
+                parts.Add(rangeText);
+            }
+
+            // Availability: remaining cooldown, or explicitly "ready" so the user can tell the
+            // difference between "off cooldown" and "we couldn't read it".
+            int cooldownRemaining = VPEPsycastsReflection.GetVefAbilityCooldownTicksRemaining(vefAbility);
+            parts.Add(cooldownRemaining > 0
+                ? "RimWorldAccess.Inspection.Gizmo.Ability.CooldownLine".Translate(
+                    "StatsReport_Cooldown".Translate(),
+                    cooldownRemaining.ToStringTicksToPeriod())
+                : "RimWorldAccess.Inspection.Gizmo.Ability.Ready".Translate());
+
+            return parts.Count == 0 ? null : string.Join(". ", parts);
         }
 
         /// <summary>
@@ -3699,6 +3850,13 @@ namespace RimWorldAccess
 
                 if (!string.IsNullOrEmpty(description))
                     announcement += (announcement.EndsWith(".") ? " " : ". ") + description;
+            }
+            else
+            {
+                // VEF-framework abilities (VPE psycasts and friends) — see GetVefAbilityInfo.
+                string vefAbilityInfo = GetVefAbilityInfo(gizmo);
+                if (!string.IsNullOrEmpty(vefAbilityInfo))
+                    announcement += (announcement.EndsWith(".") ? " " : ". ") + vefAbilityInfo;
             }
 
             if (gizmo.Disabled)
