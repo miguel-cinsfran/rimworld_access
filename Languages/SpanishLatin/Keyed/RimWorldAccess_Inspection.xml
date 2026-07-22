@@ -728,6 +728,7 @@
   <RimWorldAccess.Inspection.Gizmo.Status.PsyfocusValue>Psicofoco: {0}%</RimWorldAccess.Inspection.Gizmo.Status.PsyfocusValue>
   <RimWorldAccess.Inspection.Gizmo.Status.PsyfocusTarget>Objetivo: {0}%</RimWorldAccess.Inspection.Gizmo.Status.PsyfocusTarget>
   <RimWorldAccess.Inspection.Gizmo.Status.LimiterStatus>Limitador: {0}</RimWorldAccess.Inspection.Gizmo.Status.LimiterStatus>
+  <RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp>Nivel {0}, experiencia {1} de {2}</RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp>
 
   <!-- =================================================================
        Growth tier rich status (GetGrowthTierStatus / FormatTierRewards).
