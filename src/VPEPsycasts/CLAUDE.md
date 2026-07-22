@@ -85,6 +85,20 @@ latter relies on a by-name reflection fallback in `GenericTargetingState.Extract
 doesn't). Reaching the gizmo is via the normal `GizmoNavigationState` (G key); combat psycasts only show
 their gizmo while the pawn is drafted (vanilla behavior).
 
+## Psychic status gizmo (neural heat / psyfocus)
+VPE patches `Pawn_PsychicEntropyTracker.GetGizmo` to replace vanilla's `PsychicEntropyGizmo` with its
+own `VanillaPsycastsExpanded.UI.PsychicStatusGizmo`. That gizmo wraps the **same** vanilla
+`Pawn_PsychicEntropyTracker` (private field `tracker`, same `limitEntropyAmount` toggle and psyfocus-
+target mechanics), it just has a different type name — so RWA's G-menu, which matched only the vanilla
+type name, previously fell through to the no-data default and announced just "Psychic status" with no
+values. `GizmoNavigationState.IsPsychicStatusGizmo` now treats both type names identically: label,
+status readout (neural heat, psyfocus %, target, limiter), Enter=toggle limiter, and right-bracket=
+adjust psyfocus target all work for VPE. The only VPE-specific branch is the slider read/write: VPE's
+gizmo has no `targetValue` field, so we read `tracker.TargetPsyfocus` and write `tracker.SetPsyfocusTarget`
+directly. The status readout also appends the psycaster's VPE **level and experience** (via
+`VPEPsycastsReflection`), mirroring the psycast tab's status row; it is a no-op for vanilla Royalty
+psychic pawns, which have no VPE hediff.
+
 ## Scope / follow-ups
 Implemented: stat upgrades, foci, paths, ability learning, and psyset (loadout) management. A remaining
 polish would be teaching `AbilityTargetingState` to consume VEF abilities directly (VEF's `Ability` is a

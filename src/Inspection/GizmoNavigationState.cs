@@ -818,8 +818,8 @@ namespace RimWorldAccess
                     }
                 }
 
-                // 3. PsychicEntropyGizmo - toggle neural heat limiter
-                if (selectedGizmo.GetType().Name == "PsychicEntropyGizmo")
+                // 3. PsychicEntropyGizmo / VPE PsychicStatusGizmo - toggle neural heat limiter
+                if (IsPsychicStatusGizmo(selectedGizmo.GetType().Name))
                 {
                     bool newState = ToggleNeuralHeatLimiter(selectedGizmo);
                     string stateStr = (newState
@@ -1252,7 +1252,7 @@ namespace RimWorldAccess
                 Gizmo enterGizmo = availableGizmos[selectedGizmoIndex];
                 string enterTypeName = enterGizmo.GetType().Name;
                 if (IsAdjustableSlider(enterGizmo)
-                    && enterTypeName != "PsychicEntropyGizmo"
+                    && !IsPsychicStatusGizmo(enterTypeName)
                     && enterTypeName != "GeneGizmo_ResourceHemogen"
                     && enterTypeName != "ActivityGizmo")
                 {
@@ -1550,8 +1550,9 @@ namespace RimWorldAccess
                 else if (IsAdjustableSlider(gizmo))
                 {
                     string hintTypeName = gizmo.GetType().Name;
-                    // PsychicEntropyGizmo has two actions: Enter toggles limiter, right bracket adjusts psyfocus
-                    if (hintTypeName == "PsychicEntropyGizmo")
+                    // PsychicEntropyGizmo / VPE PsychicStatusGizmo have two actions:
+                    // Enter toggles limiter, right bracket adjusts psyfocus target.
+                    if (IsPsychicStatusGizmo(hintTypeName))
                         announcement += "RimWorldAccess.Inspection.Gizmo.HintPsychicEntropy".Translate();
                     // GeneGizmo_ResourceHemogen mirrors that pattern: Enter toggles hemogen packs allowed,
                     // right bracket adjusts the desired hemogen target value.
@@ -1674,6 +1675,7 @@ namespace RimWorldAccess
                     return GetEnergyShieldLabel(gizmo);
 
                 case "PsychicEntropyGizmo":
+                case "PsychicStatusGizmo":
                     return "RimWorldAccess.Inspection.Gizmo.Type.PsychicEntropy".Translate();
 
                 case "MechanitorBandwidthGizmo":
@@ -1914,6 +1916,7 @@ namespace RimWorldAccess
                         return GetEnergyShieldStatus(gizmo);
 
                     case "PsychicEntropyGizmo":
+                    case "PsychicStatusGizmo":
                         return GetPsychicEntropyStatus(gizmo);
 
                     case "Gizmo_GrowthTier":
@@ -2059,13 +2062,49 @@ namespace RimWorldAccess
                     parts.Add("RimWorldAccess.Inspection.Gizmo.Status.LimiterStatus".Translate(stateWord));
                 }
 
+                // Vanilla Psycasts Expanded psycasters also track a level and experience toward the
+                // next level; append it so the gizmo surfaces the same progression the psycast tab
+                // shows. No-op for vanilla Royalty pawns (they have no VPE hediff).
+                var pawn = tracker.GetType().GetProperty("Pawn")?.GetValue(tracker) as Pawn;
+                string vpeProgress = GetVpePsycasterProgress(pawn);
+                if (!string.IsNullOrEmpty(vpeProgress))
+                    parts.Add(vpeProgress);
+
                 return string.Join(", ", parts);
             }
             return "";
         }
 
         /// <summary>
-        /// Gets the Pawn_PsychicEntropyTracker from a PsychicEntropyGizmo.
+        /// Builds a "Level N, experience X / Y" fragment for a Vanilla Psycasts Expanded psycaster,
+        /// mirroring the psycast tab's status row. Returns "" when VPE is absent or the pawn has no
+        /// psycast hediff (e.g. a vanilla Royalty psychic pawn).
+        /// </summary>
+        private static string GetVpePsycasterProgress(Pawn pawn)
+        {
+            if (pawn == null || !VPEPsycastsReflection.Available)
+                return "";
+            var hediff = VPEPsycastsReflection.GetPsycastHediff(pawn);
+            if (hediff == null)
+                return "";
+            int level = VPEPsycastsReflection.GetLevel(hediff);
+            int exp = Mathf.RoundToInt(VPEPsycastsReflection.GetExperience(hediff));
+            int needed = VPEPsycastsReflection.GetExperienceRequiredForLevel(level + 1);
+            return "RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp".Translate(level, exp, needed);
+        }
+
+        /// <summary>
+        /// True for the vanilla Royalty <c>PsychicEntropyGizmo</c> and Vanilla Psycasts Expanded's
+        /// replacement <c>PsychicStatusGizmo</c>. VPE patches <c>Pawn_PsychicEntropyTracker.GetGizmo</c>
+        /// to swap in its own gizmo, but that gizmo wraps the same <c>Pawn_PsychicEntropyTracker</c>
+        /// (private field <c>tracker</c>) and the same <c>limitEntropyAmount</c> / psyfocus-target
+        /// mechanics, so both types share our label, status, toggle, and slider handling.
+        /// </summary>
+        private static bool IsPsychicStatusGizmo(string typeName)
+            => typeName == "PsychicEntropyGizmo" || typeName == "PsychicStatusGizmo";
+
+        /// <summary>
+        /// Gets the Pawn_PsychicEntropyTracker from a PsychicEntropyGizmo or VPE PsychicStatusGizmo.
         /// </summary>
         private static object GetPsychicEntropyTracker(Gizmo gizmo)
         {
@@ -2996,7 +3035,7 @@ namespace RimWorldAccess
                 }
 
                 string typeName = gizmo.GetType().Name;
-                if (typeName == "PsychicEntropyGizmo")
+                if (IsPsychicStatusGizmo(typeName))
                 {
                     // Only adjustable for colonist-player-controlled pawns
                     var tracker = GetPsychicEntropyTracker(gizmo);
@@ -3156,12 +3195,24 @@ namespace RimWorldAccess
                         System.Reflection.BindingFlags.NonPublic |
                         System.Reflection.BindingFlags.Public;
 
-                    if (typeName == "PsychicEntropyGizmo")
+                    if (IsPsychicStatusGizmo(typeName))
                     {
+                        // Vanilla's PsychicEntropyGizmo caches the desired target in a `targetValue`
+                        // field; VPE's PsychicStatusGizmo has no such field and reads/writes the
+                        // tracker directly, so fall back to the tracker's TargetPsyfocus there.
                         var targetField = gizmo.GetType().GetField("targetValue", flags);
-                        if (targetField == null) { TolkHelper.Speak("RimWorldAccess.Inspection.Gizmo.CouldNotReadPsyfocusValue".Loc()); return; }
+                        if (targetField != null)
+                        {
+                            sliderValue = (float)targetField.GetValue(gizmo);
+                        }
+                        else
+                        {
+                            var tracker = GetPsychicEntropyTracker(gizmo);
+                            var targetProp = tracker?.GetType().GetProperty("TargetPsyfocus");
+                            if (targetProp == null) { TolkHelper.Speak("RimWorldAccess.Inspection.Gizmo.CouldNotReadPsyfocusValue".Loc()); return; }
+                            sliderValue = (float)targetProp.GetValue(tracker);
+                        }
 
-                        sliderValue = (float)targetField.GetValue(gizmo);
                         sliderMin = 0f;
                         sliderMax = 1f;
                         sliderStep = 1f / 16f;
@@ -3271,9 +3322,10 @@ namespace RimWorldAccess
             {
                 string typeName = gizmo.GetType().Name;
 
-                if (typeName == "PsychicEntropyGizmo")
+                if (IsPsychicStatusGizmo(typeName))
                 {
-                    // Write to both the gizmo's targetValue and the tracker
+                    // Write to the gizmo's targetValue (vanilla only; null-safe no-op on VPE's
+                    // PsychicStatusGizmo, which has no such field) and to the shared tracker.
                     var targetField = gizmo.GetType().GetField("targetValue", flags);
                     targetField?.SetValue(gizmo, value);
 
