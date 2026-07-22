@@ -823,6 +823,27 @@ namespace RimWorldAccess
                 }
             }
 
+            // ===== PRIORITY -0.225: Handle VEF new-faction prompt if active =====
+            // Modal, input-absorbing dialog VEF shows on load for each faction a newly added mod
+            // wants in the world. The settlements follow-up sits on top of it, so it is checked first.
+            if (NewFactionSettlementsState.IsActive)
+            {
+                if (NewFactionSettlementsState.HandleInput(Event.current))
+                {
+                    Event.current.Use();
+                    return;
+                }
+            }
+
+            if (NewFactionSpawningState.IsActive)
+            {
+                if (NewFactionSpawningState.HandleInput(Event.current))
+                {
+                    Event.current.Use();
+                    return;
+                }
+            }
+
             // ===== PRIORITY -0.22: Handle Faction Landing dialog if active =====
             // Faction relations is a modal dialog opened from starting site selection (F key)
             if (FactionLandingState.IsActive)

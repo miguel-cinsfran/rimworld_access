@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Vanilla Expanded Framework: ventana de facciones nuevas.
+       Intencionalmente mínimo: el nombre de la facción, el del mod, las explicaciones y los
+       botones reutilizan las claves propias de VEF ("VanillaFactionsExpanded.*"), así la
+       terminología se mantiene sincronizada con lo que traiga el framework. Aquí solo vive el
+       texto propio de RimWorld Access. -->
+
+  <RimWorldAccess.VEFFactions.InfoRow>Información de la facción, presiona Enter para volver a leerla</RimWorldAccess.VEFFactions.InfoRow>
+  <RimWorldAccess.VEFFactions.Unavailable>{0}, no disponible</RimWorldAccess.VEFFactions.Unavailable>
+  <RimWorldAccess.VEFFactions.CannotRefuse>Este mod requiere que esta facción se agregue.</RimWorldAccess.VEFFactions.CannotRefuse>
+  <RimWorldAccess.VEFFactions.SkippedForNow>Omitida por ahora. Se te volverá a preguntar por esta facción la próxima vez que cargues la partida.</RimWorldAccess.VEFFactions.SkippedForNow>
+  <RimWorldAccess.VEFFactions.OpenFailed>No se pudo leer la ventana de facción nueva. Presiona Escape para cerrarla.</RimWorldAccess.VEFFactions.OpenFailed>
+
+  <RimWorldAccess.VEFFactions.SettlementsOpened>Opciones de asentamientos. Izquierda y derecha ajustan, mantén Shift para pasos más grandes.</RimWorldAccess.VEFFactions.SettlementsOpened>
+  <RimWorldAccess.VEFFactions.SettlementsCancelled>Opciones de asentamientos canceladas.</RimWorldAccess.VEFFactions.SettlementsCancelled>
+
+</LanguageData>

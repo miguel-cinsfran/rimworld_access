@@ -177,6 +177,11 @@ namespace RimWorldAccess
             // Vanilla Psycasts Expanded psycast tab — opens OVER the inspection tree (4.806), which
             // stays active beneath it, so register lower so its typeahead wins over the tree.
             TypeaheadDispatcher.Register(4.615, () => VPEPsycastsState.IsActive, c => VPEPsycastsState.HandleTypeahead(c));
+            // Above the psycast tab: the VEF new-faction prompt is a modal that absorbs everything
+            // while it is up, and its settlements follow-up has no typeahead of its own.
+            TypeaheadDispatcher.Register(0.225,
+                () => NewFactionSpawningState.IsActive && !NewFactionSettlementsState.IsActive,
+                c => NewFactionSpawningState.HandleTypeahead(c));
             // Prisoner/Slave tab opens OVER the inspection tree (which stays active at 4.806). Register
             // lower so its cross-section typeahead wins; otherwise the tree beneath steals the search.
             TypeaheadDispatcher.Register(4.61, () => PrisonerTabState.IsActive, c => PrisonerTabState.HandleTypeahead(c));

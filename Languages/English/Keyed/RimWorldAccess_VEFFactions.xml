@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Vanilla Expanded Framework: new-faction spawning prompt.
+       Deliberately minimal — the faction name, mod name, explanations and button captions all
+       reuse VEF's own translated "VanillaFactionsExpanded.*" keys, so wording stays in sync with
+       whatever the framework ships. Only RimWorld Access's own framing lives here. -->
+
+  <RimWorldAccess.VEFFactions.InfoRow>Faction information, press Enter to read it again</RimWorldAccess.VEFFactions.InfoRow>
+  <RimWorldAccess.VEFFactions.Unavailable>{0}, unavailable</RimWorldAccess.VEFFactions.Unavailable>
+  <RimWorldAccess.VEFFactions.CannotRefuse>This mod requires this faction to be added.</RimWorldAccess.VEFFactions.CannotRefuse>
+  <RimWorldAccess.VEFFactions.SkippedForNow>Skipped for now. You will be asked about this faction again next time you load.</RimWorldAccess.VEFFactions.SkippedForNow>
+  <RimWorldAccess.VEFFactions.OpenFailed>Could not read the new faction dialog. Press Escape to close it.</RimWorldAccess.VEFFactions.OpenFailed>
+
+  <RimWorldAccess.VEFFactions.SettlementsOpened>Settlement options. Left and Right adjust, hold Shift for larger steps.</RimWorldAccess.VEFFactions.SettlementsOpened>
+  <RimWorldAccess.VEFFactions.SettlementsCancelled>Settlement options cancelled.</RimWorldAccess.VEFFactions.SettlementsCancelled>
+
+</LanguageData>

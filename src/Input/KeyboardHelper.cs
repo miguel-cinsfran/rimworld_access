@@ -304,6 +304,8 @@ namespace RimWorldAccess
                 || PrisonerTabState.IsActive
                 // Third-party: Vanilla Psycasts Expanded psycast tab
                 || VPEPsycastsState.IsActive
+                || NewFactionSpawningState.IsActive
+                || NewFactionSettlementsState.IsActive
                 // Filter navigation
                 || ThingFilterMenuState.IsActive
                 || ThingFilterNavigationState.IsActive
