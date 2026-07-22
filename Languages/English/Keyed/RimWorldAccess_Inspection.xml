@@ -730,6 +730,10 @@
   <RimWorldAccess.Inspection.Gizmo.Status.PsyfocusTarget>Target: {0}%</RimWorldAccess.Inspection.Gizmo.Status.PsyfocusTarget>
   <RimWorldAccess.Inspection.Gizmo.Status.LimiterStatus>Limiter: {0}</RimWorldAccess.Inspection.Gizmo.Status.LimiterStatus>
   <RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp>Level {0}, experience {1} of {2}</RimWorldAccess.Inspection.Gizmo.Status.PsycastLevelExp>
+  <RimWorldAccess.Inspection.Gizmo.Status.HeatRecoveryRate>Recovery: {0} per second</RimWorldAccess.Inspection.Gizmo.Status.HeatRecoveryRate>
+  <RimWorldAccess.Inspection.Gizmo.Status.HeatTimeToClear>Cools down in {0}</RimWorldAccess.Inspection.Gizmo.Status.HeatTimeToClear>
+  <RimWorldAccess.Inspection.Gizmo.Status.PsyfocusMaxCastLevel>Allows psycasts up to level {0}</RimWorldAccess.Inspection.Gizmo.Status.PsyfocusMaxCastLevel>
+  <RimWorldAccess.Inspection.Gizmo.Status.PainRecoveryBonus>Pain recovery bonus: {0}</RimWorldAccess.Inspection.Gizmo.Status.PainRecoveryBonus>
 
   <!-- =================================================================
        Growth tier rich status (GetGrowthTierStatus / FormatTierRewards).
@@ -793,6 +797,7 @@
   <RimWorldAccess.Inspection.Gizmo.Ability.EffectRadiusSuffix>, {0} tile radius</RimWorldAccess.Inspection.Gizmo.Ability.EffectRadiusSuffix>
 
   <RimWorldAccess.Inspection.Gizmo.Ability.CooldownLine>{0}: {1}</RimWorldAccess.Inspection.Gizmo.Ability.CooldownLine>
+  <RimWorldAccess.Inspection.Gizmo.Ability.Ready>Ready</RimWorldAccess.Inspection.Gizmo.Ability.Ready>
 
   <!-- =================================================================
        Disabled-launch context (GetDisabledGizmoContext for transport
