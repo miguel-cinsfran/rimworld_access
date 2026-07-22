@@ -35,6 +35,14 @@ namespace RimWorldAccess
                 IsActive = true;
                 selectedIndex = 0;
 
+                // This dialog uses the vanilla accept/cancel handlers, which close it the moment
+                // Enter or Escape is seen — before our Spawn/Cancel row ever runs, which is why
+                // pressing Spawn silently dropped back to the faction prompt. RimWorld raises those
+                // from KeyBindingDef.KeyDownEvent, which ignores Event.current.Use(), so clearing
+                // the flags is the reliable way to stop it (the FactionLandingState precedent).
+                window.closeOnAccept = false;
+                window.closeOnCancel = false;
+
                 items.Clear();
                 items.Add(ItemKind.Settlements);
                 items.Add(ItemKind.Distance);

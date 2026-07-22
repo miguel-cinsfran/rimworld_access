@@ -1,3 +1,4 @@
+using System.Reflection;
 using HarmonyLib;
 using Verse;
 
@@ -41,6 +42,32 @@ namespace RimWorldAccess
                 else if (VEFFactionsReflection.IsNewFactionDialog(__instance) && NewFactionSpawningState.IsActive)
                     NewFactionSpawningState.Close();
             }
+        }
+
+        /// <summary>
+        /// Blocks VEF's own <c>OnAcceptKeyPressed</c> override on the faction prompt while our list
+        /// is driving it.
+        ///
+        /// This is the root CLAUDE.md "Keyboard Input Isolation" case. RimWorld raises Accept/Cancel
+        /// from <c>KeyBindingDef.KeyDownEvent</c>, which does not consult <c>Event.current.Use()</c>,
+        /// so consuming the event in our handler is not enough. And unlike the vanilla base method —
+        /// which only closes when <c>closeOnAccept</c> is set, and so can be neutralised by clearing
+        /// that flag — VEF's override ignores the flag and adds the faction outright. Left unpatched,
+        /// Enter would add the faction regardless of whether the user had "Do nothing" or "Don't ask
+        /// again" selected.
+        ///
+        /// Resolved dynamically (<see cref="Prepare"/> skips the patch entirely when VEF is absent)
+        /// so RimWorld Access still never hard-references the framework.
+        /// </summary>
+        [HarmonyPatch]
+        public static class Dialog_OnAcceptKeyPressed_Patch
+        {
+            public static bool Prepare() => VEFFactionsReflection.DialogOnAcceptKeyPressed != null;
+
+            public static MethodBase TargetMethod() => VEFFactionsReflection.DialogOnAcceptKeyPressed;
+
+            [HarmonyPrefix]
+            public static bool Prefix() => !NewFactionSpawningState.IsActive;
         }
     }
 }

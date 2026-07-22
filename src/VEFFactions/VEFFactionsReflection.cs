@@ -36,6 +36,15 @@ namespace RimWorldAccess
         // ===== Dialog_NewFactionSpawning members =====
         private static FieldInfo fFactionDef, fForcedFactionData, fFailedToSpawn;
         private static MethodInfo mSpawnWithBases, mSpawnWithoutBases, mSkip, mIgnore;
+        private static MethodInfo mDialogOnAcceptKeyPressed;
+
+        /// <summary>
+        /// VEF's <c>Dialog_NewFactionSpawning.OnAcceptKeyPressed</c> override, or null.
+        /// Unlike the vanilla base (which merely honours <c>closeOnAccept</c>), this override adds
+        /// the faction outright — so it cannot be neutralised with a flag and must be patched, or
+        /// Enter would add the faction no matter which row the user has selected.
+        /// </summary>
+        public static MethodInfo DialogOnAcceptKeyPressed => mDialogOnAcceptKeyPressed;
 
         // ===== ForcedFactionData members =====
         private static FieldInfo fForcePlayerToAdd;
@@ -76,6 +85,7 @@ namespace RimWorldAccess
                 mSpawnWithoutBases = AccessTools.Method(dialogType, "SpawnWithoutBases");
                 mSkip = AccessTools.Method(dialogType, "Skip");
                 mIgnore = AccessTools.Method(dialogType, "Ignore");
+                mDialogOnAcceptKeyPressed = AccessTools.Method(dialogType, "OnAcceptKeyPressed");
             }
 
             if (settlementsDialogType != null)

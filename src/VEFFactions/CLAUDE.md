@@ -61,6 +61,32 @@ shortcuts through would act on a world the user cannot see.
 - **KeyboardHelper.IsAnyAccessibilityMenuActive** — includes both states.
 - **TypeaheadConsumerRegistry** — main prompt only, suppressed while the settlements dialog is up.
 
+## Keyboard input isolation (the Spawn-did-nothing bug)
+First live test: navigating both dialogs worked, but Enter on **Spawn** silently dropped back to the
+faction prompt without spawning anything — no message, no exception, `failedToSpawn` still false.
+Invoking `Spawn()` through the dev bridge worked perfectly, proving the reflection was fine: Enter
+was never reaching our handler's action. This is the root CLAUDE.md **Keyboard Input Isolation**
+case — RimWorld raises Accept/Cancel from `KeyBindingDef.KeyDownEvent`, which does **not** consult
+`Event.current.Use()`, so consuming the event in our handler cannot stop it.
+
+The two dialogs need *different* fixes, because they reach `OnAcceptKeyPressed` differently:
+
+| Dialog | Accept handler | Fix |
+|---|---|---|
+| `Dialog_NewFactionSpawningSettlements` | vanilla `Window.OnAcceptKeyPressed`, which only closes when `closeOnAccept` | clear `closeOnAccept`/`closeOnCancel` in `Open()` (the `FactionLandingState` precedent) |
+| `Dialog_NewFactionSpawning` | **overrides** it and adds the faction outright, ignoring `closeOnAccept` | flag-clearing is not enough — `NewFactionSpawningPatch.Dialog_OnAcceptKeyPressed_Patch` prefixes the override out while our state is active |
+
+Without the second patch, Enter would add the faction no matter which row was selected — including
+"Do nothing" and "Don't ask for this faction again". That patch resolves its target dynamically
+(`Prepare()` + `TargetMethod()`), so it is skipped entirely when VEF is absent and the framework is
+still never hard-referenced.
+
+## Localization note
+All faction/button/explanation text goes through the mod's own `VanillaFactionsExpanded.*` keys, so
+it follows whatever VEF ships. **VEF ships English only** (`Languages/English` is its sole language
+folder), so these strings read as English in every locale — the same thing a sighted player sees.
+That is upstream behavior, not a RimWorld Access translation gap.
+
 ## Notes / gotchas
 - `TolkHelper.Speak` takes a `Localized`; any string coming from VEF (faction text, refusal messages)
   must go through `SpeakData`.

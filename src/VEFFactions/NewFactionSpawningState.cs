@@ -53,6 +53,13 @@ namespace RimWorldAccess
                 typeahead.ClearSearch();
                 RebuildItems();
 
+                // We drive Escape ourselves (announcing that the faction was only skipped), so stop
+                // vanilla closing the window behind us. Enter is handled separately: VEF overrides
+                // OnAcceptKeyPressed to add the faction outright regardless of this flag, which is
+                // why NewFactionSpawningPatch also patches that override out while we are active.
+                window.closeOnCancel = false;
+                window.closeOnAccept = false;
+
                 // Read the whole prompt first — what faction, from which mod, and why it matters —
                 // then land on the first choice.
                 TolkHelper.SpeakData(BuildFullDescription(), SpeechPriority.High);
