@@ -36,6 +36,14 @@ namespace RimWorldAccess
         private static int selectedIndex;
         private static TypeaheadSearchHelper typeahead = new TypeaheadSearchHelper();
 
+        /// <summary>
+        /// Set once a choice has been committed for the current faction. Each prompt in VEF's chain
+        /// gets its own <see cref="Open"/>, so this permits exactly one decision per faction and a
+        /// repeated Enter (key repeat, or a second event in the same frame) cannot add the faction
+        /// twice — which would leave duplicate factions in the world.
+        /// </summary>
+        private static bool actionTaken;
+
         public static void Open(Window window)
         {
             if (window == null || !VEFFactionsReflection.Available)
@@ -50,6 +58,7 @@ namespace RimWorldAccess
 
                 IsActive = true;
                 selectedIndex = 0;
+                actionTaken = false;
                 typeahead.ClearSearch();
                 RebuildItems();
 
@@ -182,6 +191,11 @@ namespace RimWorldAccess
 
             Item item = items[selectedIndex];
 
+            // Re-reading the information is always safe; every other row commits a decision and must
+            // only ever fire once for this faction.
+            if (item.Kind != ItemKind.Info && actionTaken)
+                return;
+
             switch (item.Kind)
             {
                 case ItemKind.Info:
@@ -190,10 +204,12 @@ namespace RimWorldAccess
 
                 case ItemKind.AddWithSettlements:
                     // Opens VEF's settlement-count dialog; NewFactionSettlementsState picks it up.
+                    actionTaken = true;
                     VEFFactionsReflection.SpawnWithBases(dialog);
                     return;
 
                 case ItemKind.Add:
+                    actionTaken = true;
                     VEFFactionsReflection.SpawnWithoutBases(dialog);
                     return;
 
@@ -209,6 +225,7 @@ namespace RimWorldAccess
                             : msg.StripTags(), SpeechPriority.High);
                         return;
                     }
+                    actionTaken = true;
                     if (item.Kind == ItemKind.Skip)
                         VEFFactionsReflection.Skip(dialog);
                     else
@@ -317,6 +334,9 @@ namespace RimWorldAccess
                         : msg.StripTags(), SpeechPriority.High);
                     return true;
                 }
+                if (actionTaken)
+                    return true;
+                actionTaken = true;
                 TolkHelper.Speak("RimWorldAccess.VEFFactions.SkippedForNow".Loc(), SpeechPriority.High);
                 VEFFactionsReflection.Skip(dialog);
                 return true;

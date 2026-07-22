@@ -24,6 +24,13 @@ namespace RimWorldAccess
         private static List<ItemKind> items = new List<ItemKind>();
         private static int selectedIndex;
 
+        /// <summary>
+        /// Guards against a repeated Enter spawning the faction twice — VEF's Spawn() closes this
+        /// window and then runs the callback, so a second event arriving before the close settles
+        /// would otherwise add a duplicate faction.
+        /// </summary>
+        private static bool spawnRequested;
+
         public static void Open(Window window)
         {
             if (window == null || !VEFFactionsReflection.SettlementsAvailable)
@@ -34,6 +41,7 @@ namespace RimWorldAccess
                 dialog = window;
                 IsActive = true;
                 selectedIndex = 0;
+                spawnRequested = false;
 
                 // This dialog uses the vanilla accept/cancel handlers, which close it the moment
                 // Enter or Escape is seen — before our Spawn/Cancel row ever runs, which is why
@@ -184,7 +192,12 @@ namespace RimWorldAccess
             {
                 ItemKind kind = items[selectedIndex];
                 if (kind == ItemKind.Spawn)
+                {
+                    if (spawnRequested)
+                        return true;
+                    spawnRequested = true;
                     VEFFactionsReflection.Spawn(dialog);
+                }
                 else if (kind == ItemKind.Cancel)
                     CloseDialog();
                 else
