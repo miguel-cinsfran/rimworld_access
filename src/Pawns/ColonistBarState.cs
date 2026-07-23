@@ -65,10 +65,12 @@ namespace RimWorldAccess
         /// </summary>
         private static List<Pawn> GetColonists()
         {
-            if (Find.ColonistBar == null || Find.CurrentMap == null)
+            if (Find.CurrentMap == null)
                 return new List<Pawn>();
 
-            return Find.ColonistBar.GetColonistsInOrder()
+            // Not Find.ColonistBar.GetColonistsInOrder(): that forces a bar layout recache whose
+            // scale search can spin the main thread forever. See ColonistBarOrderHelper.
+            return ColonistBarOrderHelper.GetColonistsInBarOrder(Find.CurrentMap)
                 .Where(p => p != null &&
                             p.Spawned &&
                             p.Map == Find.CurrentMap &&

@@ -52,5 +52,25 @@ namespace RimWorldAccess
             [HarmonyPostfix]
             public static void Postfix() => HangWatchdog.Mark("game loop: after map update");
         }
+
+        /// <summary>
+        /// The colonist bar layout search that the freeze was traced to. Its scale loop has no
+        /// iteration cap, so it can spin the main thread forever. The mod no longer reaches it (see
+        /// <c>ColonistBarOrderHelper</c>), but the bar reordering paths still touch
+        /// <c>ColonistBar.Entries</c>, and the game itself runs this whenever the bar is visible and
+        /// dirty. Marked so that if it ever spins again, the report names it outright instead of
+        /// leaving another round of narrowing to do.
+        /// </summary>
+        [HarmonyPatch(typeof(RimWorld.ColonistBarDrawLocsFinder), "FindBestScale")]
+        public static class FindBestScalePatch
+        {
+            public static bool Prepare() => HangWatchdog.Enabled;
+
+            [HarmonyPrefix]
+            public static void Prefix() => HangWatchdog.Mark("colonist bar: searching for a layout scale");
+
+            [HarmonyPostfix]
+            public static void Postfix() => HangWatchdog.Mark("colonist bar: layout scale found");
+        }
     }
 }

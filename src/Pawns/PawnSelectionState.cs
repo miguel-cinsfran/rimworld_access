@@ -30,18 +30,11 @@ namespace RimWorldAccess
         /// </summary>
         private static List<Pawn> GetSelectableColonists()
         {
-            if (Find.ColonistBar == null)
-                return new List<Pawn>();
-
-            // TEMPORARY (2026-07-23): vanilla's colonist bar recomputes its layout here, and that
-            // layout search is a loop that shrinks the scale until the entries fit. Marked separately
-            // from the rest of the selection work so a stall report can name it directly.
-            HangWatchdog.Mark("asking vanilla for the colonist bar order");
-
-            // Get colonists in the order they appear in the colonist bar
-            var colonists = Find.ColonistBar.GetColonistsInOrder();
-
-            HangWatchdog.Mark("filtering the colonist list");
+            // Bar order without asking the game to rebuild the bar: going through
+            // Find.ColonistBar.GetColonistsInOrder() forces a layout recache whose scale search can
+            // spin forever, which is what froze the game on the first comma/period after a load.
+            // See ColonistBarOrderHelper.
+            var colonists = ColonistBarOrderHelper.GetColonistsInBarOrder(Find.CurrentMap);
 
             // Filter to only spawned, selectable colonists on the current map
             return colonists
