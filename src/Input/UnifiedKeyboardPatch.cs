@@ -226,6 +226,26 @@ namespace RimWorldAccess
         [HarmonyPrefix]
         public static void Prefix()
         {
+            // TEMPORARY (2026-07-23): time the whole handler for the freeze investigation. The body
+            // lives in PrefixCore so its many early returns all pass through this one finally — a
+            // breadcrumb left behind by an early return would otherwise look like a hang.
+            long timed = HangWatchdog.Begin("keyboard handler (entry)");
+            try
+            {
+                PrefixCore();
+            }
+            finally
+            {
+                HangWatchdog.End("UnifiedKeyboardPatch.Prefix", timed);
+            }
+        }
+
+        private static void PrefixCore()
+        {
+            // Heartbeat: refreshed every OnGUI pass. If the watchdog ever reports a stall whose last
+            // breadcrumb is this one, the main thread died outside RimWorld Access.
+            HangWatchdog.Mark("game frame (outside RWA)");
+
             // Process per-frame sound queue for bulk painting operations
             BulkSoundQueue.Update();
 
@@ -284,6 +304,10 @@ namespace RimWorldAccess
             }
 
             KeyCode key = Event.current.keyCode;
+
+            // TEMPORARY (2026-07-23): name the key being routed, so a stall report says which
+            // keystroke the main thread went into and never came back from.
+            HangWatchdog.Mark("routing key: " + key);
 
             // ===== EXCLUSIVE: Archonexus relocation dialogs own all input =====
             // The selection screen and the reform-ideoligion dialog handle their own

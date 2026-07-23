@@ -547,6 +547,11 @@ namespace RimWorldAccess
                 return;
             }
 
+            // TEMPORARY (2026-07-23): the backend call is a synchronous cross-process request to the
+            // screen reader, so a wedged NVDA blocks the game's main thread with no exception and no
+            // log line — exactly the shape of the freeze under investigation. Timed and breadcrumbed
+            // so the watchdog can either convict it or rule it out.
+            long timedSpeech = HangWatchdog.Begin("speaking: " + HangWatchdog.Snippet(text));
             try
             {
                 bool interrupt = priority == SpeechPriority.High;
@@ -582,6 +587,7 @@ namespace RimWorldAccess
                 var (handle, pointer) = PrismNative.MarshalUtf8(text);
                 try
                 {
+                    HangWatchdog.Mark("inside screen reader call: " + HangWatchdog.Snippet(text));
                     PrismError result = PrismNative.prism_backend_output(prismBackend, pointer, interrupt);
                     if (result == PrismError.NotImplemented && PrismNative.prism_backend_speak != null)
                     {
@@ -608,6 +614,10 @@ namespace RimWorldAccess
             catch (Exception ex)
             {
                 Log.Error($"[RimWorld Access] Error speaking text: {ex.Message}");
+            }
+            finally
+            {
+                HangWatchdog.End("screen reader output", timedSpeech);
             }
         }
     }

@@ -325,6 +325,10 @@ namespace RimWorldAccess
             }
             else
             {
+                // TEMPORARY (2026-07-23): this is the path the reported freeze is triggered from
+                // (period on the map). Breadcrumbed step by step so a stall report names the exact
+                // stage rather than just "the period key".
+                HangWatchdog.Mark("period: picking next colonist");
                 selectedPawn = PawnSelectionState.SelectNextColonist();
                 if (selectedPawn == null)
                 {
@@ -342,6 +346,9 @@ namespace RimWorldAccess
             // Select the pawn and jump camera to follow
             if (Find.Selector != null)
             {
+                // Selecting is where other mods hook hardest (inspect tabs, overlays), so it gets its
+                // own breadcrumb rather than sharing one with the surrounding bookkeeping.
+                HangWatchdog.Mark("comma/period: selecting " + selectedPawn.LabelShort);
                 Find.Selector.ClearSelection();
                 Find.Selector.Select(selectedPawn, playSound: true, forceDesignatorDeselect: !ShapePlacementState.IsActive);
             }
@@ -353,6 +360,7 @@ namespace RimWorldAccess
             // NOTE: Cursor stays where it was - user can press Alt+C to move cursor to pawn
             if (Find.CameraDriver != null)
             {
+                HangWatchdog.Mark("comma/period: moving camera");
                 Find.CameraDriver.JumpToCurrentMapLoc(selectedPawn.Position);
             }
             MapNavigationState.CurrentCameraMode = CameraFollowMode.Pawn;
@@ -364,6 +372,7 @@ namespace RimWorldAccess
             ColonistBarState.SyncBarPosition(selectedPawn);
 
             // Announce selection
+            HangWatchdog.Mark("comma/period: building the announcement");
             string currentTask = selectedPawn.GetJobReport();
             if (string.IsNullOrEmpty(currentTask))
                 currentTask = (string)"RimWorldAccess.Map.Pawn.Idle".Translate();
@@ -437,6 +446,9 @@ namespace RimWorldAccess
             // Select the pawn and jump camera to follow
             if (Find.Selector != null)
             {
+                // Selecting is where other mods hook hardest (inspect tabs, overlays), so it gets its
+                // own breadcrumb rather than sharing one with the surrounding bookkeeping.
+                HangWatchdog.Mark("comma/period: selecting " + selectedPawn.LabelShort);
                 Find.Selector.ClearSelection();
                 Find.Selector.Select(selectedPawn, playSound: true, forceDesignatorDeselect: !ShapePlacementState.IsActive);
             }
@@ -448,6 +460,7 @@ namespace RimWorldAccess
             // NOTE: Cursor stays where it was - user can press Alt+C to move cursor to pawn
             if (Find.CameraDriver != null)
             {
+                HangWatchdog.Mark("comma/period: moving camera");
                 Find.CameraDriver.JumpToCurrentMapLoc(selectedPawn.Position);
             }
             MapNavigationState.CurrentCameraMode = CameraFollowMode.Pawn;
@@ -459,6 +472,7 @@ namespace RimWorldAccess
             ColonistBarState.SyncBarPosition(selectedPawn);
 
             // Announce selection
+            HangWatchdog.Mark("comma/period: building the announcement");
             string currentTask = selectedPawn.GetJobReport();
             if (string.IsNullOrEmpty(currentTask))
                 currentTask = (string)"RimWorldAccess.Map.Pawn.Idle".Translate();
