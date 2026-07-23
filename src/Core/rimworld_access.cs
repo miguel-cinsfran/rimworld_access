@@ -16,12 +16,6 @@ namespace RimWorldAccess
         {
             Log.Message("[RimWorld Access] Initializing accessibility features...");
 
-            // TEMPORARY (2026-07-23): breadcrumb watcher for the freeze under investigation. Started
-            // first so it covers initialization too — one reported variant of the freeze happens
-            // during load. The save-data folder is resolved here, on the main thread, because the
-            // watcher thread must not call into RimWorld.
-            HangWatchdog.Start(GenFilePaths.SaveDataFolderPath);
-
             try
             {
                 TolkHelper.Initialize();

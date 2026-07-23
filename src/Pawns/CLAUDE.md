@@ -6,7 +6,26 @@ Pawn information, character tabs, policies, and assignments.
 ## Files
 **Patches:** PawnInfoPatch.cs, AssignMenuPatch.cs, PolicyEditorPatch.cs, PawnSkillsTablePatch.cs
 **States:** PawnSelectionState.cs, ColonistBarState.cs, HealthState.cs, HealthTabState.cs, MoodState.cs, NeedsState.cs, AssignMenuState.cs, BedAssignmentState.cs, PolicyEditorState.cs, DrugPolicyEditorState.cs, ReadingPolicyEditorState.cs, WindowlessScheduleState.cs, PawnSkillsTableState.cs
-**Helpers:** PawnInfoHelper.cs, HealthTabHelper.cs, SocialTabHelper.cs, InteractiveGearHelper.cs, PawnSkillsTableHelper.cs
+**Helpers:** PawnInfoHelper.cs, HealthTabHelper.cs, SocialTabHelper.cs, InteractiveGearHelper.cs, PawnSkillsTableHelper.cs, ColonistBarOrderHelper.cs
+
+### ColonistBarOrderHelper — never call Find.ColonistBar.GetColonistsInOrder()
+
+That property reaches `ColonistBar.Entries` → `CheckRecacheEntries` → `ColonistBarDrawLocsFinder
+.CalculateDrawLocs` → `FindBestScale`, a layout search with **no iteration cap**. When it fails to
+converge it spins the main thread forever — no exception, no log, Windows reports AppHangB1. It froze
+the game on the first comma/period after every load until 2026-07-23.
+
+Vanilla mostly dodges it because `ColonistBarOnGUI` checks `Visible` and returns before touching
+`Entries`, so an off-screen bar never recomputes its layout. This mod had no such guard and forced
+the recache from a keystroke handler.
+
+Use `ColonistBarOrderHelper.GetColonistsInBarOrder(map)` instead: same list, rebuilt from the same
+inputs vanilla feeds its entries (`FreeColonists` + `ColonySubhumansControllable`, sorted with
+`PlayerPawnsDisplayOrderUtility`), with none of the layout work. Removing the recache also cured the
+200–340 ms per-frame hitching that came with it.
+
+**Still exposed:** the reorder paths below read `Entries` because they genuinely operate on the bar's
+groups.
 
 ## Key Shortcuts
 - **Tab/Shift+Tab** - Cycle selected pawns
@@ -51,7 +70,7 @@ Both were lost when PR #62 rewrote this method to rely solely on `TipStringExtra
 
 ### ColonistBarState
 - Virtual "bar" overlaid on flat colonist list (pages of 10)
-- Colonists from `Find.ColonistBar.GetColonistsInOrder()` filtered by current map
+- Colonists from `ColonistBarOrderHelper.GetColonistsInBarOrder()` filtered by current map
 - Mechs from `mapPawns.SpawnedColonyMechs` (Biotech DLC)
 - Alt+Down/Up navigates: colonist pages first, then mech pages
 - Reordering uses `ColonistBar.Reorder()` which sets `pawn.playerSettings.displayOrder`

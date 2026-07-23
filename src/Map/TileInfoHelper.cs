@@ -18,21 +18,6 @@ namespace RimWorldAccess
         /// </summary>
         public static string GetTileSummary(IntVec3 position, Map map)
         {
-            // TEMPORARY (2026-07-23): runs on every arrow-key move, so it is the prime suspect for the
-            // intermittent hitching reported alongside the freeze. Timed to confirm or clear it.
-            long timed = HangWatchdog.Begin("reading tile info");
-            try
-            {
-                return GetTileSummaryCore(position, map);
-            }
-            finally
-            {
-                HangWatchdog.End("tile info read", timed);
-            }
-        }
-
-        private static string GetTileSummaryCore(IntVec3 position, Map map)
-        {
             if (map == null || !position.InBounds(map))
                 return "RimWorldAccess.Map.Tile.OutOfBounds".Translate();
 

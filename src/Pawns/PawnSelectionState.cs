@@ -32,7 +32,7 @@ namespace RimWorldAccess
         {
             // Bar order without asking the game to rebuild the bar: going through
             // Find.ColonistBar.GetColonistsInOrder() forces a layout recache whose scale search can
-            // spin forever, which is what froze the game on the first comma/period after a load.
+            // spin forever, which froze the game on the first comma/period after a load.
             // See ColonistBarOrderHelper.
             var colonists = ColonistBarOrderHelper.GetColonistsInBarOrder(Find.CurrentMap);
 
@@ -100,12 +100,7 @@ namespace RimWorldAccess
             // Selecting is taught up front (first map load). Now that a colonist is actually
             // selected, prime the player on the quick status reads — Alt H, N, and M — for
             // hearing how the selected colonist is doing.
-            // TEMPORARY (2026-07-23): this only does real work on the first cycle of a session, which
-            // matches the reported symptom exactly — the freeze always lands on the first comma or
-            // period pressed after loading. Marked on both sides to confirm or clear it.
-            HangWatchdog.Mark("offering the 'checking colonists' lesson");
             DocsTeacher.Teach("RWA_CheckingColonists");
-            HangWatchdog.Mark("lesson offered, resuming colonist cycle");
 
             // Find the index of the last pawn we selected
             int foundIndex = -1;
@@ -161,12 +156,7 @@ namespace RimWorldAccess
             // Selecting is taught up front (first map load). Now that a colonist is actually
             // selected, prime the player on the quick status reads — Alt H, N, and M — for
             // hearing how the selected colonist is doing.
-            // TEMPORARY (2026-07-23): this only does real work on the first cycle of a session, which
-            // matches the reported symptom exactly — the freeze always lands on the first comma or
-            // period pressed after loading. Marked on both sides to confirm or clear it.
-            HangWatchdog.Mark("offering the 'checking colonists' lesson");
             DocsTeacher.Teach("RWA_CheckingColonists");
-            HangWatchdog.Mark("lesson offered, resuming colonist cycle");
 
             // Find the index of the last pawn we selected
             int foundIndex = -1;

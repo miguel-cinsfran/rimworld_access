@@ -25,22 +25,6 @@ namespace RimWorldAccess
     /// </summary>
     public static class VEFFactionsReflection
     {
-        /// <summary>
-        /// TEMPORARY diagnostic kill switch (2026-07-22).
-        ///
-        /// When true this module disables itself completely: <see cref="Available"/> stays false, so
-        /// the lifecycle postfixes no-op, the states never activate, and the two dynamically-targeted
-        /// Harmony patches are skipped (their <c>Prepare()</c> sees a null target). VEF's dialog then
-        /// behaves exactly as it did before this module existed — mouse-driven, Escape closes it.
-        ///
-        /// Exists so a freeze can be A/B tested without disabling all of RimWorld Access, which is
-        /// not an option for a screen-reader user: without it the game is unplayable, so "just turn
-        /// the mod off to test" is not a real experiment.
-        ///
-        /// Set back to false once the cause is established.
-        /// </summary>
-        private const bool DisabledForDiagnostics = true;
-
         public static bool Available { get; private set; }
         public static bool SettlementsAvailable { get; private set; }
 
@@ -97,14 +81,6 @@ namespace RimWorldAccess
 
         private static void Initialize()
         {
-            if (DisabledForDiagnostics)
-            {
-                Available = false;
-                SettlementsAvailable = false;
-                Log.Message("[RimWorld Access] VEF new-faction dialog support is temporarily disabled (diagnostic switch).");
-                return;
-            }
-
             dialogType = AccessTools.TypeByName("VEF.Factions.Dialog_NewFactionSpawning");
             settlementsDialogType = AccessTools.TypeByName("VEF.Factions.Dialog_NewFactionSpawningSettlements");
             customGenOptionType = AccessTools.TypeByName("KCSG.CustomGenOption");
