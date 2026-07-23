@@ -128,7 +128,9 @@ namespace RimWorldAccess
             if (elapsed >= SlowMs)
                 pending.Enqueue($"{Stamp()} SLOW {elapsed,6} ms  {tag}");
 
-            Mark("(idle)");
+            // Not "(idle)": a timed section closing means the mod handed control back, and naming that
+            // explicitly stops the mark from reading like "nothing was happening" in a stall report.
+            Mark("left RimWorld Access, back in game code");
         }
 
         /// <summary>

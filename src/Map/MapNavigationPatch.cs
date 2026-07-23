@@ -294,6 +294,11 @@ namespace RimWorldAccess
         [HarmonyPrefix]
         public static bool SelectNextColonist_Prefix()
         {
+            // TEMPORARY (2026-07-23): mark on entry, before any branching. The first version of this
+            // instrumentation only marked further down, so a hang in the multi-select or mech branch
+            // above would have been indistinguishable from a hang outside the mod entirely.
+            HangWatchdog.Mark("period: entering colonist cycle");
+
             // If in full planet view, let the original method handle it (caravan cycling)
             if (!WorldRendererUtility.DrawingMap)
                 return true;
@@ -402,6 +407,10 @@ namespace RimWorldAccess
         [HarmonyPrefix]
         public static bool SelectPreviousColonist_Prefix()
         {
+            // See SelectNextColonist_Prefix: marked on entry so the branches above the later marks
+            // are covered too.
+            HangWatchdog.Mark("comma: entering colonist cycle");
+
             // If in full planet view, let the original method handle it (caravan cycling)
             if (!WorldRendererUtility.DrawingMap)
                 return true;
