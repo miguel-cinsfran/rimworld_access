@@ -48,7 +48,9 @@ namespace RimWorldAccess
 
             PawnSkillsTableHelper.RefreshSkills();
 
-            pawns = Find.ColonistBar.GetColonistsInOrder()
+            // Not Find.ColonistBar.GetColonistsInOrder(): that forces a bar layout recache whose
+            // scale search can spin the main thread forever. See ColonistBarOrderHelper.
+            pawns = ColonistBarOrderHelper.GetColonistsInBarOrder(Find.CurrentMap)
                 .Where(p => p != null && p.Spawned && p.Map == Find.CurrentMap && p.skills != null)
                 .ToList();
 

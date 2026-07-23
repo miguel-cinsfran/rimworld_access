@@ -24,15 +24,6 @@ namespace RimWorldAccess
         private static TypeaheadSearchHelper typeahead = new TypeaheadSearchHelper();
         private static bool isExecutingGizmo = false;
 
-        /// <summary>
-        /// TEMPORARY diagnostic kill switch (2026-07-22), paired with the one in
-        /// VEFFactionsReflection. Disables only the psychic-status/VEF-ability readouts added that
-        /// day, so every change made in that session can be made inert while the rest of RimWorld
-        /// Access keeps working — the user is blind and cannot test by disabling the whole mod.
-        /// Set back to true once the freeze under investigation is explained.
-        /// </summary>
-        private const bool PsycastGizmoExtrasEnabled = false;
-
         // Slider adjustment mode state
         private static bool isAdjustingSlider = false;
         private static Gizmo sliderGizmo = null;
@@ -2066,7 +2057,7 @@ namespace RimWorldAccess
                 // Recovery rate and time until the heat is fully dissipated. Vanilla's own tooltip
                 // shows both (PawnTooltipPsychicEntropyStats); RecoveryRate is entropy per second,
                 // so entropy / rate is the seconds left — the most actionable "when can I cast again".
-                var recoveryProp = PsycastGizmoExtrasEnabled ? tracker.GetType().GetProperty("RecoveryRate") : null;
+                var recoveryProp = tracker.GetType().GetProperty("RecoveryRate");
                 if (recoveryProp != null)
                 {
                     float recoveryRate = (float)recoveryProp.GetValue(tracker);
@@ -2097,7 +2088,7 @@ namespace RimWorldAccess
                 // In vanilla the band is a real gate — it caps the psycast level the pawn may cast
                 // (MaxAbilityLevelPerPsyfocusBand). VPE does NOT use that gate (it checks psyfocus
                 // *cost* per ability instead), so announcing a level cap there would be a lie.
-                if (PsycastGizmoExtrasEnabled && !isVpePsycaster)
+                if (!isVpePsycaster)
                 {
                     var maxAbilityLevelProp = tracker.GetType().GetProperty("MaxAbilityLevel");
                     if (maxAbilityLevelProp != null)
@@ -2142,9 +2133,6 @@ namespace RimWorldAccess
         /// </summary>
         private static string GetVpePsycasterProgress(Pawn pawn)
         {
-            if (!PsycastGizmoExtrasEnabled)
-                return "";
-
             var hediff = GetVpePsycastHediff(pawn);
             if (hediff == null)
                 return "";
@@ -2173,7 +2161,7 @@ namespace RimWorldAccess
         /// </summary>
         private static string GetPsychicPainBonus(Pawn pawn)
         {
-            if (!PsycastGizmoExtrasEnabled || pawn == null)
+            if (pawn == null)
                 return "";
             try
             {
@@ -2445,9 +2433,6 @@ namespace RimWorldAccess
         /// </summary>
         private static string GetVefAbilityInfo(Gizmo gizmo)
         {
-            if (!PsycastGizmoExtrasEnabled)
-                return null;
-
             object vefAbility = VPEPsycastsReflection.GetVefAbilityFromGizmo(gizmo);
             if (vefAbility == null)
                 return null;
