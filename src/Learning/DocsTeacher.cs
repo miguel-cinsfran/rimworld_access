@@ -67,9 +67,16 @@ namespace RimWorldAccess
             if (conc == null)
                 return;
 
+            // TEMPORARY (2026-07-23): both steps below reach deep into vanilla tutor code (settings
+            // write, knowledge database, lesson activation, and our own activation announcement), so
+            // they are marked separately for the freeze investigation.
+            HangWatchdog.Mark("lesson: re-teach check for " + conceptDefName);
             ReteachOverriddenConceptIfAlreadyLearned(conc);
 
+            HangWatchdog.Mark("lesson: activating " + conceptDefName);
             LessonAutoActivator.TeachOpportunity(conc, opportunity);
+
+            HangWatchdog.Mark("lesson: activated " + conceptDefName);
         }
 
         /// <summary>

@@ -33,8 +33,15 @@ namespace RimWorldAccess
             if (Find.ColonistBar == null)
                 return new List<Pawn>();
 
+            // TEMPORARY (2026-07-23): vanilla's colonist bar recomputes its layout here, and that
+            // layout search is a loop that shrinks the scale until the entries fit. Marked separately
+            // from the rest of the selection work so a stall report can name it directly.
+            HangWatchdog.Mark("asking vanilla for the colonist bar order");
+
             // Get colonists in the order they appear in the colonist bar
             var colonists = Find.ColonistBar.GetColonistsInOrder();
+
+            HangWatchdog.Mark("filtering the colonist list");
 
             // Filter to only spawned, selectable colonists on the current map
             return colonists
@@ -100,7 +107,12 @@ namespace RimWorldAccess
             // Selecting is taught up front (first map load). Now that a colonist is actually
             // selected, prime the player on the quick status reads — Alt H, N, and M — for
             // hearing how the selected colonist is doing.
+            // TEMPORARY (2026-07-23): this only does real work on the first cycle of a session, which
+            // matches the reported symptom exactly — the freeze always lands on the first comma or
+            // period pressed after loading. Marked on both sides to confirm or clear it.
+            HangWatchdog.Mark("offering the 'checking colonists' lesson");
             DocsTeacher.Teach("RWA_CheckingColonists");
+            HangWatchdog.Mark("lesson offered, resuming colonist cycle");
 
             // Find the index of the last pawn we selected
             int foundIndex = -1;
@@ -156,7 +168,12 @@ namespace RimWorldAccess
             // Selecting is taught up front (first map load). Now that a colonist is actually
             // selected, prime the player on the quick status reads — Alt H, N, and M — for
             // hearing how the selected colonist is doing.
+            // TEMPORARY (2026-07-23): this only does real work on the first cycle of a session, which
+            // matches the reported symptom exactly — the freeze always lands on the first comma or
+            // period pressed after loading. Marked on both sides to confirm or clear it.
+            HangWatchdog.Mark("offering the 'checking colonists' lesson");
             DocsTeacher.Teach("RWA_CheckingColonists");
+            HangWatchdog.Mark("lesson offered, resuming colonist cycle");
 
             // Find the index of the last pawn we selected
             int foundIndex = -1;
