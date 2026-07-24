@@ -1173,11 +1173,29 @@ namespace RimWorldAccess
 
             // Get the DrawStyleDef for this shape (null for Manual mode)
             DrawStyleDef styleDef = ShapeHelper.GetDrawStyleDef(designator, shape);
+            if (styleDef == null)
+                return;
 
-            // Setting SelectedStyle automatically updates the previouslySelected dictionary
-            if (styleDef != null)
+            // Persist the chosen shape into RimWorld's "previouslySelected" dictionary so the
+            // "Remember Draw Styles" setting restores it the next time this designator is picked
+            // (DesignatorManager.Select copies previouslySelected straight into selectedStyle).
+            //
+            // We intentionally do NOT assign designatorManager.SelectedStyle. That property setter
+            // also calls DesignationDragger.UpdateDragCellsIfNeeded(), which rebuilds a filled-
+            // rectangle cell buffer spanning the dragger's startDragCell to the current cell. When a
+            // designator is entered from the keyboard there is no active drag, so startDragCell is
+            // stale and that span can be enormous - producing multi-second main-thread stalls and,
+            // at the extreme, an OutOfMemoryException inside DrawStyle_FilledRectangle.Update.
+            // Writing the dictionary entry directly gives the same "remember" behaviour without ever
+            // touching the dragger. See DesignatorManager.set_SelectedStyle / DesignationDragger.
+            DrawStyleCategoryDef category = designator.DrawStyleCategory;
+            if (category?.styles == null || !category.styles.Contains(styleDef))
+                return;
+
+            var previouslySelectedField = AccessTools.Field(typeof(DesignatorManager), "previouslySelected");
+            if (previouslySelectedField?.GetValue(designatorManager) is System.Collections.IDictionary previouslySelected)
             {
-                designatorManager.SelectedStyle = styleDef;
+                previouslySelected[category] = styleDef;
             }
         }
 
