@@ -15,6 +15,9 @@
   <!-- Lista de pestañas (nivel 1). {0} etiqueta, {1} cantidad de trabajos, {2} posición ("3 de 10") -->
   <RimWorldAccess.ColonyManager.TabItem>{0}, {1} trabajos, {2}</RimWorldAccess.ColonyManager.TabItem>
   <RimWorldAccess.ColonyManager.TabItemDisabled>{0}, deshabilitada, {1}</RimWorldAccess.ColonyManager.TabItemDisabled>
+  <!-- Pestaña informativa (resumen / registros / importar-exportar): sin lista de trabajos. {0} etiqueta, {1} posición -->
+  <RimWorldAccess.ColonyManager.TabItemInformational>{0}, información, {1}</RimWorldAccess.ColonyManager.TabItemInformational>
+  <RimWorldAccess.ColonyManager.TabInformational>{0}. Esta pestaña es informativa y no tiene trabajos que gestionar desde aquí.</RimWorldAccess.ColonyManager.TabInformational>
   <RimWorldAccess.ColonyManager.TabDisabled>{0} está deshabilitada: {1}</RimWorldAccess.ColonyManager.TabDisabled>
   <RimWorldAccess.ColonyManager.TabDisabledNoReason>{0} está deshabilitada</RimWorldAccess.ColonyManager.TabDisabledNoReason>
 
@@ -28,6 +31,10 @@
 
   <!-- Lista de trabajos (nivel 2). {0} etiqueta, {1} etiqueta de objetivo, {2} posición -->
   <RimWorldAccess.ColonyManager.JobItem>{0}, {1}, {2}</RimWorldAccess.ColonyManager.JobItem>
+  <!-- Fila de trabajo sin texto de objetivo útil (p. ej. Energía). {0} etiqueta, {1} posición -->
+  <RimWorldAccess.ColonyManager.JobItemNoTargets>{0}, {1}</RimWorldAccess.ColonyManager.JobItemNoTargets>
+  <!-- Resumen del rebaño. {0} total actual de animales, {1} total objetivo -->
+  <RimWorldAccess.ColonyManager.JobLivestockSummary>{0} de {1} animales</RimWorldAccess.ColonyManager.JobLivestockSummary>
   <RimWorldAccess.ColonyManager.NoJobs>No hay trabajos en esta pestaña. Pulsa Escape o Izquierda para volver a las pestañas.</RimWorldAccess.ColonyManager.NoJobs>
   <RimWorldAccess.ColonyManager.StatusSuspended>suspendido</RimWorldAccess.ColonyManager.StatusSuspended>
   <RimWorldAccess.ColonyManager.StatusCompleted>objetivo alcanzado</RimWorldAccess.ColonyManager.StatusCompleted>
@@ -40,19 +47,28 @@
   <!-- Crear / borrar / reordenar. {0} etiqueta del trabajo -->
   <RimWorldAccess.ColonyManager.NewJobCreated>Trabajo nuevo creado: {0}. Pulsa Enter para configurarlo.</RimWorldAccess.ColonyManager.NewJobCreated>
   <RimWorldAccess.ColonyManager.NewJobFailed>No se pudo crear un trabajo nuevo</RimWorldAccess.ColonyManager.NewJobFailed>
+  <RimWorldAccess.ColonyManager.NewJobNeedsPicker>Crear este trabajo requiere elegir un animal o una receta, algo que todavía no está disponible desde aquí. De todos modos puedes abrir y editar los trabajos existentes de este tipo.</RimWorldAccess.ColonyManager.NewJobNeedsPicker>
   <RimWorldAccess.ColonyManager.JobDeleted>{0} eliminado</RimWorldAccess.ColonyManager.JobDeleted>
 
   <!-- Nivel de detalle del trabajo. {0} etiqueta del trabajo -->
   <RimWorldAccess.ColonyManager.EnteredJob>Ajustes de {0}</RimWorldAccess.ColonyManager.EnteredJob>
   <RimWorldAccess.ColonyManager.JobSelectedNoSettings>{0} seleccionado. Todavía no hay ajustes editables aquí.</RimWorldAccess.ColonyManager.JobSelectedNoSettings>
+  <!-- Trabajos de solo lectura (p. ej. el monitor de Energía): {0} etiqueta del trabajo, {1} etiqueta de objetivo -->
+  <RimWorldAccess.ColonyManager.JobNoSettingsReadonly>{0}. No hay nada que ajustar aquí.</RimWorldAccess.ColonyManager.JobNoSettingsReadonly>
+  <RimWorldAccess.ColonyManager.JobNoSettingsReadonlyWithTargets>{0}, {1}. No hay nada que ajustar aquí.</RimWorldAccess.ColonyManager.JobNoSettingsReadonlyWithTargets>
   <RimWorldAccess.ColonyManager.BackToJobs>Trabajos</RimWorldAccess.ColonyManager.BackToJobs>
 
-  <!-- Ajustes editables. Objetivo = umbral "cuánto querés". Izquierda/Derecha ajusta. -->
+  <!-- Ajustes editables. Objetivo = umbral "cuánto quieres". Izquierda/Derecha ajusta. -->
   <RimWorldAccess.ColonyManager.SettingTarget>Cantidad objetivo</RimWorldAccess.ColonyManager.SettingTarget>
   <!-- {0} etiqueta del ajuste, {1} valor, {2} posición -->
   <RimWorldAccess.ColonyManager.SettingInt>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingInt>
   <!-- {0} etiqueta del ajuste, {1} valor, {2} máximo, {3} posición -->
   <RimWorldAccess.ColonyManager.SettingIntWithMax>{0}: {1} de {2}, {3}</RimWorldAccess.ColonyManager.SettingIntWithMax>
+  <!-- Cantidad con contexto en vivo. {0} etiqueta, {1} objetivo, {2} stock actual, {3} alcanzado/faltan, {4} posición -->
+  <RimWorldAccess.ColonyManager.SettingCount>{0}: mantener {1}, tienes {2}, {3}, {4}</RimWorldAccess.ColonyManager.SettingCount>
+  <RimWorldAccess.ColonyManager.TargetMet>objetivo alcanzado</RimWorldAccess.ColonyManager.TargetMet>
+  <!-- {0} cuánto falta para el objetivo -->
+  <RimWorldAccess.ColonyManager.TargetShort>faltan {0}</RimWorldAccess.ColonyManager.TargetShort>
 
   <!-- ===== Fase 3: ajustes de detalle por pestaña ===== -->
 
@@ -91,4 +107,21 @@
   <RimWorldAccess.ColonyManager.SettingCheckRoofSupport>Verificar soporte del techo</RimWorldAccess.ColonyManager.SettingCheckRoofSupport>
   <RimWorldAccess.ColonyManager.SettingCheckRoomDivision>Verificar división de salas</RimWorldAccess.ColonyManager.SettingCheckRoomDivision>
   <RimWorldAccess.ColonyManager.SettingMineThickRoofs>Minar bajo techos gruesos</RimWorldAccess.ColonyManager.SettingMineThickRoofs>
+
+  <!-- Ganadería: objetivos de población por categoría (Trigger_PawnKind) -->
+  <RimWorldAccess.ColonyManager.LivestockAdultFemale>Hembras adultas</RimWorldAccess.ColonyManager.LivestockAdultFemale>
+  <RimWorldAccess.ColonyManager.LivestockAdultMale>Machos adultos</RimWorldAccess.ColonyManager.LivestockAdultMale>
+  <RimWorldAccess.ColonyManager.LivestockJuvenileFemale>Hembras jóvenes</RimWorldAccess.ColonyManager.LivestockJuvenileFemale>
+  <RimWorldAccess.ColonyManager.LivestockJuvenileMale>Machos jóvenes</RimWorldAccess.ColonyManager.LivestockJuvenileMale>
+  <!-- Toggles / áreas de ganadería -->
+  <RimWorldAccess.ColonyManager.SettingTryTameMore>Domesticar hasta el objetivo</RimWorldAccess.ColonyManager.SettingTryTameMore>
+  <RimWorldAccess.ColonyManager.SettingTamePastTargets>Domesticar más allá del objetivo</RimWorldAccess.ColonyManager.SettingTamePastTargets>
+  <RimWorldAccess.ColonyManager.SettingRespectBonds>Respetar vínculos</RimWorldAccess.ColonyManager.SettingRespectBonds>
+  <RimWorldAccess.ColonyManager.SettingCullTrained>Sacrificar animales entrenados</RimWorldAccess.ColonyManager.SettingCullTrained>
+  <RimWorldAccess.ColonyManager.SettingCullPregnant>Sacrificar animales preñados</RimWorldAccess.ColonyManager.SettingCullPregnant>
+  <RimWorldAccess.ColonyManager.SettingCullBonded>Sacrificar animales con vínculo</RimWorldAccess.ColonyManager.SettingCullBonded>
+  <RimWorldAccess.ColonyManager.SettingTameArea>Área de domesticación</RimWorldAccess.ColonyManager.SettingTameArea>
+  <RimWorldAccess.ColonyManager.SettingTrainingArea>Área de entrenamiento</RimWorldAccess.ColonyManager.SettingTrainingArea>
+  <!-- Producción -->
+  <RimWorldAccess.ColonyManager.SettingWorkbenchArea>Área de mesas de trabajo</RimWorldAccess.ColonyManager.SettingWorkbenchArea>
 </LanguageData>

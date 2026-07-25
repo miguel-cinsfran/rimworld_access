@@ -15,6 +15,9 @@
   <!-- Tab list (level 1). {0} label, {1} job count, {2} position ("3 of 10") -->
   <RimWorldAccess.ColonyManager.TabItem>{0}, {1} jobs, {2}</RimWorldAccess.ColonyManager.TabItem>
   <RimWorldAccess.ColonyManager.TabItemDisabled>{0}, disabled, {1}</RimWorldAccess.ColonyManager.TabItemDisabled>
+  <!-- Informational tab (summary / logs / import-export): no job list. {0} label, {1} position -->
+  <RimWorldAccess.ColonyManager.TabItemInformational>{0}, information, {1}</RimWorldAccess.ColonyManager.TabItemInformational>
+  <RimWorldAccess.ColonyManager.TabInformational>{0}. This tab is informational and has no jobs to manage from here.</RimWorldAccess.ColonyManager.TabInformational>
   <RimWorldAccess.ColonyManager.TabDisabled>{0} is disabled: {1}</RimWorldAccess.ColonyManager.TabDisabled>
   <RimWorldAccess.ColonyManager.TabDisabledNoReason>{0} is disabled</RimWorldAccess.ColonyManager.TabDisabledNoReason>
 
@@ -28,6 +31,10 @@
 
   <!-- Job list (level 2). {0} label, {1} target label, {2} position -->
   <RimWorldAccess.ColonyManager.JobItem>{0}, {1}, {2}</RimWorldAccess.ColonyManager.JobItem>
+  <!-- Job row with no meaningful target text (e.g. Power). {0} label, {1} position -->
+  <RimWorldAccess.ColonyManager.JobItemNoTargets>{0}, {1}</RimWorldAccess.ColonyManager.JobItemNoTargets>
+  <!-- Livestock herd summary. {0} current total animals, {1} target total -->
+  <RimWorldAccess.ColonyManager.JobLivestockSummary>{0} of {1} animals</RimWorldAccess.ColonyManager.JobLivestockSummary>
   <RimWorldAccess.ColonyManager.NoJobs>No jobs in this tab. Press Escape or Left to go back to tabs.</RimWorldAccess.ColonyManager.NoJobs>
   <RimWorldAccess.ColonyManager.StatusSuspended>suspended</RimWorldAccess.ColonyManager.StatusSuspended>
   <RimWorldAccess.ColonyManager.StatusCompleted>target met</RimWorldAccess.ColonyManager.StatusCompleted>
@@ -40,11 +47,15 @@
   <!-- Create / delete / reorder. {0} job label -->
   <RimWorldAccess.ColonyManager.NewJobCreated>New job created: {0}. Press Enter to configure it.</RimWorldAccess.ColonyManager.NewJobCreated>
   <RimWorldAccess.ColonyManager.NewJobFailed>Could not create a new job</RimWorldAccess.ColonyManager.NewJobFailed>
+  <RimWorldAccess.ColonyManager.NewJobNeedsPicker>Creating this job needs an animal or recipe to be chosen, which is not available from here yet. You can still open and edit existing jobs of this type.</RimWorldAccess.ColonyManager.NewJobNeedsPicker>
   <RimWorldAccess.ColonyManager.JobDeleted>{0} deleted</RimWorldAccess.ColonyManager.JobDeleted>
 
   <!-- Job detail level. {0} job label -->
   <RimWorldAccess.ColonyManager.EnteredJob>{0} settings</RimWorldAccess.ColonyManager.EnteredJob>
   <RimWorldAccess.ColonyManager.JobSelectedNoSettings>{0} selected. No editable settings here yet.</RimWorldAccess.ColonyManager.JobSelectedNoSettings>
+  <!-- Read-only jobs (e.g. Power monitor): {0} job label, {1} targets label -->
+  <RimWorldAccess.ColonyManager.JobNoSettingsReadonly>{0}. Nothing to adjust here.</RimWorldAccess.ColonyManager.JobNoSettingsReadonly>
+  <RimWorldAccess.ColonyManager.JobNoSettingsReadonlyWithTargets>{0}, {1}. Nothing to adjust here.</RimWorldAccess.ColonyManager.JobNoSettingsReadonlyWithTargets>
   <RimWorldAccess.ColonyManager.BackToJobs>Jobs</RimWorldAccess.ColonyManager.BackToJobs>
 
   <!-- Editable settings. Target = threshold "how much you want". Left/Right adjusts. -->
@@ -53,6 +64,11 @@
   <RimWorldAccess.ColonyManager.SettingInt>{0}: {1}, {2}</RimWorldAccess.ColonyManager.SettingInt>
   <!-- {0} setting label, {1} value, {2} max, {3} position -->
   <RimWorldAccess.ColonyManager.SettingIntWithMax>{0}: {1} of {2}, {3}</RimWorldAccess.ColonyManager.SettingIntWithMax>
+  <!-- Count with live context. {0} label, {1} target, {2} current stock, {3} met/short, {4} position -->
+  <RimWorldAccess.ColonyManager.SettingCount>{0}: keep {1}, currently {2}, {3}, {4}</RimWorldAccess.ColonyManager.SettingCount>
+  <RimWorldAccess.ColonyManager.TargetMet>target met</RimWorldAccess.ColonyManager.TargetMet>
+  <!-- {0} how many short of target -->
+  <RimWorldAccess.ColonyManager.TargetShort>short by {0}</RimWorldAccess.ColonyManager.TargetShort>
 
   <!-- ===== Phase 3: per-tab detail settings ===== -->
 
@@ -91,4 +107,21 @@
   <RimWorldAccess.ColonyManager.SettingCheckRoofSupport>Check roof support</RimWorldAccess.ColonyManager.SettingCheckRoofSupport>
   <RimWorldAccess.ColonyManager.SettingCheckRoomDivision>Check room division</RimWorldAccess.ColonyManager.SettingCheckRoomDivision>
   <RimWorldAccess.ColonyManager.SettingMineThickRoofs>Mine under thick roofs</RimWorldAccess.ColonyManager.SettingMineThickRoofs>
+
+  <!-- Livestock: per-category population targets (Trigger_PawnKind) -->
+  <RimWorldAccess.ColonyManager.LivestockAdultFemale>Adult females</RimWorldAccess.ColonyManager.LivestockAdultFemale>
+  <RimWorldAccess.ColonyManager.LivestockAdultMale>Adult males</RimWorldAccess.ColonyManager.LivestockAdultMale>
+  <RimWorldAccess.ColonyManager.LivestockJuvenileFemale>Juvenile females</RimWorldAccess.ColonyManager.LivestockJuvenileFemale>
+  <RimWorldAccess.ColonyManager.LivestockJuvenileMale>Juvenile males</RimWorldAccess.ColonyManager.LivestockJuvenileMale>
+  <!-- Livestock toggles / areas -->
+  <RimWorldAccess.ColonyManager.SettingTryTameMore>Tame more toward target</RimWorldAccess.ColonyManager.SettingTryTameMore>
+  <RimWorldAccess.ColonyManager.SettingTamePastTargets>Tame past targets</RimWorldAccess.ColonyManager.SettingTamePastTargets>
+  <RimWorldAccess.ColonyManager.SettingRespectBonds>Respect bonds</RimWorldAccess.ColonyManager.SettingRespectBonds>
+  <RimWorldAccess.ColonyManager.SettingCullTrained>Cull trained animals</RimWorldAccess.ColonyManager.SettingCullTrained>
+  <RimWorldAccess.ColonyManager.SettingCullPregnant>Cull pregnant animals</RimWorldAccess.ColonyManager.SettingCullPregnant>
+  <RimWorldAccess.ColonyManager.SettingCullBonded>Cull bonded animals</RimWorldAccess.ColonyManager.SettingCullBonded>
+  <RimWorldAccess.ColonyManager.SettingTameArea>Taming area</RimWorldAccess.ColonyManager.SettingTameArea>
+  <RimWorldAccess.ColonyManager.SettingTrainingArea>Training area</RimWorldAccess.ColonyManager.SettingTrainingArea>
+  <!-- Production -->
+  <RimWorldAccess.ColonyManager.SettingWorkbenchArea>Workbench area</RimWorldAccess.ColonyManager.SettingWorkbenchArea>
 </LanguageData>

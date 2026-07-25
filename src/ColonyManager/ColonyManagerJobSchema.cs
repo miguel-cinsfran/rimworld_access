@@ -104,6 +104,30 @@ namespace RimWorldAccess
                         Spec.Toggle("RimWorldAccess.ColonyManager.SettingMineThickRoofs", "MineThickRoofs"),
                     };
 
+                case "ManagerJob_Livestock":
+                    // The four population targets are added separately (Trigger_PawnKind, not a
+                    // named member). These are the key follow-on toggles/areas, all best-effort.
+                    return new List<Spec>
+                    {
+                        Spec.Toggle("RimWorldAccess.ColonyManager.SettingTryTameMore", "TryTameMore"),
+                        Spec.Toggle("RimWorldAccess.ColonyManager.SettingTamePastTargets", "TamePastTargets"),
+                        Spec.Toggle("RimWorldAccess.ColonyManager.SettingRespectBonds", "RespectBonds"),
+                        Spec.Toggle("RimWorldAccess.ColonyManager.SettingCullTrained", "CullTrained"),
+                        Spec.Toggle("RimWorldAccess.ColonyManager.SettingCullPregnant", "CullPregnant"),
+                        Spec.Toggle("RimWorldAccess.ColonyManager.SettingCullBonded", "CullBonded"),
+                        Spec.Area("RimWorldAccess.ColonyManager.SettingTameArea", "TameArea"),
+                        Spec.Area("RimWorldAccess.ColonyManager.SettingTrainingArea", "TrainingArea"),
+                    };
+
+                case "ManagerJob_Production":
+                    // Threshold ("keep N") is added generically; recipe picker and production
+                    // mode are a later pass. These two are safe reuse of existing kinds.
+                    return new List<Spec>
+                    {
+                        Spec.Area("RimWorldAccess.ColonyManager.SettingWorkbenchArea", "WorkbenchArea"),
+                        Spec.Toggle("RimWorldAccess.ColonyManager.SettingInvertArea", "InvertWorkbenchArea"),
+                    };
+
                 default:
                     return new List<Spec>();
             }

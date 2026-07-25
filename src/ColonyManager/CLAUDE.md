@@ -68,25 +68,45 @@ Four nested levels; Escape/Left steps back one level (Escape at Tabs closes the 
 - **DefList** (which animals/trees/plants/minerals) — Up/Down/Home/End + typeahead; **Space/Enter**
   toggles the selected def allowed/not.
 
-## Implemented (Phases 1–3)
-- Tabs + job-list navigation; read job target + status (suspended/target-met).
+## Implemented
+- Tabs + job-list navigation; read job target + status (suspended/target-met). Job-list rows read
+  a **live "kept / current, met or short by N"** for threshold jobs and a **"N of M animals"**
+  summary for Livestock (its own `TargetsLabel` is raw translation keys, unusable for speech).
 - Job actions: create (Ctrl+N via the tab's own `MakeNewJob`+`JobTracker.Add`), delete
   (`JobTracker.Delete`), reorder (`ManagerTab.Increase/DecreasePriority`), suspend/resume.
 - Job detail via `ColonyManagerJobSchema` (per-job-type, **best-effort** — an unresolved member is
-  silently dropped, never crashes): threshold target (all resource jobs) + per-tab **what** to
-  hunt/chop/forage/mine (allowed-def sub-list), **where** (area of operation, cycles the map's
-  areas), and option toggles (invert area, lock-to-map, unforbid corpses, allow saplings,
-  fully-grown-only, allow mining, haul chunks, roof/room checks, …).
-- Covered tabs: **Hunting, Forestry, Foraging, Mining** (the threshold-based resource jobs).
+  silently dropped, never crashes):
+  - **Threshold** rows announce target + **current stock** (`Trigger_Threshold.GetCurrentCount`)
+    and whether it's met (`DoesCountMeetTarget`), not the meaningless `MaxUpperThreshold`.
+  - **Hunting/Forestry/Foraging/Mining:** what to hunt/chop/forage/mine (allowed-def sub-list),
+    area of operation, and option toggles (invert area, lock-to-map, unforbid corpses, allow
+    saplings, fully-grown-only, allow mining, haul chunks, roof/room checks, …).
+  - **Livestock:** the four per-category population targets (adult/juvenile × female/male, from
+    `Trigger_PawnKind.CountTargets`) as adjustable counts with live current populations, plus key
+    toggles (tame-more, tame-past-targets, respect-bonds, cull trained/pregnant/bonded) and taming
+    /training areas. **Writing a target must also update the tab's `_newCounts` string buffer** —
+    `ManagerTab_Livestock.DoCountField` re-parses that buffer into `CountTargets` every frame it
+    draws, so setting only `CountTargets` is clobbered on the next frame (see
+    `ColonyManagerReflection.SyncLivestockCountBuffer`). Threshold sliders bind directly to
+    `TargetCount`, so those need no such mirror.
+  - **Production:** threshold ("keep N") + workbench area + invert-area. Recipe picker and
+    production mode are deferred.
+- Covered tabs: **Hunting, Forestry, Foraging, Mining, Livestock, Production** (edit), plus **Power**
+  and any read-only job (announced as read-only status, never a silent dead-end).
+- **Informational tabs** (Overview / Logs / Import & Export) announce as "information" and don't
+  drop into an empty job list or offer job creation.
+- **Safe creation guard:** Ctrl+N on Livestock/Production is refused with a spoken explanation —
+  their `MakeNewJob()` with no picker produces an invalid job (a pawn-kind-less Livestock job even
+  throws on save reload), so blind creation would corrupt the colony. Editing existing jobs of
+  those types works fully.
 
-## Not yet (follow-up PRs)
-- **Livestock** (per-animal target populations, training toggles, tame/butcher — a table, not a
-  threshold), **Power** (no threshold), **Production** (recipe picker, maintain/consume modes).
-- **Overview / Logs / Import-Export** tabs (mostly read-only tables + import/export flows).
-- Polish worth considering for naturalness: **Alt+I** info card on a selected def/job (RWA has
-  `InfoCardState`); **numeric direct entry** for the threshold target (type a number, RWA has a
-  text-input pipeline); a **delete confirmation** via `WindowlessConfirmationState`; Hunting's
-  meat-type toggles (allow humanlike/insect/twisted — skipped, side effects + DLC-gated).
+## Not yet (follow-up)
+- **Livestock/Production job creation** from the keyboard (needs an animal / recipe picker level).
+- **Production** recipe picker + maintain/consume mode; **Power** has essentially nothing to tune.
+- **Overview / Logs / Import-Export** content (summary tables, history, import/export flows).
+- Polish worth considering: **Alt+I** info card on a selected def/job (RWA has `InfoCardState`);
+  **numeric direct entry** for a threshold/target (RWA has a text-input pipeline); a **delete
+  confirmation** via `WindowlessConfirmationState`; Hunting's meat-type toggles.
 
 ## DO NOT
 - Do not add a hard reference to Colony Manager's assembly — keep everything reflection-based.

@@ -78,6 +78,15 @@ namespace RimWorldAccess
         private static PropertyInfo thresholdTargetCountProp;
         private static PropertyInfo thresholdTargetLabelProp;
         private static PropertyInfo thresholdMaxProp;      // int MaxUpperThreshold
+        private static MethodInfo thresholdGetCurrentCount;    // int GetCurrentCount(bool)
+        private static MethodInfo thresholdDoesCountMeetTarget; // bool DoesCountMeetTarget(int)
+
+        // Livestock (ManagerJob_Livestock + Trigger_PawnKind) — per-animal population targets
+        private static Type livestockJobType;
+        private static Type pawnKindTriggerType;
+        private static PropertyInfo livestockTriggerPawnKindProp; // Trigger_PawnKind TriggerPawnKind
+        private static PropertyInfo pawnKindCountsProp;           // int[] Counts (current)
+        private static FieldInfo pawnKindCountTargetsField;       // int[] CountTargets (writable)
 
         /// <summary>True once every required Colony Manager member has been resolved.</summary>
         public static bool Available
@@ -141,6 +150,22 @@ namespace RimWorldAccess
                     thresholdTargetCountProp = AccessTools.Property(triggerThresholdType, "TargetCount");
                     thresholdTargetLabelProp = AccessTools.Property(triggerThresholdType, "TargetLabel");
                     thresholdMaxProp = AccessTools.Property(triggerThresholdType, "MaxUpperThreshold");
+                    thresholdGetCurrentCount = AccessTools.Method(triggerThresholdType, "GetCurrentCount", new[] { typeof(bool) });
+                    thresholdDoesCountMeetTarget = AccessTools.Method(triggerThresholdType, "DoesCountMeetTarget", new[] { typeof(int) });
+                }
+
+                // Livestock model (optional — namespace ColonyManagerRedux.Managers). Best-effort:
+                // if any member is missing the Livestock detail simply won't be offered.
+                livestockJobType = AccessTools.TypeByName("ColonyManagerRedux.Managers.ManagerJob_Livestock");
+                pawnKindTriggerType = AccessTools.TypeByName("ColonyManagerRedux.Managers.Trigger_PawnKind");
+                if (livestockJobType != null)
+                {
+                    livestockTriggerPawnKindProp = AccessTools.Property(livestockJobType, "TriggerPawnKind");
+                }
+                if (pawnKindTriggerType != null)
+                {
+                    pawnKindCountsProp = AccessTools.Property(pawnKindTriggerType, "Counts");
+                    pawnKindCountTargetsField = AccessTools.Field(pawnKindTriggerType, "CountTargets");
                 }
 
                 // Action members — resolved best-effort; features that need them degrade to
@@ -481,6 +506,184 @@ namespace RimWorldAccess
                 return "";
             }
             return thresholdTargetLabelProp.GetValue(t) as string ?? "";
+        }
+
+        /// <summary>
+        /// The amount currently on the map counted against this job's threshold (e.g. how much
+        /// wood/steel/meat you actually have right now), via the trigger's own GetCurrentCount.
+        /// Returns -1 when the count can't be read (older API, or not a threshold job) so callers
+        /// can omit it rather than announce a wrong 0.
+        /// </summary>
+        public static int GetThresholdCurrentCount(object job)
+        {
+            var t = GetThreshold(job);
+            if (t == null || thresholdGetCurrentCount == null)
+            {
+                return -1;
+            }
+            try
+            {
+                return thresholdGetCurrentCount.Invoke(t, new object[] { false }) is int i ? i : -1;
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("GetThresholdCurrentCount failed", e);
+                return -1;
+            }
+        }
+
+        /// <summary>True if the current amount already satisfies the job's target ("keep N").</summary>
+        public static bool ThresholdMeetsTarget(object job)
+        {
+            var t = GetThreshold(job);
+            if (t == null || thresholdDoesCountMeetTarget == null)
+            {
+                return false;
+            }
+            try
+            {
+                int target = GetThresholdTarget(job);
+                return thresholdDoesCountMeetTarget.Invoke(t, new object[] { target }) is bool b && b;
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("ThresholdMeetsTarget failed", e);
+                return false;
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Livestock (per-animal population targets via Trigger_PawnKind)
+        // ---------------------------------------------------------------
+
+        /// <summary>True if this job is a Livestock job with a resolvable pawn-kind trigger.</summary>
+        public static bool IsLivestockJob(object job)
+        {
+            return job != null
+                && livestockJobType != null
+                && livestockJobType.IsInstanceOfType(job)
+                && livestockTriggerPawnKindProp != null
+                && pawnKindCountTargetsField != null;
+        }
+
+        private static object GetPawnKindTrigger(object job)
+        {
+            if (!IsLivestockJob(job))
+            {
+                return null;
+            }
+            return livestockTriggerPawnKindProp.GetValue(job);
+        }
+
+        /// <summary>The four target populations [adult female, adult male, juvenile female, juvenile male].</summary>
+        public static int[] GetLivestockTargets(object job)
+        {
+            var trig = GetPawnKindTrigger(job);
+            if (trig == null)
+            {
+                return null;
+            }
+            try
+            {
+                return pawnKindCountTargetsField.GetValue(trig) as int[];
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("GetLivestockTargets failed", e);
+                return null;
+            }
+        }
+
+        /// <summary>The four current populations, aligned with <see cref="GetLivestockTargets"/>.</summary>
+        public static int[] GetLivestockCurrent(object job)
+        {
+            var trig = GetPawnKindTrigger(job);
+            if (trig == null || pawnKindCountsProp == null)
+            {
+                return null;
+            }
+            try
+            {
+                return pawnKindCountsProp.GetValue(trig) as int[];
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("GetLivestockCurrent failed", e);
+                return null;
+            }
+        }
+
+        /// <summary>Set one category's target population (clamped ≥ 0) and refresh the job's targets.</summary>
+        public static int SetLivestockTarget(object job, int index, int value)
+        {
+            var trig = GetPawnKindTrigger(job);
+            if (trig == null)
+            {
+                return 0;
+            }
+            try
+            {
+                var targets = pawnKindCountTargetsField.GetValue(trig) as int[];
+                if (targets == null || index < 0 || index >= targets.Length)
+                {
+                    return 0;
+                }
+                if (value < 0)
+                {
+                    value = 0;
+                }
+                targets[index] = value;
+                pawnKindCountTargetsField.SetValue(trig, targets);
+                // The Livestock tab keeps a string buffer (_newCounts) and, every frame it draws,
+                // parses it back into CountTargets (ManagerTab_Livestock.DoCountField). Writing only
+                // CountTargets is therefore undone on the next frame — we must mirror the change into
+                // that buffer so the mod's own per-frame sync reproduces our value.
+                SyncLivestockCountBuffer(job, targets);
+                jobNotifyTargetsChanged?.Invoke(job, null);
+                return value;
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("SetLivestockTarget failed", e);
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Rewrite the Livestock tab's <c>_newCounts</c> string buffer from the job's current
+        /// CountTargets, so the mod's per-frame re-parse keeps (not clobbers) our edit. The buffer
+        /// is only otherwise refreshed on job selection (PostSelect), so it can go stale between
+        /// keystrokes; rewriting the whole array keeps every category consistent.
+        /// </summary>
+        private static void SyncLivestockCountBuffer(object job, int[] targets)
+        {
+            try
+            {
+                var tab = jobTabProp?.GetValue(job);
+                if (tab == null || targets == null)
+                {
+                    return;
+                }
+                var f = AccessTools.Field(tab.GetType(), "_newCounts");
+                if (f == null)
+                {
+                    return;
+                }
+                var buf = f.GetValue(tab) as string[];
+                if (buf == null || buf.Length != targets.Length)
+                {
+                    buf = new string[targets.Length];
+                }
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    buf[i] = targets[i].ToString(System.Globalization.CultureInfo.InvariantCulture);
+                }
+                f.SetValue(tab, buf);
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("SyncLivestockCountBuffer failed", e);
+            }
         }
 
         /// <summary>
