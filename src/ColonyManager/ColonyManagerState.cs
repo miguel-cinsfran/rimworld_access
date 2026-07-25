@@ -48,12 +48,17 @@ namespace RimWorldAccess
             public SettingKind Kind;
             public string Label;
 
-            // Threshold (int, Left/Right adjusts)
+            // Threshold / count (int, Left/Right adjusts). Also used for Livestock per-category
+            // population targets, which share the "keep N, currently M" shape.
             public System.Func<int> GetInt;
             public System.Func<int, int> SetInt;   // returns the value actually applied
             public int Min;
             public int Max;
             public int Step;
+            // Optional context for count settings: current stock/population and whether the
+            // target is already met. Null when unavailable (older API) so it's simply omitted.
+            public System.Func<int> GetCurrent;
+            public System.Func<bool> GetMeets;
 
             // Toggle (bool)
             public System.Func<bool> GetBool;
@@ -459,6 +464,18 @@ namespace RimWorldAccess
 
             ColonyManagerDebug.Log($"EnterSelectedTab: '{ColonyManagerReflection.TabLabel(tab)}'");
             ColonyManagerReflection.GoToTab(tab);
+
+            // Informational tabs (Overview / Logs / Import & Export) have no job list to browse
+            // and nothing our menu can create. Switch the visible tab so a sighted helper sees it,
+            // but stay at the tab row and say so, instead of dropping into an empty "0 jobs" list.
+            if (IsInformationalTab(tab))
+            {
+                TolkHelper.SpeakData(
+                    "RimWorldAccess.ColonyManager.TabInformational".Loc(
+                        ColonyManagerReflection.TabLabel(tab)).ToString());
+                return;
+            }
+
             RebuildJobs(tab);
             level = Level.Jobs;
             typeahead.ClearSearch();
@@ -492,6 +509,20 @@ namespace RimWorldAccess
         private static object CurrentTab => (tabIndex >= 0 && tabIndex < tabs.Count) ? tabs[tabIndex] : null;
         private static object CurrentJob => (jobIndex >= 0 && jobIndex < jobs.Count) ? jobs[jobIndex] : null;
 
+        // Tabs that don't hold a manager-job list (a summary/history/transfer UI instead). We
+        // don't descend into an empty job list or offer "create job" for these — they're read
+        // only from our menu's point of view.
+        private static readonly System.Collections.Generic.HashSet<string> InformationalTabTypes =
+            new System.Collections.Generic.HashSet<string>
+            {
+                "ManagerTab_Overview",
+                "ManagerTab_Logs",
+                "ManagerTab_ImportExport",
+            };
+
+        private static bool IsInformationalTab(object tab) =>
+            tab != null && InformationalTabTypes.Contains(tab.GetType().Name);
+
         private static void OpenJobDetail()
         {
             var job = CurrentJob;
@@ -508,10 +539,25 @@ namespace RimWorldAccess
 
             if (detailSettings.Count == 0)
             {
-                // Nothing editable yet for this job type (Phase 2 covers threshold targets only).
-                TolkHelper.SpeakData(
-                    "RimWorldAccess.ColonyManager.JobSelectedNoSettings".Loc(
-                        ColonyManagerReflection.JobLabel(job)).ToString());
+                // No knob our menu can drive for this job type (e.g. Power is essentially a
+                // read-only monitor). Don't dead-end silently — read what status we can so the
+                // user hears where they are and that there's nothing to adjust here.
+                string jl = ColonyManagerReflection.JobLabel(job);
+                string tl = ColonyManagerReflection.JobTargetsLabel(job);
+                string status = "";
+                if (ColonyManagerReflection.JobIsSuspended(job))
+                {
+                    status = " " + "RimWorldAccess.ColonyManager.StatusSuspended".Loc().ToString();
+                }
+                else if (ColonyManagerReflection.JobIsCompleted(job))
+                {
+                    status = " " + "RimWorldAccess.ColonyManager.StatusCompleted".Loc().ToString();
+                }
+
+                string body = (string.IsNullOrEmpty(tl) || tl == "None")
+                    ? "RimWorldAccess.ColonyManager.JobNoSettingsReadonly".Loc(jl).ToString()
+                    : "RimWorldAccess.ColonyManager.JobNoSettingsReadonlyWithTargets".Loc(jl, tl).ToString();
+                TolkHelper.SpeakData(body + status);
                 return;
             }
 
@@ -536,11 +582,27 @@ namespace RimWorldAccess
             AnnounceCurrentJob(SpeechPriority.Normal);
         }
 
+        // Tab types whose new job needs an up-front choice (which animal / which recipe) that our
+        // menu doesn't offer yet. Creating one blind would add an invalid job — a pawn-kind-less
+        // Livestock job even throws on save reload — so we refuse rather than corrupt the colony.
+        private static readonly System.Collections.Generic.HashSet<string> NeedsPickerToCreate =
+            new System.Collections.Generic.HashSet<string>
+            {
+                "ManagerTab_Livestock",
+                "ManagerTab_Production",
+            };
+
         private static void CreateNewJob()
         {
             var tab = CurrentTab;
             if (tab == null)
             {
+                return;
+            }
+            if (NeedsPickerToCreate.Contains(tab.GetType().Name))
+            {
+                // Editing an existing job of this type works fully; only blind creation is unsafe.
+                TolkHelper.Speak("RimWorldAccess.ColonyManager.NewJobNeedsPicker".Loc());
                 return;
             }
             var job = ColonyManagerReflection.CreateAndAddManagedJob(manager, tab);
@@ -643,8 +705,17 @@ namespace RimWorldAccess
                     SetInt = v => ColonyManagerReflection.SetThresholdTarget(job, v),
                     Min = 0,
                     Max = max,
-                    Step = NiceStep(max)
+                    Step = NiceStep(max),
+                    GetCurrent = () => ColonyManagerReflection.GetThresholdCurrentCount(job),
+                    GetMeets = () => ColonyManagerReflection.ThresholdMeetsTarget(job)
                 });
+            }
+
+            // 1b) Livestock: four per-category population targets (adult/juvenile × female/male).
+            //     Structurally different from a single threshold — driven by Trigger_PawnKind.
+            if (ColonyManagerReflection.IsLivestockJob(job))
+            {
+                AddLivestockTargets(job);
             }
 
             // 2) Per-job-type settings (what / where / options) from the schema. Best-effort:
@@ -710,6 +781,49 @@ namespace RimWorldAccess
                     };
             }
             return null;
+        }
+
+        // The four Trigger_PawnKind categories, in the order CM stores them
+        // (Counts / CountTargets are int[4]).
+        private static readonly string[] LivestockCategoryKeys =
+        {
+            "RimWorldAccess.ColonyManager.LivestockAdultFemale",
+            "RimWorldAccess.ColonyManager.LivestockAdultMale",
+            "RimWorldAccess.ColonyManager.LivestockJuvenileFemale",
+            "RimWorldAccess.ColonyManager.LivestockJuvenileMale",
+        };
+
+        private static void AddLivestockTargets(object job)
+        {
+            var targets = ColonyManagerReflection.GetLivestockTargets(job);
+            if (targets == null || targets.Length == 0)
+            {
+                return;
+            }
+            int count = System.Math.Min(targets.Length, LivestockCategoryKeys.Length);
+            for (int i = 0; i < count; i++)
+            {
+                int idx = i; // capture per-iteration
+                detailSettings.Add(new DetailSetting
+                {
+                    Kind = SettingKind.Threshold,
+                    Label = LivestockCategoryKeys[idx].Loc().ToString(),
+                    GetInt = () =>
+                    {
+                        var t = ColonyManagerReflection.GetLivestockTargets(job);
+                        return (t != null && idx < t.Length) ? t[idx] : 0;
+                    },
+                    SetInt = v => ColonyManagerReflection.SetLivestockTarget(job, idx, v),
+                    Min = 0,
+                    Max = 0,     // no meaningful upper bound — don't announce a max
+                    Step = 1,
+                    GetCurrent = () =>
+                    {
+                        var c = ColonyManagerReflection.GetLivestockCurrent(job);
+                        return (c != null && idx < c.Length) ? c[idx] : -1;
+                    }
+                });
+            }
         }
 
         private static int CountAllowed(object job, ColonyManagerJobSchema.Spec spec)
@@ -843,9 +957,32 @@ namespace RimWorldAccess
             {
                 case SettingKind.Threshold:
                     int value = setting.GetInt();
-                    announcement = setting.Max > 0
-                        ? "RimWorldAccess.ColonyManager.SettingIntWithMax".Loc(setting.Label, value, setting.Max, position).ToString()
-                        : "RimWorldAccess.ColonyManager.SettingInt".Loc(setting.Label, value, position).ToString();
+                    int current = setting.GetCurrent != null ? setting.GetCurrent() : -1;
+                    if (current >= 0)
+                    {
+                        // "target N, currently M, met / short by K"
+                        string statusPart;
+                        if (setting.GetMeets != null)
+                        {
+                            statusPart = setting.GetMeets()
+                                ? "RimWorldAccess.ColonyManager.TargetMet".Loc().ToString()
+                                : "RimWorldAccess.ColonyManager.TargetShort".Loc(System.Math.Max(0, value - current)).ToString();
+                        }
+                        else
+                        {
+                            statusPart = current >= value
+                                ? "RimWorldAccess.ColonyManager.TargetMet".Loc().ToString()
+                                : "RimWorldAccess.ColonyManager.TargetShort".Loc(System.Math.Max(0, value - current)).ToString();
+                        }
+                        announcement = "RimWorldAccess.ColonyManager.SettingCount".Loc(
+                            setting.Label, value, current, statusPart, position).ToString();
+                    }
+                    else
+                    {
+                        announcement = setting.Max > 0
+                            ? "RimWorldAccess.ColonyManager.SettingIntWithMax".Loc(setting.Label, value, setting.Max, position).ToString()
+                            : "RimWorldAccess.ColonyManager.SettingInt".Loc(setting.Label, value, position).ToString();
+                    }
                     break;
                 case SettingKind.Toggle:
                     string onOff = (setting.GetBool()
@@ -943,6 +1080,29 @@ namespace RimWorldAccess
             return (def as Def)?.LabelCap.ToString() ?? (def as Def)?.defName ?? def?.ToString() ?? "";
         }
 
+        /// <summary>
+        /// A spoken summary of a Livestock job's herd ("7 of 20 animals"), or null if the job
+        /// isn't a Livestock job. The mod's own TargetsLabel for Livestock is a bundle of raw
+        /// translation keys, unsuitable for speech.
+        /// </summary>
+        private static string LivestockJobSummary(object job)
+        {
+            if (!ColonyManagerReflection.IsLivestockJob(job))
+            {
+                return null;
+            }
+            var current = ColonyManagerReflection.GetLivestockCurrent(job);
+            var targets = ColonyManagerReflection.GetLivestockTargets(job);
+            if (current == null || targets == null)
+            {
+                return null;
+            }
+            int have = 0, want = 0;
+            foreach (int c in current) have += c;
+            foreach (int t in targets) want += t;
+            return "RimWorldAccess.ColonyManager.JobLivestockSummary".Loc(have, want).ToString();
+        }
+
         private static void ToggleCurrentJobSuspended()
         {
             if (jobIndex < 0 || jobIndex >= jobs.Count)
@@ -993,6 +1153,11 @@ namespace RimWorldAccess
                 announcement = "RimWorldAccess.ColonyManager.TabItemDisabled".Loc(
                     label, position).ToString();
             }
+            else if (IsInformationalTab(tab))
+            {
+                announcement = "RimWorldAccess.ColonyManager.TabItemInformational".Loc(
+                    label, position).ToString();
+            }
             else
             {
                 announcement = "RimWorldAccess.ColonyManager.TabItem".Loc(
@@ -1016,7 +1181,6 @@ namespace RimWorldAccess
             }
             var job = jobs[jobIndex];
             string label = ColonyManagerReflection.JobLabel(job);
-            string targets = ColonyManagerReflection.JobTargetsLabel(job);
             string position = MenuHelper.FormatPosition(jobIndex, jobs.Count);
 
             string status = "";
@@ -1029,8 +1193,13 @@ namespace RimWorldAccess
                 status = " " + "RimWorldAccess.ColonyManager.StatusCompleted".Loc().ToString();
             }
 
-            string announcement = "RimWorldAccess.ColonyManager.JobItem".Loc(
-                label, targets, position).ToString() + status;
+            // Targets text. Livestock's TargetsLabel is a set of raw translation keys, so build a
+            // plain "current of target animals" summary instead. Jobs with no meaningful targets
+            // (e.g. Power reports "None") drop the targets clause entirely.
+            string targets = LivestockJobSummary(job) ?? ColonyManagerReflection.JobTargetsLabel(job);
+            string announcement = (string.IsNullOrEmpty(targets) || targets == "None")
+                ? "RimWorldAccess.ColonyManager.JobItemNoTargets".Loc(label, position).ToString() + status
+                : "RimWorldAccess.ColonyManager.JobItem".Loc(label, targets, position).ToString() + status;
 
             ColonyManagerDebug.Log($"announce job: {announcement}");
             TolkHelper.SpeakData(typeahead.BuildItemAnnouncement(announcement), priority);
