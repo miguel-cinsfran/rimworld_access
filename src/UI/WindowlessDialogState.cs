@@ -552,8 +552,12 @@ namespace RimWorldAccess
                 announcement += " ";
             }
 
-            // Subtract 1 from count since element 0 is the description, not an action
-            int actionCount = elements.Count > 0 ? elements.Count - 1 : 0;
+            // Subtract the description row only when there is one — a dialog that opens straight
+            // on a control (VPE's rename psyset: text field first) otherwise announced one item
+            // fewer than the positions the user then hears ("2 items", then "1 of 3").
+            int actionCount = elements.Count > 0 && elements[0] is DialogDescriptionElement
+                ? elements.Count - 1
+                : elements.Count;
             announcement += "RimWorldAccess.UI.Dialog.NavInstructions".Translate(actionCount);
 
             return announcement;
