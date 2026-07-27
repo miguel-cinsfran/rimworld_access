@@ -2,11 +2,19 @@
 <LanguageData>
   <!-- Accesibilidad de la pestaña de psicasts de Vanilla Psycasts Expanded (VPEPsycastsState).
        Árbol de gasto de puntos: gasta puntos para mejorar estadísticas, desbloquear focos de
-       meditación, desbloquear sendas o aprender habilidades dentro de sendas desbloqueadas. -->
+       meditación, desbloquear sendas o aprender habilidades dentro de sendas desbloqueadas.
+
+       Las filas ya terminan en punto; el estado agrega la posición como oración aparte, así que
+       ninguna cadena de fila debe terminar con un separador. El vocabulario de los grupos de
+       poderes es el que usa el propio VPE en pantalla. -->
 
   <RimWorldAccess.VPEPsycasts.Unavailable>La información de psicasts no está disponible para este pawn.</RimWorldAccess.VPEPsycasts.Unavailable>
   <RimWorldAccess.VPEPsycasts.Closed>Psicasts cerrado.</RimWorldAccess.VPEPsycasts.Closed>
   <RimWorldAccess.VPEPsycasts.NoPoints>No hay puntos de psicast suficientes.</RimWorldAccess.VPEPsycasts.NoPoints>
+
+  <!-- Puntos que quedan tras gastar. {0} = puntos (solo en Many). -->
+  <RimWorldAccess.VPEPsycasts.PointsLeft.One>queda 1 punto</RimWorldAccess.VPEPsycasts.PointsLeft.One>
+  <RimWorldAccess.VPEPsycasts.PointsLeft.Many>quedan {0} puntos</RimWorldAccess.VPEPsycasts.PointsLeft.Many>
 
   <!-- Encabezado de apertura. {0} = nivel, {1} = puntos. -->
   <RimWorldAccess.VPEPsycasts.Status>Nivel {0}. Puntos disponibles: {1}.</RimWorldAccess.VPEPsycasts.Status>
@@ -14,57 +22,67 @@
   <RimWorldAccess.VPEPsycasts.Item.Status>Estado</RimWorldAccess.VPEPsycasts.Item.Status>
   <!-- {0} = nivel, {1} = puntos, {2} = experiencia, {3} = experiencia para el siguiente nivel. -->
   <RimWorldAccess.VPEPsycasts.StatusFull>Nivel {0}. Puntos: {1}. Experiencia {2} de {3}.</RimWorldAccess.VPEPsycasts.StatusFull>
+  <!-- En el nivel máximo de VPE ya no hay siguiente nivel. {0} = nivel, {1} = puntos. -->
+  <RimWorldAccess.VPEPsycasts.StatusFullMaxLevel>Nivel {0}, máximo. Puntos: {1}.</RimWorldAccess.VPEPsycasts.StatusFullMaxLevel>
   <RimWorldAccess.VPEPsycasts.Item.Paths>Sendas de psicasts</RimWorldAccess.VPEPsycasts.Item.Paths>
   <!-- {0} = desbloqueadas, {1} = total. -->
   <RimWorldAccess.VPEPsycasts.Item.PathsCount>Sendas de psicasts. {0} de {1} desbloqueadas.</RimWorldAccess.VPEPsycasts.Item.PathsCount>
-  <RimWorldAccess.VPEPsycasts.Item.Foci>Tipos de foco de meditación</RimWorldAccess.VPEPsycasts.Item.Foci>
+  <RimWorldAccess.VPEPsycasts.Item.Foci>Tipos de foco</RimWorldAccess.VPEPsycasts.Item.Foci>
   <!-- {0} = desbloqueados, {1} = total. -->
-  <RimWorldAccess.VPEPsycasts.Item.FociCount>Tipos de foco de meditación. {0} de {1} desbloqueados.</RimWorldAccess.VPEPsycasts.Item.FociCount>
-  <RimWorldAccess.VPEPsycasts.Item.ImproveStats>Mejorar estadísticas de psicaster</RimWorldAccess.VPEPsycasts.Item.ImproveStats>
-  <RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>Mejorar estadísticas de psicaster. Cuesta un punto.</RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>
-  <!-- {0} = puntos restantes. -->
-  <RimWorldAccess.VPEPsycasts.StatsImproved>Estadísticas de psicaster mejoradas. Quedan {0} puntos.</RimWorldAccess.VPEPsycasts.StatsImproved>
+  <RimWorldAccess.VPEPsycasts.Item.FociCount>Tipos de foco. {0} de {1} desbloqueados.</RimWorldAccess.VPEPsycasts.Item.FociCount>
+  <RimWorldAccess.VPEPsycasts.Item.ImproveStats>Mejorar estadísticas del psíquico</RimWorldAccess.VPEPsycasts.Item.ImproveStats>
+  <RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>Mejorar estadísticas del psíquico. Cuesta un punto.</RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>
+  <!-- {0} = frase de puntos restantes. -->
+  <RimWorldAccess.VPEPsycasts.StatsImproved>Estadísticas mejoradas, {0}.</RimWorldAccess.VPEPsycasts.StatsImproved>
 
   <RimWorldAccess.VPEPsycasts.Header.Paths>Sendas de psicasts.</RimWorldAccess.VPEPsycasts.Header.Paths>
   <!-- {0} = nombre de la senda. -->
   <RimWorldAccess.VPEPsycasts.Header.Abilities>Habilidades de {0}.</RimWorldAccess.VPEPsycasts.Header.Abilities>
-  <RimWorldAccess.VPEPsycasts.Header.Foci>Tipos de foco de meditación.</RimWorldAccess.VPEPsycasts.Header.Foci>
+  <RimWorldAccess.VPEPsycasts.Header.Foci>Tipos de foco.</RimWorldAccess.VPEPsycasts.Header.Foci>
 
   <!-- Filas de sendas. {0} = nombre, {1}/{2} = habilidades aprendidas/total, {1} razón donde aplica. -->
   <RimWorldAccess.VPEPsycasts.Path.Unlocked>{0}. Desbloqueada. {1} de {2} habilidades aprendidas.</RimWorldAccess.VPEPsycasts.Path.Unlocked>
   <RimWorldAccess.VPEPsycasts.Path.Unlockable>{0}. Disponible para desbloquear, cuesta un punto.</RimWorldAccess.VPEPsycasts.Path.Unlockable>
   <RimWorldAccess.VPEPsycasts.Path.NoPoints>{0}. No hay puntos suficientes para desbloquear.</RimWorldAccess.VPEPsycasts.Path.NoPoints>
   <RimWorldAccess.VPEPsycasts.Path.Locked>{0}. Bloqueada.</RimWorldAccess.VPEPsycasts.Path.Locked>
+  <!-- El lockedReason de la senda es un fragmento suelto ("Imperials only") y sí lleva prefijo. -->
   <RimWorldAccess.VPEPsycasts.Path.LockedReason>{0}. Bloqueada: {1}.</RimWorldAccess.VPEPsycasts.Path.LockedReason>
+  <!-- Alt+C sobre una senda. {0} = senda, {1} = cantidad, {2} = nombres. -->
+  <RimWorldAccess.VPEPsycasts.Path.AbilityList>{0}. {1} habilidades: {2}.</RimWorldAccess.VPEPsycasts.Path.AbilityList>
 
-  <RimWorldAccess.VPEPsycasts.PathUnlocked>{0} desbloqueada. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.PathUnlocked>
+  <!-- Resultados al activar una senda. {1} = frase de puntos restantes. -->
+  <RimWorldAccess.VPEPsycasts.PathUnlocked>{0} desbloqueada, {1}.</RimWorldAccess.VPEPsycasts.PathUnlocked>
   <RimWorldAccess.VPEPsycasts.PathLocked>{0} está bloqueada.</RimWorldAccess.VPEPsycasts.PathLocked>
   <RimWorldAccess.VPEPsycasts.PathLockedReason>{0} está bloqueada: {1}.</RimWorldAccess.VPEPsycasts.PathLockedReason>
   <RimWorldAccess.VPEPsycasts.PathNoAbilities>{0} no tiene habilidades.</RimWorldAccess.VPEPsycasts.PathNoAbilities>
 
-  <!-- Filas de habilidades. {0} = nombre, {1} = nivel, {2} = lista de requisitos. -->
+  <!-- Filas de habilidades. {0} = nombre, {1} = nivel, {2} = requisitos.
+       Los requisitos de VPE son "cualquiera de": basta con tener uno aprendido. -->
   <RimWorldAccess.VPEPsycasts.Ability.Learned>{0}. Nivel {1}. Aprendida.</RimWorldAccess.VPEPsycasts.Ability.Learned>
   <RimWorldAccess.VPEPsycasts.Ability.Unlockable>{0}. Nivel {1}. Disponible para aprender, cuesta un punto.</RimWorldAccess.VPEPsycasts.Ability.Unlockable>
   <RimWorldAccess.VPEPsycasts.Ability.NoPoints>{0}. Nivel {1}. No hay puntos suficientes.</RimWorldAccess.VPEPsycasts.Ability.NoPoints>
   <RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>{0}. Nivel {1}. Requiere: {2}.</RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>
+  <RimWorldAccess.VPEPsycasts.Ability.NeedsAnyPrereq>{0}. Nivel {1}. Requiere una de: {2}.</RimWorldAccess.VPEPsycasts.Ability.NeedsAnyPrereq>
 
+  <!-- Resultados al activar una habilidad. {1} = frase de puntos restantes. -->
   <RimWorldAccess.VPEPsycasts.AbilityLearned>{0} ya está aprendida.</RimWorldAccess.VPEPsycasts.AbilityLearned>
-  <RimWorldAccess.VPEPsycasts.AbilityUnlocked>{0} aprendida. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.AbilityUnlocked>
+  <RimWorldAccess.VPEPsycasts.AbilityUnlocked>{0} aprendida, {1}.</RimWorldAccess.VPEPsycasts.AbilityUnlocked>
 
-  <!-- Filas de foco de meditación. {0} = nombre, {1} = razón donde aplica. -->
+  <!-- Filas de foco de meditación. {1} = razón del propio VPE, que ya es una oración completa
+       ("Bloqueado: ..."), por eso aquí no se agrega ningún prefijo. -->
   <RimWorldAccess.VPEPsycasts.Focus.Available>{0}. Ya disponible.</RimWorldAccess.VPEPsycasts.Focus.Available>
   <RimWorldAccess.VPEPsycasts.Focus.Unlockable>{0}. Disponible para desbloquear, cuesta un punto.</RimWorldAccess.VPEPsycasts.Focus.Unlockable>
   <RimWorldAccess.VPEPsycasts.Focus.NoPoints>{0}. No hay puntos suficientes para desbloquear.</RimWorldAccess.VPEPsycasts.Focus.NoPoints>
   <RimWorldAccess.VPEPsycasts.Focus.Locked>{0}. Bloqueado.</RimWorldAccess.VPEPsycasts.Focus.Locked>
-  <RimWorldAccess.VPEPsycasts.Focus.LockedReason>{0}. Bloqueado: {1}.</RimWorldAccess.VPEPsycasts.Focus.LockedReason>
+  <RimWorldAccess.VPEPsycasts.Focus.LockedReason>{0}. {1}</RimWorldAccess.VPEPsycasts.Focus.LockedReason>
 
   <RimWorldAccess.VPEPsycasts.FocusAvailable>{0} ya está disponible.</RimWorldAccess.VPEPsycasts.FocusAvailable>
   <RimWorldAccess.VPEPsycasts.FocusLocked>{0} está bloqueado.</RimWorldAccess.VPEPsycasts.FocusLocked>
-  <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0} está bloqueado: {1}.</RimWorldAccess.VPEPsycasts.FocusLockedReason>
-  <RimWorldAccess.VPEPsycasts.FocusUnlocked>{0} desbloqueado. Quedan {1} puntos.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
+  <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0}. {1}</RimWorldAccess.VPEPsycasts.FocusLockedReason>
+  <RimWorldAccess.VPEPsycasts.FocusUnlocked>{0} desbloqueado, {1}.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
 
   <!-- Atajos de info bajo demanda y ayudas. -->
-  <RimWorldAccess.VPEPsycasts.DetailsHint>Pulsa Alt más D para la descripción, Alt más C para los datos de casteo.</RimWorldAccess.VPEPsycasts.DetailsHint>
+  <RimWorldAccess.VPEPsycasts.DetailsHint>Alt más D describe, Alt más C da los datos.</RimWorldAccess.VPEPsycasts.DetailsHint>
   <RimWorldAccess.VPEPsycasts.NoDescription>No hay descripción disponible.</RimWorldAccess.VPEPsycasts.NoDescription>
   <RimWorldAccess.VPEPsycasts.NoData>No hay datos disponibles.</RimWorldAccess.VPEPsycasts.NoData>
   <!-- {0} = lista de estadísticas. -->
@@ -77,26 +95,28 @@
   <RimWorldAccess.VPEPsycasts.Data.Range>Rango {0}</RimWorldAccess.VPEPsycasts.Data.Range>
   <RimWorldAccess.VPEPsycasts.Data.Radius>Radio de área {0}</RimWorldAccess.VPEPsycasts.Data.Radius>
 
-  <!-- Psysets (conjuntos de casteo). -->
-  <RimWorldAccess.VPEPsycasts.Item.Psysets>Conjuntos de psicasts</RimWorldAccess.VPEPsycasts.Item.Psysets>
-  <!-- {0} = cantidad de conjuntos. -->
-  <RimWorldAccess.VPEPsycasts.Item.PsysetsCount>Conjuntos de psicasts. {0} definidos.</RimWorldAccess.VPEPsycasts.Item.PsysetsCount>
-  <RimWorldAccess.VPEPsycasts.Item.PsysetCreate>Crear conjunto nuevo</RimWorldAccess.VPEPsycasts.Item.PsysetCreate>
-  <RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>Crear conjunto nuevo. Intro para crear y editar.</RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>
-  <RimWorldAccess.VPEPsycasts.Header.Psysets>Conjuntos de psicasts. Intro para editar un conjunto, F2 para renombrar, Suprimir para borrar.</RimWorldAccess.VPEPsycasts.Header.Psysets>
-  <!-- {0} = nombre del conjunto. -->
-  <RimWorldAccess.VPEPsycasts.Header.PsysetEdit>Editando el conjunto {0}. Intro agrega o quita una habilidad.</RimWorldAccess.VPEPsycasts.Header.PsysetEdit>
-  <!-- {0} = nombre del conjunto, {1} = cantidad de habilidades. -->
+  <!-- Grupos de poderes (psysets). VPE los llama así en pantalla; solo las habilidades del
+       grupo activo aparecen en la barra de comandos del pawn. -->
+  <RimWorldAccess.VPEPsycasts.Item.Psysets>Grupos de poderes</RimWorldAccess.VPEPsycasts.Item.Psysets>
+  <!-- {0} = cantidad de grupos. -->
+  <RimWorldAccess.VPEPsycasts.Item.PsysetsCount>Grupos de poderes. {0} definidos.</RimWorldAccess.VPEPsycasts.Item.PsysetsCount>
+  <RimWorldAccess.VPEPsycasts.Item.PsysetCreate>Crear grupo nuevo</RimWorldAccess.VPEPsycasts.Item.PsysetCreate>
+  <RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>Crear grupo nuevo. Intro para crear y editar.</RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>
+  <RimWorldAccess.VPEPsycasts.Header.Psysets>Grupos de poderes. Intro edita, F2 renombra, Suprimir borra.</RimWorldAccess.VPEPsycasts.Header.Psysets>
+  <!-- {0} = nombre del grupo. -->
+  <RimWorldAccess.VPEPsycasts.Header.PsysetEdit>Editando {0}. Intro agrega o quita una habilidad.</RimWorldAccess.VPEPsycasts.Header.PsysetEdit>
+  <!-- {0} = nombre del grupo, {1} = cantidad de habilidades. -->
   <RimWorldAccess.VPEPsycasts.Psyset.Row>{0}. {1} habilidades.</RimWorldAccess.VPEPsycasts.Psyset.Row>
-  <!-- {0} = número secuencial. -->
-  <RimWorldAccess.VPEPsycasts.Psyset.DefaultName>Conjunto {0}</RimWorldAccess.VPEPsycasts.Psyset.DefaultName>
-  <RimWorldAccess.VPEPsycasts.Psyset.Created>Conjunto {0} creado.</RimWorldAccess.VPEPsycasts.Psyset.Created>
-  <RimWorldAccess.VPEPsycasts.Psyset.Deleted>Conjunto {0} eliminado.</RimWorldAccess.VPEPsycasts.Psyset.Deleted>
+  <RimWorldAccess.VPEPsycasts.Psyset.Active>Activo</RimWorldAccess.VPEPsycasts.Psyset.Active>
+  <!-- Nombre de respaldo si no se puede leer el "Sin título" del propio VPE. {0} = número. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.DefaultName>Grupo {0}</RimWorldAccess.VPEPsycasts.Psyset.DefaultName>
+  <RimWorldAccess.VPEPsycasts.Psyset.Created>{0} creado.</RimWorldAccess.VPEPsycasts.Psyset.Created>
+  <RimWorldAccess.VPEPsycasts.Psyset.Deleted>{0} eliminado.</RimWorldAccess.VPEPsycasts.Psyset.Deleted>
   <!-- {0} = nombre de la habilidad. -->
-  <RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>{0} agregada al conjunto.</RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>
-  <RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>{0} quitada del conjunto.</RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>
-  <RimWorldAccess.VPEPsycasts.Psyset.InSet>en el conjunto</RimWorldAccess.VPEPsycasts.Psyset.InSet>
-  <RimWorldAccess.VPEPsycasts.Psyset.NotInSet>fuera del conjunto</RimWorldAccess.VPEPsycasts.Psyset.NotInSet>
+  <RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>{0} agregada al grupo.</RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>
+  <RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>{0} quitada del grupo.</RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>
+  <RimWorldAccess.VPEPsycasts.Psyset.InSet>en el grupo</RimWorldAccess.VPEPsycasts.Psyset.InSet>
+  <RimWorldAccess.VPEPsycasts.Psyset.NotInSet>fuera del grupo</RimWorldAccess.VPEPsycasts.Psyset.NotInSet>
   <!-- {0} = nombre de la habilidad, {1} = estado de pertenencia. -->
   <RimWorldAccess.VPEPsycasts.PsysetAbility>{0}. {1}.</RimWorldAccess.VPEPsycasts.PsysetAbility>
 </LanguageData>

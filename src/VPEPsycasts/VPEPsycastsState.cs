@@ -166,9 +166,13 @@ namespace RimWorldAccess
         {
             if (!isActive || evt.type != EventType.KeyDown) return false;
 
-            // Defer entirely while a modal text session owns input (our psyset rename dialog):
-            // let UnifiedKeyboardPatch's -1.6 text dispatch handle every key instead of stealing them.
-            if (TextInputManager.IsActive) return false;
+            // Defer entirely while another overlay owns the keyboard. The psyset rename dialog is
+            // presented by WindowlessDialogState (not TextInputManager) until its text field is
+            // entered, and without this guard Escape/arrows drove the rename dialog AND this menu
+            // at once — one Escape closed the dialog and stepped back a level here.
+            if (TextInputManager.IsActive || WindowlessDialogState.IsActive ||
+                WindowlessConfirmationState.IsActive || WindowlessFloatMenuState.IsActive)
+                return false;
 
             KeyCode key = evt.keyCode;
 
@@ -411,8 +415,8 @@ namespace RimWorldAccess
             VPEPsycastsReflection.ImproveStats(hediff, 1);
             SoundDefOf.Tick_High.PlayOneShotOnCamera();
             BuildItems();
-            string result = "RimWorldAccess.VPEPsycasts.StatsImproved".Loc(VPEPsycastsReflection.GetPoints(hediff)).ToString();
-            TolkHelper.SpeakData($"{result}. {BuildStatsDetails()}");
+            string result = "RimWorldAccess.VPEPsycasts.StatsImproved".Loc(PointsLeft()).ToString();
+            TolkHelper.SpeakData(Sentence(result, BuildStatsDetails()));
         }
 
         private static void ActivatePath(Def path)
@@ -446,7 +450,7 @@ namespace RimWorldAccess
 
             VPEPsycastsReflection.UnlockPath(hediff, path);
             SoundDefOf.Tick_High.PlayOneShotOnCamera();
-            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.PathUnlocked".Loc(path.LabelCap, VPEPsycastsReflection.GetPoints(hediff)).ToString());
+            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.PathUnlocked".Loc(path.LabelCap, PointsLeft()).ToString());
 
             // Drill straight into the freshly-unlocked path's abilities, the natural next step.
             if (VPEPsycastsReflection.PathHasAbilities(path))
@@ -481,7 +485,7 @@ namespace RimWorldAccess
             VPEPsycastsReflection.GiveAbility(hediff, comp, ability);
             SoundDefOf.Tick_High.PlayOneShotOnCamera();
             BuildItems();
-            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.AbilityUnlocked".Loc(ability.LabelCap, VPEPsycastsReflection.GetPoints(hediff)).ToString());
+            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.AbilityUnlocked".Loc(ability.LabelCap, PointsLeft()).ToString());
         }
 
         private static void ActivateFocus(MeditationFocusDef focus)
@@ -512,7 +516,7 @@ namespace RimWorldAccess
             VPEPsycastsReflection.UnlockFocus(hediff, focus);
             SoundDefOf.Tick_High.PlayOneShotOnCamera();
             BuildItems();
-            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.FocusUnlocked".Loc(focus.LabelCap, VPEPsycastsReflection.GetPoints(hediff)).ToString());
+            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.FocusUnlocked".Loc(focus.LabelCap, PointsLeft()).ToString());
         }
 
         private static void RejectNoPoints()
@@ -526,7 +530,11 @@ namespace RimWorldAccess
         private static void CreatePsyset()
         {
             int n = (VPEPsycastsReflection.GetPsysets(hediff)?.Count ?? 0) + 1;
-            string name = "RimWorldAccess.VPEPsycasts.Psyset.DefaultName".Loc(n).ToString();
+            // Use VPE's own name for a new set, numbered so several are distinguishable by ear.
+            string untitled = VPEPsycastsReflection.GetUntitledPsysetName();
+            string name = string.IsNullOrEmpty(untitled)
+                ? "RimWorldAccess.VPEPsycasts.Psyset.DefaultName".Loc(n).ToString()
+                : $"{untitled} {n}";
             var ps = VPEPsycastsReflection.CreatePsyset(hediff, name);
             if (ps == null)
             {
@@ -534,9 +542,11 @@ namespace RimWorldAccess
                 return;
             }
             SoundDefOf.Tick_High.PlayOneShotOnCamera();
+            // Announce the creation before entering the editor: as a High-priority message it
+            // otherwise interrupted the editor header it was meant to precede.
+            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.Psyset.Created".Loc(name).ToString(), SpeechPriority.High);
             currentPsyset = ps;
             EnterView(View.PsysetEdit);
-            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.Psyset.Created".Loc(name).ToString(), SpeechPriority.High);
         }
 
         private static void TogglePsysetAbility(Def ability)
@@ -561,7 +571,13 @@ namespace RimWorldAccess
             SoundDefOf.Tick_Low.PlayOneShotOnCamera();
             BuildItems();
             if (selectedIndex >= items.Count) selectedIndex = System.Math.Max(0, items.Count - 1);
-            TolkHelper.SpeakData("RimWorldAccess.VPEPsycasts.Psyset.Deleted".Loc(name ?? "").ToString(), SpeechPriority.High);
+            // Say what was removed and where the cursor landed, so the list never goes silent.
+            TolkHelper.SpeakData(Sentence(
+                "RimWorldAccess.VPEPsycasts.Psyset.Deleted".Loc(name ?? "").ToString(),
+                items.Count > 0
+                    ? Sentence(BuildItemAnnouncement(items[selectedIndex]),
+                               MenuHelper.FormatPosition(selectedIndex, items.Count))
+                    : ""), SpeechPriority.High);
         }
 
         private static void RenameCurrentPsyset()
@@ -681,8 +697,16 @@ namespace RimWorldAccess
         private static void AnnounceDescription()
         {
             var def = CurrentDef();
-            if (def == null) { AnnounceCurrent(); return; }
-            string desc = SanitizeText(def.description);
+            if (def == null)
+            {
+                // Rows that carry no def (status, submenu entries) have nothing to describe;
+                // say so rather than repeating the row, which sounds like a missed keypress.
+                TolkHelper.Speak("RimWorldAccess.VPEPsycasts.NoDescription".Loc());
+                return;
+            }
+            // Paths carry both a plain description and the richer lore VPE shows in its tooltip.
+            string desc = SanitizeText(VPEPsycastsReflection.GetPathTooltip(def)) ;
+            if (string.IsNullOrEmpty(desc)) desc = SanitizeText(def.description);
             TolkHelper.SpeakData(string.IsNullOrEmpty(desc)
                 ? "RimWorldAccess.VPEPsycasts.NoDescription".Loc().ToString()
                 : $"{def.LabelCap}. {desc}", SpeechPriority.High);
@@ -703,10 +727,26 @@ namespace RimWorldAccess
                 case ItemKind.ImproveStats:
                     TolkHelper.SpeakData(BuildStatsDetails(), SpeechPriority.High);
                     return;
+                case ItemKind.Path:
+                    // A locked path can't be drilled into, so its ability list would otherwise be
+                    // unreachable — VPE puts the same list in the path's tooltip.
+                    TolkHelper.SpeakData(BuildPathAbilityList(item.Path), SpeechPriority.High);
+                    return;
                 default:
                     TolkHelper.Speak("RimWorldAccess.VPEPsycasts.NoData".Loc());
                     return;
             }
+        }
+
+        /// <summary>The abilities a path teaches, in learning order — VPE's own tooltip list.</summary>
+        private static string BuildPathAbilityList(Def path)
+        {
+            if (path == null) return "RimWorldAccess.VPEPsycasts.NoData".Loc().ToString();
+            var names = OrderAbilitiesLogically(path).Select(a => a.LabelCap.ToString()).ToList();
+            if (names.Count == 0)
+                return "RimWorldAccess.VPEPsycasts.PathNoAbilities".Loc(path.LabelCap).ToString();
+            return "RimWorldAccess.VPEPsycasts.Path.AbilityList".Loc(
+                path.LabelCap, names.Count, string.Join(", ", names)).ToString();
         }
 
         private static string BuildAbilityData(Def ability)
@@ -733,16 +773,22 @@ namespace RimWorldAccess
 
         private static string BuildStatsDetails()
         {
-            // The four psycaster stats a sighted user reads next to the Upgrade button.
+            // Exactly the stat panel VPE draws next to its Upgrade button, in the same order:
+            // neural heat limit, recovery rate, psychic sensitivity, meditation focus gain (only
+            // when the mod's changeFocusGain setting is on) and its own psyfocus cost factor.
             var parts = new List<string>();
             AppendStat(parts, StatDefOf.PsychicEntropyMax);
             AppendStat(parts, StatDefOf.PsychicEntropyRecoveryRate);
             AppendStat(parts, StatDefOf.PsychicSensitivity);
+            if (VPEPsycastsReflection.ChangeFocusGainEnabled())
+                AppendStat(parts, StatDefOf.MeditationFocusGain);
+            AppendStat(parts, VPEPsycastsReflection.GetPsyfocusCostFactorStat());
             return "RimWorldAccess.VPEPsycasts.CurrentStats".Loc(string.Join(". ", parts)).ToString();
         }
 
         private static void AppendStat(List<string> parts, StatDef stat)
         {
+            if (stat == null) return;
             try { parts.Add($"{stat.LabelCap}: {stat.ValueToString(pawn.GetStatValue(stat))}"); }
             catch { /* stat unavailable — skip */ }
         }
@@ -752,7 +798,11 @@ namespace RimWorldAccess
         private static void AnnounceCurrentWithSearch()
         {
             if (typeahead.HasActiveSearch && items.Count > 0 && selectedIndex >= 0 && selectedIndex < items.Count)
-                TolkHelper.SpeakData(GetItemLabel(items[selectedIndex]) + typeahead.BuildSearchContextSuffix());
+                // Keep the row's full state while searching (learned / costs a point / locked) and
+                // append the match context, as every other RWA menu does. The suffix opens with a
+                // comma, so drop the row's closing period rather than saying "one point., 1 of 7".
+                TolkHelper.SpeakData(BuildItemAnnouncement(items[selectedIndex]).TrimEnd('.', ' ')
+                                     + typeahead.BuildSearchContextSuffix());
             else
                 AnnounceCurrent();
         }
@@ -765,8 +815,29 @@ namespace RimWorldAccess
                 return;
             }
             string body = BuildItemAnnouncement(items[selectedIndex]);
-            string position = MenuHelper.FormatPosition(selectedIndex, items.Count);
-            TolkHelper.SpeakData(string.IsNullOrEmpty(position) ? body : $"{body}. {position}");
+            TolkHelper.SpeakData(Sentence(body, MenuHelper.FormatPosition(selectedIndex, items.Count)));
+        }
+
+        /// <summary>
+        /// Joins two clauses as separate sentences without ever producing "..". Every row here
+        /// ends in a period already, so appending ". {position}" by hand doubled it.
+        /// </summary>
+        private static string Sentence(string text, string next)
+        {
+            if (string.IsNullOrEmpty(next)) return text ?? "";
+            if (string.IsNullOrEmpty(text)) return next;
+            text = text.TrimEnd();
+            char last = text[text.Length - 1];
+            return last == '.' || last == '!' || last == '?' ? $"{text} {next}" : $"{text}. {next}";
+        }
+
+        /// <summary>"1 point left" / "N points left" — Spanish needs the singular verb and noun.</summary>
+        private static string PointsLeft()
+        {
+            int points = VPEPsycastsReflection.GetPoints(hediff);
+            return (points == 1
+                ? "RimWorldAccess.VPEPsycasts.PointsLeft.One".Loc()
+                : "RimWorldAccess.VPEPsycasts.PointsLeft.Many".Loc(points)).ToString();
         }
 
         private static string BuildOpeningHeader()
@@ -816,11 +887,19 @@ namespace RimWorldAccess
             switch (item.Kind)
             {
                 case ItemKind.Status:
+                {
+                    int level = VPEPsycastsReflection.GetLevel(hediff);
+                    // At the level cap VPE removes its experience bar — there is no next level to
+                    // earn toward, so announcing "experience X of Y" would invent a target.
+                    if (level >= VPEPsycastsReflection.GetMaxLevel())
+                        return "RimWorldAccess.VPEPsycasts.StatusFullMaxLevel".Loc(
+                            level, VPEPsycastsReflection.GetPoints(hediff)).ToString();
                     return "RimWorldAccess.VPEPsycasts.StatusFull".Loc(
-                        VPEPsycastsReflection.GetLevel(hediff),
+                        level,
                         VPEPsycastsReflection.GetPoints(hediff),
                         Mathf.RoundToInt(VPEPsycastsReflection.GetExperience(hediff)),
-                        VPEPsycastsReflection.GetExperienceRequiredForLevel(VPEPsycastsReflection.GetLevel(hediff) + 1)).ToString();
+                        VPEPsycastsReflection.GetExperienceRequiredForLevel(level + 1)).ToString();
+                }
 
                 case ItemKind.GotoPaths:
                 {
@@ -848,9 +927,19 @@ namespace RimWorldAccess
                 case ItemKind.Focus: return BuildFocusAnnouncement(item.Focus);
 
                 case ItemKind.Psyset:
-                    return "RimWorldAccess.VPEPsycasts.Psyset.Row".Loc(
+                {
+                    string row = "RimWorldAccess.VPEPsycasts.Psyset.Row".Loc(
                         VPEPsycastsReflection.GetPsysetName(item.Psyset) ?? "",
                         VPEPsycastsReflection.GetPsysetAbilityCount(item.Psyset)).ToString();
+                    // Only the active set's abilities appear on the pawn's gizmo bar, so say which
+                    // one that is — the switch itself lives on VPE's own gizmo (G, then bracket).
+                    var psysets = VPEPsycastsReflection.GetPsysets(hediff);
+                    int active = VPEPsycastsReflection.GetPsysetIndex(hediff);
+                    if (psysets != null && active >= 0 && active < psysets.Count &&
+                        ReferenceEquals(psysets[active], item.Psyset))
+                        row = Sentence(row, "RimWorldAccess.VPEPsycasts.Psyset.Active".Loc().ToString());
+                    return row;
+                }
 
                 case ItemKind.PsysetCreate:
                     return "RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull".Loc().ToString();
@@ -905,9 +994,13 @@ namespace RimWorldAccess
         {
             int level = VPEPsycastsReflection.GetAbilityLevel(ability);
             var prereqs = VPEPsycastsReflection.GetAbilityPrerequisites(ability)
-                .Select(p => p.LabelCap.ToString());
-            return "RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq".Loc(
-                ability.LabelCap, level, string.Join(", ", prereqs)).ToString();
+                .Select(p => p.LabelCap.ToString()).ToList();
+            // VPE's PrereqsCompleted is ANY-of: one learned prerequisite is enough. Listing them
+            // with commas made a two-prerequisite ability sound like it needed both.
+            string key = prereqs.Count > 1
+                ? "RimWorldAccess.VPEPsycasts.Ability.NeedsAnyPrereq"
+                : "RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq";
+            return key.Loc(ability.LabelCap, level, string.Join(", ", prereqs)).ToString();
         }
 
         private static string BuildFocusAnnouncement(MeditationFocusDef focus)

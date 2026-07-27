@@ -2,12 +2,19 @@
 <LanguageData>
   <!-- Vanilla Psycasts Expanded (VPE) psycast tab accessibility (VPEPsycastsState).
        A point-spend tree surfaced on any player psycaster: spend points to improve stats,
-       unlock meditation foci, unlock paths, or learn abilities inside unlocked paths. -->
+       unlock meditation foci, unlock paths, or learn abilities inside unlocked paths.
+
+       Rows already end in a period; the state appends the position as a separate sentence,
+       so no row string should end with a trailing joiner. -->
 
   <!-- Shown when VPE isn't installed or the pawn has no psycast implant. -->
   <RimWorldAccess.VPEPsycasts.Unavailable>Psycast information is not available for this pawn.</RimWorldAccess.VPEPsycasts.Unavailable>
   <RimWorldAccess.VPEPsycasts.Closed>Closed psycasts.</RimWorldAccess.VPEPsycasts.Closed>
   <RimWorldAccess.VPEPsycasts.NoPoints>Not enough psycast points.</RimWorldAccess.VPEPsycasts.NoPoints>
+
+  <!-- Remaining points after a spend. {0} = points (Many only). -->
+  <RimWorldAccess.VPEPsycasts.PointsLeft.One>1 point left</RimWorldAccess.VPEPsycasts.PointsLeft.One>
+  <RimWorldAccess.VPEPsycasts.PointsLeft.Many>{0} points left</RimWorldAccess.VPEPsycasts.PointsLeft.Many>
 
   <!-- Opening header. {0} = level, {1} = points. -->
   <RimWorldAccess.VPEPsycasts.Status>Level {0}. Points available: {1}.</RimWorldAccess.VPEPsycasts.Status>
@@ -16,6 +23,8 @@
   <RimWorldAccess.VPEPsycasts.Item.Status>Status</RimWorldAccess.VPEPsycasts.Item.Status>
   <!-- {0} = level, {1} = points, {2} = experience, {3} = experience needed for next level. -->
   <RimWorldAccess.VPEPsycasts.StatusFull>Level {0}. Points: {1}. Experience {2} of {3}.</RimWorldAccess.VPEPsycasts.StatusFull>
+  <!-- At VPE's level cap there is no next level to earn toward. {0} = level, {1} = points. -->
+  <RimWorldAccess.VPEPsycasts.StatusFullMaxLevel>Level {0}, max. Points: {1}.</RimWorldAccess.VPEPsycasts.StatusFullMaxLevel>
   <RimWorldAccess.VPEPsycasts.Item.Paths>Psycast paths</RimWorldAccess.VPEPsycasts.Item.Paths>
   <!-- {0} = unlocked, {1} = total. -->
   <RimWorldAccess.VPEPsycasts.Item.PathsCount>Psycast paths. {0} of {1} unlocked.</RimWorldAccess.VPEPsycasts.Item.PathsCount>
@@ -24,8 +33,8 @@
   <RimWorldAccess.VPEPsycasts.Item.FociCount>Meditation focus types. {0} of {1} unlocked.</RimWorldAccess.VPEPsycasts.Item.FociCount>
   <RimWorldAccess.VPEPsycasts.Item.ImproveStats>Improve psycaster stats</RimWorldAccess.VPEPsycasts.Item.ImproveStats>
   <RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>Improve psycaster stats. Costs one point.</RimWorldAccess.VPEPsycasts.Item.ImproveStatsFull>
-  <!-- {0} = remaining points. -->
-  <RimWorldAccess.VPEPsycasts.StatsImproved>Psycaster stats improved. {0} points left.</RimWorldAccess.VPEPsycasts.StatsImproved>
+  <!-- {0} = remaining-points phrase. -->
+  <RimWorldAccess.VPEPsycasts.StatsImproved>Psycaster stats improved. {0}.</RimWorldAccess.VPEPsycasts.StatsImproved>
 
   <!-- View headers. -->
   <RimWorldAccess.VPEPsycasts.Header.Paths>Psycast paths.</RimWorldAccess.VPEPsycasts.Header.Paths>
@@ -38,39 +47,45 @@
   <RimWorldAccess.VPEPsycasts.Path.Unlockable>{0}. Available to unlock, costs one point.</RimWorldAccess.VPEPsycasts.Path.Unlockable>
   <RimWorldAccess.VPEPsycasts.Path.NoPoints>{0}. Not enough points to unlock.</RimWorldAccess.VPEPsycasts.Path.NoPoints>
   <RimWorldAccess.VPEPsycasts.Path.Locked>{0}. Locked.</RimWorldAccess.VPEPsycasts.Path.Locked>
+  <!-- The path's lockedReason is a bare fragment ("Imperials only"), so it needs the prefix. -->
   <RimWorldAccess.VPEPsycasts.Path.LockedReason>{0}. Locked: {1}.</RimWorldAccess.VPEPsycasts.Path.LockedReason>
+  <!-- Alt+C on a path row. {0} = path, {1} = ability count, {2} = ability names. -->
+  <RimWorldAccess.VPEPsycasts.Path.AbilityList>{0}. {1} abilities: {2}.</RimWorldAccess.VPEPsycasts.Path.AbilityList>
 
-  <!-- Path activation results. -->
-  <RimWorldAccess.VPEPsycasts.PathUnlocked>Unlocked {0}. {1} points left.</RimWorldAccess.VPEPsycasts.PathUnlocked>
+  <!-- Path activation results. {1} = remaining-points phrase. -->
+  <RimWorldAccess.VPEPsycasts.PathUnlocked>Unlocked {0}. {1}.</RimWorldAccess.VPEPsycasts.PathUnlocked>
   <RimWorldAccess.VPEPsycasts.PathLocked>{0} is locked.</RimWorldAccess.VPEPsycasts.PathLocked>
   <RimWorldAccess.VPEPsycasts.PathLockedReason>{0} is locked: {1}.</RimWorldAccess.VPEPsycasts.PathLockedReason>
   <RimWorldAccess.VPEPsycasts.PathNoAbilities>{0} has no abilities.</RimWorldAccess.VPEPsycasts.PathNoAbilities>
 
-  <!-- Ability rows. {0} = ability name, {1} = level, {2} = prerequisite list. -->
+  <!-- Ability rows. {0} = ability name, {1} = level, {2} = prerequisite list.
+       VPE's prerequisites are ANY-of: one learned prerequisite unlocks the ability. -->
   <RimWorldAccess.VPEPsycasts.Ability.Learned>{0}. Level {1}. Learned.</RimWorldAccess.VPEPsycasts.Ability.Learned>
   <RimWorldAccess.VPEPsycasts.Ability.Unlockable>{0}. Level {1}. Available to learn, costs one point.</RimWorldAccess.VPEPsycasts.Ability.Unlockable>
   <RimWorldAccess.VPEPsycasts.Ability.NoPoints>{0}. Level {1}. Not enough points.</RimWorldAccess.VPEPsycasts.Ability.NoPoints>
   <RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>{0}. Level {1}. Requires: {2}.</RimWorldAccess.VPEPsycasts.Ability.NeedsPrereq>
+  <RimWorldAccess.VPEPsycasts.Ability.NeedsAnyPrereq>{0}. Level {1}. Requires any of: {2}.</RimWorldAccess.VPEPsycasts.Ability.NeedsAnyPrereq>
 
-  <!-- Ability activation results. -->
+  <!-- Ability activation results. {1} = remaining-points phrase. -->
   <RimWorldAccess.VPEPsycasts.AbilityLearned>{0} is already learned.</RimWorldAccess.VPEPsycasts.AbilityLearned>
-  <RimWorldAccess.VPEPsycasts.AbilityUnlocked>Learned {0}. {1} points left.</RimWorldAccess.VPEPsycasts.AbilityUnlocked>
+  <RimWorldAccess.VPEPsycasts.AbilityUnlocked>Learned {0}. {1}.</RimWorldAccess.VPEPsycasts.AbilityUnlocked>
 
-  <!-- Meditation focus rows. {0} = focus name, {1} = reason where noted. -->
+  <!-- Meditation focus rows. {0} = focus name, {1} = VPE's own reason, already a full
+       sentence of its own ("Locked: ..."), so no prefix is added here. -->
   <RimWorldAccess.VPEPsycasts.Focus.Available>{0}. Already available.</RimWorldAccess.VPEPsycasts.Focus.Available>
   <RimWorldAccess.VPEPsycasts.Focus.Unlockable>{0}. Available to unlock, costs one point.</RimWorldAccess.VPEPsycasts.Focus.Unlockable>
   <RimWorldAccess.VPEPsycasts.Focus.NoPoints>{0}. Not enough points to unlock.</RimWorldAccess.VPEPsycasts.Focus.NoPoints>
   <RimWorldAccess.VPEPsycasts.Focus.Locked>{0}. Locked.</RimWorldAccess.VPEPsycasts.Focus.Locked>
-  <RimWorldAccess.VPEPsycasts.Focus.LockedReason>{0}. Locked: {1}.</RimWorldAccess.VPEPsycasts.Focus.LockedReason>
+  <RimWorldAccess.VPEPsycasts.Focus.LockedReason>{0}. {1}</RimWorldAccess.VPEPsycasts.Focus.LockedReason>
 
   <!-- Meditation focus activation results. -->
   <RimWorldAccess.VPEPsycasts.FocusAvailable>{0} is already available.</RimWorldAccess.VPEPsycasts.FocusAvailable>
   <RimWorldAccess.VPEPsycasts.FocusLocked>{0} is locked.</RimWorldAccess.VPEPsycasts.FocusLocked>
-  <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0} is locked: {1}.</RimWorldAccess.VPEPsycasts.FocusLockedReason>
-  <RimWorldAccess.VPEPsycasts.FocusUnlocked>Unlocked {0}. {1} points left.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
+  <RimWorldAccess.VPEPsycasts.FocusLockedReason>{0}. {1}</RimWorldAccess.VPEPsycasts.FocusLockedReason>
+  <RimWorldAccess.VPEPsycasts.FocusUnlocked>Unlocked {0}. {1}.</RimWorldAccess.VPEPsycasts.FocusUnlocked>
 
   <!-- On-demand info shortcuts and hints. -->
-  <RimWorldAccess.VPEPsycasts.DetailsHint>Press Alt plus D for the description, Alt plus C for cast data.</RimWorldAccess.VPEPsycasts.DetailsHint>
+  <RimWorldAccess.VPEPsycasts.DetailsHint>Alt plus D describes, Alt plus C gives the data.</RimWorldAccess.VPEPsycasts.DetailsHint>
   <RimWorldAccess.VPEPsycasts.NoDescription>No description available.</RimWorldAccess.VPEPsycasts.NoDescription>
   <RimWorldAccess.VPEPsycasts.NoData>No data available.</RimWorldAccess.VPEPsycasts.NoData>
   <!-- {0} = stat list. -->
@@ -83,21 +98,22 @@
   <RimWorldAccess.VPEPsycasts.Data.Range>Range {0}</RimWorldAccess.VPEPsycasts.Data.Range>
   <RimWorldAccess.VPEPsycasts.Data.Radius>Area radius {0}</RimWorldAccess.VPEPsycasts.Data.Radius>
 
-  <!-- Psysets (casting loadouts). -->
+  <!-- Psysets (casting loadouts). Only the active set's psycasts appear on the gizmo bar. -->
   <RimWorldAccess.VPEPsycasts.Item.Psysets>Psycast sets</RimWorldAccess.VPEPsycasts.Item.Psysets>
   <!-- {0} = number of psysets. -->
   <RimWorldAccess.VPEPsycasts.Item.PsysetsCount>Psycast sets. {0} defined.</RimWorldAccess.VPEPsycasts.Item.PsysetsCount>
   <RimWorldAccess.VPEPsycasts.Item.PsysetCreate>Create new set</RimWorldAccess.VPEPsycasts.Item.PsysetCreate>
   <RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>Create new set. Enter to create and edit.</RimWorldAccess.VPEPsycasts.Item.PsysetCreateFull>
-  <RimWorldAccess.VPEPsycasts.Header.Psysets>Psycast sets. Enter to edit a set, F2 to rename, Delete to remove.</RimWorldAccess.VPEPsycasts.Header.Psysets>
+  <RimWorldAccess.VPEPsycasts.Header.Psysets>Psycast sets. Enter edits, F2 renames, Delete removes.</RimWorldAccess.VPEPsycasts.Header.Psysets>
   <!-- {0} = set name. -->
-  <RimWorldAccess.VPEPsycasts.Header.PsysetEdit>Editing set {0}. Enter toggles an ability in or out.</RimWorldAccess.VPEPsycasts.Header.PsysetEdit>
+  <RimWorldAccess.VPEPsycasts.Header.PsysetEdit>Editing {0}. Enter adds or removes an ability.</RimWorldAccess.VPEPsycasts.Header.PsysetEdit>
   <!-- {0} = set name, {1} = ability count. -->
   <RimWorldAccess.VPEPsycasts.Psyset.Row>{0}. {1} abilities.</RimWorldAccess.VPEPsycasts.Psyset.Row>
-  <!-- {0} = sequential number. -->
+  <RimWorldAccess.VPEPsycasts.Psyset.Active>Active</RimWorldAccess.VPEPsycasts.Psyset.Active>
+  <!-- Fallback name when VPE's own "Untitled" can't be read. {0} = sequential number. -->
   <RimWorldAccess.VPEPsycasts.Psyset.DefaultName>Set {0}</RimWorldAccess.VPEPsycasts.Psyset.DefaultName>
-  <RimWorldAccess.VPEPsycasts.Psyset.Created>Created set {0}.</RimWorldAccess.VPEPsycasts.Psyset.Created>
-  <RimWorldAccess.VPEPsycasts.Psyset.Deleted>Removed set {0}.</RimWorldAccess.VPEPsycasts.Psyset.Deleted>
+  <RimWorldAccess.VPEPsycasts.Psyset.Created>Created {0}.</RimWorldAccess.VPEPsycasts.Psyset.Created>
+  <RimWorldAccess.VPEPsycasts.Psyset.Deleted>Removed {0}.</RimWorldAccess.VPEPsycasts.Psyset.Deleted>
   <!-- {0} = ability name. -->
   <RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>{0} added to set.</RimWorldAccess.VPEPsycasts.Psyset.AbilityAdded>
   <RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>{0} removed from set.</RimWorldAccess.VPEPsycasts.Psyset.AbilityRemoved>

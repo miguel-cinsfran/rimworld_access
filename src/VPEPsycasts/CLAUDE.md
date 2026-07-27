@@ -42,8 +42,20 @@ Root ─┬─ Status (level / points / experience — read-only)
 
 The psyset (loadout) rows appear only when `VPEPsycastsReflection.PsysetsAvailable`. Rename opens
 VPE's `Dialog_RenamePsyset` (a vanilla `Dialog_Rename<PsySet>`, made accessible by RWA's text-input
-pipeline); `HandleInput` defers entirely while `TextInputManager.IsActive` so it never steals keys
-from that text session.
+pipeline); `HandleInput` defers entirely while `TextInputManager`, `WindowlessDialogState`,
+`WindowlessConfirmationState` or `WindowlessFloatMenuState` own the keyboard. That full list matters:
+the rename dialog is presented by `WindowlessDialogState` *before* the text field is entered, and
+guarding on `TextInputManager` alone let one Escape both close the dialog and step this menu back a
+level (verified live, 2026-07-27).
+
+**Psyset activation.** Only the *active* psyset's abilities appear on the pawn's gizmo bar
+(`Hediff_PsycastAbilities.ShouldShow`, with `psysetIndex == psysets.Count` meaning "show all"). VPE's
+own Create button appends the set without touching `psysetIndex`, which silently makes the new, empty
+set active and removes every psycast from the gizmo bar — invisible to a screen-reader user, who gets
+no clue their abilities vanished. `VPEPsycastsReflection.CreatePsyset` therefore keeps a previous
+"show all" selection pointing at "all", and the psyset rows announce which set is active. Switching
+sets stays where VPE puts it: its `Command_ActionWithFloat` gizmo, reachable with **G** then the
+right-bracket key (RWA's gizmo float-menu key) — confirmed to expose its options live.
 
 Keys:
 - **Up/Down/Home/End** navigate; typeahead searches by name.
@@ -55,10 +67,13 @@ Keys:
 - **Left** = collapse / go back one level. **Escape** = back one level, and closes from Root.
 - **Alt+D / Alt+C** = speak, on demand, the focused element's description (D) or its numeric cast
   data (C — psyfocus cost, neural heat, level, range, AOE radius; on the status/improve-stats rows,
-  the current psycaster stats). Keeps fast navigation terse. This **deliberately departs** from RWA's
-  usual Alt+I → `Dialog_InfoCard` convention: VPE's ability defs are `VEF.Abilities.AbilityDef`, not
-  vanilla `AbilityDef`s, so their info card carries no numeric data — spoken shortcuts are what
-  actually surface the cost here (confirmed empty via the dev bridge).
+  the current psycaster stats; on a **path** row, the abilities that path teaches). Keeps fast
+  navigation terse. This **deliberately departs** from RWA's usual Alt+I → `Dialog_InfoCard`
+  convention: VPE's ability defs are `VEF.Abilities.AbilityDef`, not vanilla `AbilityDef`s, so their
+  info card carries no numeric data — spoken shortcuts are what actually surface the cost here
+  (confirmed empty via the dev bridge). Alt+D on a path speaks VPE's own tooltip lore, and Alt+C its
+  ability list, because a **locked** path can't be drilled into — that list is otherwise unreachable
+  by keyboard while VPE shows it in the tooltip.
 - **Backspace** edits the active search.
 
 Ability lists are **topologically ordered** (prerequisites always precede their dependents), and all
@@ -120,6 +135,32 @@ in the G menu at all. Cooldown comes from VEF's `Ability.cooldown` (an absolute 
 cooldown" is distinguishable from "unreadable". The VEF accessors in `VPEPsycastsReflection` are
 gated on their own `VefAbilitiesAvailable` flag and resolved *before* the VPE bail-out, so this works
 for any VEF-based ability mod even when VPE itself is absent.
+
+## Speech audit (2026-07-27)
+
+The whole tab was driven key by key in the live game with a Harmony tap on `TolkHelper`, reading the
+literal spoken strings. What that changed, and the rules behind it:
+
+- **Positions were joined by hand** (`$"{body}. {position}"`) onto rows that already end in a period,
+  so every single row said "…1423.. 1 de 5". All joins now go through a local `Sentence` helper.
+- **Prerequisites are ANY-of** (`PrereqsCompleted` returns true when the pawn owns *one* of them),
+  but they were listed comma-separated, which reads as "needs both". Two or more now use
+  `Ability.NeedsAnyPrereq` ("Requires any of"). Proven live: learning one of two prerequisites made
+  the dependent ability immediately learnable.
+- **Meditation focus reasons already carry their own "Locked:" prefix** (`VPE.LockedTitle` /
+  `VPE.LockedLocked` resolve to full sentences), so wrapping them again produced "Bloqueado:
+  Bloqueado: …". Path `lockedReason`, by contrast, is a bare fragment ("Imperials only") and keeps
+  the prefix. Check the actual string before assuming a reason is a fragment.
+- **Spanish plurals**: "Quedan 1 puntos" → `PointsLeft.One` / `PointsLeft.Many`.
+- **Psycaster stats**: VPE's panel lists neural heat limit, recovery, sensitivity, *its own*
+  `VPE_PsyfocusCostFactor`, and meditation focus gain only when `changeFocusGain` is on. Alt+C now
+  mirrors that list, settings-aware, instead of the three vanilla stats.
+- **Typeahead dropped the row state**, announcing bare labels while every other RWA menu appends the
+  match suffix to the full announcement. Fixed, trimming the row's closing period first.
+- **The level cap** (`PsycastsMod.Settings.maxLevel`, default 50) hides VPE's experience bar; the
+  status row now stops quoting a next-level target there.
+- Psyset vocabulary follows VPE's own Spanish ("grupos de poderes", VPE's "Sin título" for a new
+  set) so the menu and the on-screen tab use the same words.
 
 ## Scope / follow-ups
 Implemented: stat upgrades, foci, paths, ability learning, and psyset (loadout) management. A remaining

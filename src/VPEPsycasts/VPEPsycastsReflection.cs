@@ -42,8 +42,12 @@ namespace RimWorldAccess
         private static MethodInfo mSpentPoints, mImproveStats, mUnlockPath, mUnlockFocus, mExpRequired;
 
         // ===== PsycasterPathDef members =====
-        private static FieldInfo fAbilities, fLockedReason, fPathOrder, fHasAbilities;
+        private static FieldInfo fAbilities, fLockedReason, fPathOrder, fHasAbilities, fPathTooltip;
         private static MethodInfo mCanPawnUnlock;
+
+        // ===== PsycastsMod.Settings (mirrors what VPE's own tab chooses to display) =====
+        private static object modSettings;
+        private static FieldInfo fMaxLevel, fChangeFocusGain;
 
         // ===== AbilityExtension_Psycast members =====
         private static FieldInfo fPrereqs, fAbLevel, fAbOrder;
@@ -64,7 +68,7 @@ namespace RimWorldAccess
 
         // ===== Psysets (loadout management) — optional; gated on PsysetsAvailable =====
         private static Type psySetType, dialogRenamePsysetType;
-        private static FieldInfo fPsysets, fPsysetName, fPsysetAbilities;
+        private static FieldInfo fPsysets, fPsysetName, fPsysetAbilities, fPsysetIndex;
         private static MethodInfo mRemovePsySet;
         private static MethodInfo mSetAdd, mSetRemove, mSetContains; // HashSet<AbilityDef> members
         public static bool PsysetsAvailable { get; private set; }
@@ -127,7 +131,18 @@ namespace RimWorldAccess
             fLockedReason = AccessTools.Field(pathDefType, "lockedReason");
             fPathOrder = AccessTools.Field(pathDefType, "order");
             fHasAbilities = AccessTools.Field(pathDefType, "HasAbilities");
+            fPathTooltip = AccessTools.Field(pathDefType, "tooltip");
             mCanPawnUnlock = AccessTools.Method(pathDefType, "CanPawnUnlock", new[] { typeof(Pawn) });
+
+            // Mod settings drive two display decisions in VPE's own tab: the XP bar disappears at
+            // maxLevel, and the meditation-focus-gain stat is only listed when changeFocusGain is on.
+            var modType = AccessTools.TypeByName("VanillaPsycastsExpanded.PsycastsMod");
+            modSettings = modType != null ? AccessTools.Field(modType, "Settings")?.GetValue(null) : null;
+            if (modSettings != null)
+            {
+                fMaxLevel = AccessTools.Field(modSettings.GetType(), "maxLevel");
+                fChangeFocusGain = AccessTools.Field(modSettings.GetType(), "changeFocusGain");
+            }
 
             fPrereqs = AccessTools.Field(psycastExtType, "prerequisites");
             fAbLevel = AccessTools.Field(psycastExtType, "level");
@@ -149,6 +164,7 @@ namespace RimWorldAccess
             psySetType = AccessTools.TypeByName("VanillaPsycastsExpanded.PsySet");
             dialogRenamePsysetType = AccessTools.TypeByName("VanillaPsycastsExpanded.UI.Dialog_RenamePsyset");
             fPsysets = AccessTools.Field(hediffType, "psysets");
+            fPsysetIndex = AccessTools.Field(hediffType, "psysetIndex");
             if (psySetType != null)
             {
                 fPsysetName = AccessTools.Field(psySetType, "Name");
@@ -275,6 +291,23 @@ namespace RimWorldAccess
             return false;
         }
 
+        /// <summary>
+        /// Level cap from VPE's mod settings (default 50). VPE hides the experience bar once the
+        /// psycaster reaches it, so we stop announcing "experience X of Y" there too.
+        /// </summary>
+        public static int GetMaxLevel()
+        {
+            try { return fMaxLevel != null ? (int)fMaxLevel.GetValue(modSettings) : int.MaxValue; }
+            catch { return int.MaxValue; }
+        }
+
+        /// <summary>True when VPE lists meditation focus gain among the psycaster stats.</summary>
+        public static bool ChangeFocusGainEnabled()
+        {
+            try { return fChangeFocusGain != null && (bool)fChangeFocusGain.GetValue(modSettings); }
+            catch { return false; }
+        }
+
         public static IList GetUnlockedFoci(object hediff)
         {
             try { return fUnlockedFoci?.GetValue(hediff) as IList; }
@@ -368,6 +401,32 @@ namespace RimWorldAccess
             try { return fPathOrder != null ? (int)fPathOrder.GetValue(path) : 0; }
             catch { return 0; }
         }
+
+        /// <summary>
+        /// The lore text VPE shows in a path's tooltip. Paths carry both this and a plain
+        /// <c>description</c>; the tab displays the tooltip, so that is what we speak.
+        /// </summary>
+        public static string GetPathTooltip(Def path)
+        {
+            try { return fPathTooltip?.GetValue(path) as string; }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// VPE's own psyfocus cost factor stat, listed on its psycaster stat panel. Null when the
+        /// def is missing (older VPE), in which case the stat is simply skipped.
+        /// </summary>
+        public static StatDef GetPsyfocusCostFactorStat()
+        {
+            if (psyfocusCostFactorResolved) return psyfocusCostFactorStat;
+            psyfocusCostFactorResolved = true;
+            try { psyfocusCostFactorStat = DefDatabase<StatDef>.GetNamedSilentFail("VPE_PsyfocusCostFactor"); }
+            catch { psyfocusCostFactorStat = null; }
+            return psyfocusCostFactorStat;
+        }
+
+        private static StatDef psyfocusCostFactorStat;
+        private static bool psyfocusCostFactorResolved;
 
         // ===== Ability accessors =====
 
@@ -584,13 +643,50 @@ namespace RimWorldAccess
             catch (Exception ex) { LogOnce("PsysetToggle", ex); return false; }
         }
 
+        /// <summary>
+        /// Index of the psyset whose abilities are currently shown on the pawn's gizmo bar.
+        /// VPE treats <c>index == psysets.Count</c> as "show every psycast".
+        /// </summary>
+        public static int GetPsysetIndex(object hediff) => SafeInt(fPsysetIndex, hediff);
+
+        public static void SetPsysetIndex(object hediff, int index)
+        {
+            try { fPsysetIndex?.SetValue(hediff, index); }
+            catch (Exception ex) { LogOnce("SetPsysetIndex", ex); }
+        }
+
+        /// <summary>VPE's own name for a fresh, unnamed psyset ("Untitled"), or null.</summary>
+        public static string GetUntitledPsysetName()
+        {
+            try
+            {
+                // Never gate on CanTranslate(): a mod that ships English only reports false under
+                // another active language even though Translate() resolves fine.
+                string label = "VPE.Untitled".Translate().ToString();
+                return string.IsNullOrWhiteSpace(label) || label == "VPE.Untitled" ? null : label;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// Creates a psyset. VPE's own button appends it to the list without touching
+        /// <c>psysetIndex</c>, which silently makes the new (empty) set the active one and hides
+        /// every psycast gizmo. A sighted player sees that instantly; we keep the previous
+        /// selection instead, so creating a set never removes abilities from the gizmo bar.
+        /// </summary>
         public static object CreatePsyset(object hediff, string name)
         {
             try
             {
+                var list = fPsysets.GetValue(hediff) as IList;
+                int previousIndex = GetPsysetIndex(hediff);
+                bool wasShowingAll = list != null && previousIndex >= list.Count;
+
                 var ps = Activator.CreateInstance(psySetType);
                 fPsysetName.SetValue(ps, name);
-                (fPsysets.GetValue(hediff) as IList)?.Add(ps);
+                list?.Add(ps);
+
+                if (wasShowingAll && list != null) SetPsysetIndex(hediff, list.Count);
                 return ps;
             }
             catch (Exception ex) { LogOnce("CreatePsyset", ex); return null; }
