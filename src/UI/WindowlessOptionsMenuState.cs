@@ -706,6 +706,10 @@ namespace RimWorldAccess
                 () => RimWorldAccessMod_Settings.Settings?.AnnounceForcedSlowdowns ?? false,
                 v => { if (RimWorldAccessMod_Settings.Settings != null) RimWorldAccessMod_Settings.Settings.AnnounceForcedSlowdowns = v; },
                 "RimWorldAccess.UI.Options.ForcedSlowdowns.Desc".Translate()));
+            accessSettings.Settings.Add(new CheckboxSetting("RimWorldAccess.UI.Options.AbilityCasts.Label".Translate(),
+                () => RimWorldAccessMod_Settings.Settings?.AnnounceAbilityCasts ?? true,
+                v => { if (RimWorldAccessMod_Settings.Settings != null) RimWorldAccessMod_Settings.Settings.AnnounceAbilityCasts = v; },
+                "RimWorldAccess.UI.Options.AbilityCasts.Desc".Translate()));
             categories.Add(accessSettings);
 
             // Mod Settings Category - list all mods that have settings

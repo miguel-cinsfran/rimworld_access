@@ -136,6 +136,8 @@
   <RimWorldAccess.UI.Options.WorkMenuView.TableDesc>Pawn rows by work-type columns; mirrors vanilla and supports sorting and painting.</RimWorldAccess.UI.Options.WorkMenuView.TableDesc>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Label>Announce Forced Slowdowns From Threats</RimWorldAccess.UI.Options.ForcedSlowdowns.Label>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>When on, announces when the game forces Normal speed because of a nearby threat, and when the slowdown lifts. Only fires if your chosen speed is faster than Normal.</RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>
+  <RimWorldAccess.UI.Options.AbilityCasts.Label>Announce Ability Casts</RimWorldAccess.UI.Options.AbilityCasts.Label>
+  <RimWorldAccess.UI.Options.AbilityCasts.Desc>When on, says when one of your pawns starts casting an ability, when the cast lands, and when it is cut short. Covers psycasts, royal-title abilities, Anomaly powers and modded abilities. The charge-up sound alone is easy to miss during a firefight.</RimWorldAccess.UI.Options.AbilityCasts.Desc>
 
   <!-- =================================================================
        Generic dialog frame (WindowlessDialogState).
