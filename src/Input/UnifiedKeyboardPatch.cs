@@ -226,6 +226,10 @@ namespace RimWorldAccess
         [HarmonyPrefix]
         public static void Prefix()
         {
+            // Track window focus for the "speak only while the game is focused" setting. Refreshed
+            // here, once per GUI pass, because speech is also produced from tick code.
+            TolkHelper.GameWindowFocused = WindowFocusWatcher.Poll();
+
             // Process per-frame sound queue for bulk painting operations
             BulkSoundQueue.Update();
 

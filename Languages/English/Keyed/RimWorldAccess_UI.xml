@@ -136,6 +136,10 @@
   <RimWorldAccess.UI.Options.WorkMenuView.TableDesc>Pawn rows by work-type columns; mirrors vanilla and supports sorting and painting.</RimWorldAccess.UI.Options.WorkMenuView.TableDesc>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Label>Announce Forced Slowdowns From Threats</RimWorldAccess.UI.Options.ForcedSlowdowns.Label>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>When on, announces when the game forces Normal speed because of a nearby threat, and when the slowdown lifts. Only fires if your chosen speed is faster than Normal.</RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>
+  <!-- Global gate: applies to every announcement the mod makes. -->
+  <RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Label>Speak Only While The Game Window Is Focused</RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Label>
+  <RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Desc>When on, everything goes quiet while you work in another window, and resumes as soon as you come back to RimWorld. When off, the colony keeps talking in the background. Applies to every announcement.</RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Desc>
+
   <!-- Live activity of the selected pawn. Each level is a different trigger, not a longer sentence. -->
   <RimWorldAccess.UI.Options.ActivityUpdates.Label>Activity Updates For The Selected Pawn</RimWorldAccess.UI.Options.ActivityUpdates.Label>
   <RimWorldAccess.UI.Options.ActivityUpdates.Off>Off</RimWorldAccess.UI.Options.ActivityUpdates.Off>

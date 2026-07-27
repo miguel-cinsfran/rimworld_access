@@ -136,6 +136,10 @@
   <RimWorldAccess.UI.Options.WorkMenuView.TableDesc>Filas de personajes por columnas de tipo de trabajo; refleja el juego original y permite ordenar y pintar.</RimWorldAccess.UI.Options.WorkMenuView.TableDesc>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Label>Anunciar reducciones de velocidad forzadas por amenazas</RimWorldAccess.UI.Options.ForcedSlowdowns.Label>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>Cuando está activado, anuncia cuando el juego fuerza la velocidad Normal por una amenaza cercana, y cuando la reducción termina. Solo se activa si la velocidad que elegiste es más rápida que Normal.</RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>
+  <!-- Interruptor global: afecta a todos los avisos del mod. -->
+  <RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Label>Hablar solo cuando el juego está enfocado</RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Label>
+  <RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Desc>Cuando está activado, todo queda en silencio mientras trabajas en otra ventana, y vuelve apenas regresas a RimWorld. Cuando está desactivado, la colonia sigue hablando en segundo plano. Afecta a todos los avisos.</RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Desc>
+
   <!-- Actividad en vivo del pawn seleccionado. Cada nivel es un disparador distinto, no una frase más larga. -->
   <RimWorldAccess.UI.Options.ActivityUpdates.Label>Avisos de actividad del pawn seleccionado</RimWorldAccess.UI.Options.ActivityUpdates.Label>
   <RimWorldAccess.UI.Options.ActivityUpdates.Off>Desactivado</RimWorldAccess.UI.Options.ActivityUpdates.Off>

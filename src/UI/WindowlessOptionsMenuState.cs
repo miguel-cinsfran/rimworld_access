@@ -671,6 +671,11 @@ namespace RimWorldAccess
             // the canonical Core.xml keys so the in-game options panel stays
             // in sync with the Mod Settings panel.
             var accessSettings = new OptionCategory("RimWorldAccess.Core.Settings.Category".Translate());
+            // First, because it governs every other announcement in this list.
+            accessSettings.Settings.Add(new CheckboxSetting("RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Label".Translate(),
+                () => RimWorldAccessMod_Settings.Settings?.SpeakOnlyWhenGameFocused ?? false,
+                v => { if (RimWorldAccessMod_Settings.Settings != null) RimWorldAccessMod_Settings.Settings.SpeakOnlyWhenGameFocused = v; },
+                "RimWorldAccess.UI.Options.SpeakOnlyWhenFocused.Desc".Translate()));
             accessSettings.Settings.Add(new CheckboxSetting("RimWorldAccess.Core.Settings.WrapNavigation.Label".Translate(),
                 () => RimWorldAccessMod_Settings.Settings?.WrapNavigation ?? false,
                 v => { if (RimWorldAccessMod_Settings.Settings != null) RimWorldAccessMod_Settings.Settings.WrapNavigation = v; }));
