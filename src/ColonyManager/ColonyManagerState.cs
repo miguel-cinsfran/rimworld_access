@@ -11,18 +11,21 @@ namespace RimWorldAccess
     /// members (see <see cref="ColonyManagerReflection"/>) so it reacts exactly as it would
     /// to a mouse.
     ///
-    /// Two levels:
+    /// Five nested levels, each stepping back into the previous one with Left or Escape:
     ///  - <see cref="Level.Tabs"/>: the row of tab icons (Overview, Hunting, Forestry,
     ///    Livestock, Foraging, Mining, Power, Production, Logs, Import/Export, plus any
     ///    third-party tabs). These are icon-only in the vanilla UI, so a sighted-only user
     ///    relies on tooltips; here each announces its label, enabled state and job count.
     ///  - <see cref="Level.Jobs"/>: the selected tab's list of manager jobs, each announcing
-    ///    its label, target and status. Enter selects a job (so the mod's own detail panel
-    ///    follows), Space suspends/resumes it.
-    ///
-    /// Reading and editing an individual job's detailed settings (threshold count, area,
-    /// allowed-animal/plant lists) is a later stage; those are drawn with the mod's custom
-    /// widgets and need their own per-tab model navigation.
+    ///    its label, target and status. Enter opens a job, Space suspends/resumes it,
+    ///    Ctrl+N creates one, Delete removes it, Ctrl+Up/Down reorders it.
+    ///  - <see cref="Level.JobDetail"/>: that job's settings — how much to keep, where to
+    ///    work, and the per-job-type toggles from <see cref="ColonyManagerJobSchema"/>.
+    ///  - <see cref="Level.DefList"/>: the multi-select behind a settings row (which animals
+    ///    to hunt, which trees to chop), where every entry toggles independently.
+    ///  - <see cref="Level.Picker"/>: a single-choice list. Livestock and Production jobs are
+    ///    meaningless until they know which animal or product they are for, so creating one
+    ///    asks here first, using the mod's own list of available animals/recipes.
     /// </summary>
     public static class ColonyManagerState
     {
@@ -31,7 +34,8 @@ namespace RimWorldAccess
             Tabs,
             Jobs,
             JobDetail,
-            DefList
+            DefList,
+            Picker
         }
 
         private enum SettingKind
@@ -39,7 +43,20 @@ namespace RimWorldAccess
             Threshold,
             Toggle,
             Area,
-            DefList
+            DefList,
+            /// <summary>A single Def chosen from a list (a production job's product).</summary>
+            Choice,
+            /// <summary>One of a fixed set of named modes, stepped with Left/Right.</summary>
+            Cycle
+        }
+
+        /// <summary>What confirming a choice in the picker level does.</summary>
+        private enum PickerPurpose
+        {
+            /// <summary>Create a new job of the current tab's type around the chosen Def.</summary>
+            CreateJob,
+            /// <summary>Repoint the open production job at the chosen recipe.</summary>
+            ChangeRecipe
         }
 
         /// <summary>An editable setting shown in a job's detail level.</summary>
@@ -72,6 +89,14 @@ namespace RimWorldAccess
             public ColonyManagerJobSchema.Spec DefListSpec;
             public System.Func<int> GetAllowedCount;
             public System.Func<int> GetTotalCount;
+
+            // Choice (a single Def, changed through the picker level)
+            public System.Func<string> GetChoiceLabel;
+            public System.Action OpenChoicePicker;
+
+            // Cycle (a named mode stepped with Left/Right)
+            public System.Func<string> GetCycleLabel;
+            public System.Action<int> CycleValue;
         }
 
         public static bool IsActive { get; private set; }
@@ -98,6 +123,12 @@ namespace RimWorldAccess
         private static ColonyManagerJobSchema.Spec defListSpec;
         private static readonly List<object> defListItems = new List<object>();
         private static int defListIndex;
+
+        // Picker sub-level: choose one Def (which animal to herd / what to produce)
+        private static readonly List<object> pickerItems = new List<object>();
+        private static int pickerIndex;
+        private static PickerPurpose pickerPurpose;
+        private static Level pickerReturnLevel;
 
         private static readonly TypeaheadSearchHelper typeahead = new TypeaheadSearchHelper();
 
@@ -158,10 +189,12 @@ namespace RimWorldAccess
             detailJob = null;
             defListItems.Clear();
             defListSpec = null;
+            pickerItems.Clear();
             tabIndex = 0;
             jobIndex = 0;
             detailIndex = 0;
             defListIndex = 0;
+            pickerIndex = 0;
             typeahead.ClearSearch();
         }
 
@@ -203,6 +236,8 @@ namespace RimWorldAccess
                     return HandleJobsInput(key, shift, ctrl, alt);
                 case Level.JobDetail:
                     return HandleDetailInput(key, shift, ctrl, alt);
+                case Level.Picker:
+                    return HandlePickerInput(key, shift, ctrl, alt);
                 default:
                     return HandleDefListInput(key, shift, ctrl, alt);
             }
@@ -433,6 +468,56 @@ namespace RimWorldAccess
             return false;
         }
 
+        private static bool HandlePickerInput(KeyCode key, bool shift, bool ctrl, bool alt)
+        {
+            if (pickerItems.Count == 0)
+            {
+                if (key == KeyCode.Escape || key == KeyCode.LeftArrow)
+                {
+                    CancelPicker();
+                }
+                return true;
+            }
+
+            switch (key)
+            {
+                case KeyCode.DownArrow:
+                    pickerIndex = MenuHelper.SelectNext(pickerIndex, pickerItems.Count);
+                    ClearSearchOnMove();
+                    AnnounceCurrentPickerItem(SpeechPriority.Low);
+                    return true;
+                case KeyCode.UpArrow:
+                    pickerIndex = MenuHelper.SelectPrevious(pickerIndex, pickerItems.Count);
+                    ClearSearchOnMove();
+                    AnnounceCurrentPickerItem(SpeechPriority.Low);
+                    return true;
+                case KeyCode.Home:
+                    pickerIndex = MenuHelper.JumpToFirst();
+                    ClearSearchOnMove();
+                    AnnounceCurrentPickerItem(SpeechPriority.Low);
+                    return true;
+                case KeyCode.End:
+                    pickerIndex = MenuHelper.JumpToLast(pickerItems.Count);
+                    ClearSearchOnMove();
+                    AnnounceCurrentPickerItem(SpeechPriority.Low);
+                    return true;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    ConfirmPicker();
+                    return true;
+                case KeyCode.LeftArrow:
+                case KeyCode.Escape:
+                    if (key == KeyCode.Escape && typeahead.ClearSearchAndAnnounce())
+                    {
+                        return true;
+                    }
+                    CancelPicker();
+                    return true;
+            }
+            return false;
+        }
+
         // ---------------------------------------------------------------
         // Actions
         // ---------------------------------------------------------------
@@ -547,11 +632,11 @@ namespace RimWorldAccess
                 string status = "";
                 if (ColonyManagerReflection.JobIsSuspended(job))
                 {
-                    status = " " + "RimWorldAccess.ColonyManager.StatusSuspended".Loc().ToString();
+                    status = ", " + "RimWorldAccess.ColonyManager.StatusSuspended".Loc().ToString();
                 }
                 else if (ColonyManagerReflection.JobIsCompleted(job))
                 {
-                    status = " " + "RimWorldAccess.ColonyManager.StatusCompleted".Loc().ToString();
+                    status = ", " + "RimWorldAccess.ColonyManager.StatusCompleted".Loc().ToString();
                 }
 
                 string body = (string.IsNullOrEmpty(tl) || tl == "None")
@@ -582,16 +667,6 @@ namespace RimWorldAccess
             AnnounceCurrentJob(SpeechPriority.Normal);
         }
 
-        // Tab types whose new job needs an up-front choice (which animal / which recipe) that our
-        // menu doesn't offer yet. Creating one blind would add an invalid job — a pawn-kind-less
-        // Livestock job even throws on save reload — so we refuse rather than corrupt the colony.
-        private static readonly System.Collections.Generic.HashSet<string> NeedsPickerToCreate =
-            new System.Collections.Generic.HashSet<string>
-            {
-                "ManagerTab_Livestock",
-                "ManagerTab_Production",
-            };
-
         private static void CreateNewJob()
         {
             var tab = CurrentTab;
@@ -599,28 +674,47 @@ namespace RimWorldAccess
             {
                 return;
             }
-            if (NeedsPickerToCreate.Contains(tab.GetType().Name))
+
+            // Livestock and Production jobs are meaningless until they know which animal to herd
+            // or what to produce — and a pawn-kind-less Livestock job throws when the save is
+            // reloaded. For those, ask first: the picker offers the mod's own "available" list.
+            if (ColonyManagerReflection.TabNeedsChoiceToCreate(tab))
             {
-                // Editing an existing job of this type works fully; only blind creation is unsafe.
-                TolkHelper.Speak("RimWorldAccess.ColonyManager.NewJobNeedsPicker".Loc());
+                OpenPicker(
+                    ColonyManagerReflection.GetCreationChoices(tab),
+                    PickerPurpose.CreateJob,
+                    Level.Jobs,
+                    "RimWorldAccess.ColonyManager.PickerCreateTitle");
                 return;
             }
+
             var job = ColonyManagerReflection.CreateAndAddManagedJob(manager, tab);
             if (job == null)
             {
                 TolkHelper.Speak("RimWorldAccess.ColonyManager.NewJobFailed".Loc());
                 return;
             }
+            SelectAndAnnounceNewJob(tab, job);
+        }
+
+        /// <summary>Refresh the job list around a freshly created job and announce it.</summary>
+        private static void SelectAndAnnounceNewJob(object tab, object job)
+        {
             RebuildJobs(tab);
             jobIndex = jobs.IndexOf(job);
             if (jobIndex < 0)
             {
                 jobIndex = jobs.Count - 1;
             }
+            if (jobIndex < 0)
+            {
+                jobIndex = 0;
+            }
             ColonyManagerDebug.Log($"CreateNewJob: created '{ColonyManagerReflection.JobLabel(job)}', now {jobs.Count} jobs");
             TolkHelper.SpeakData(
                 "RimWorldAccess.ColonyManager.NewJobCreated".Loc(
                     ColonyManagerReflection.JobLabel(job)).ToString());
+            AnnounceCurrentJob(SpeechPriority.Normal);
         }
 
         private static void DeleteCurrentJob()
@@ -716,6 +810,13 @@ namespace RimWorldAccess
             if (ColonyManagerReflection.IsLivestockJob(job))
             {
                 AddLivestockTargets(job);
+            }
+
+            // 1c) Production: what the job makes, and whether it keeps stock up or works surplus
+            //     down. The product defines the whole job, so it leads the settings list.
+            if (ColonyManagerReflection.IsProductionJob(job))
+            {
+                AddProductionSettings(job);
             }
 
             // 2) Per-job-type settings (what / where / options) from the schema. Best-effort:
@@ -826,6 +927,68 @@ namespace RimWorldAccess
             }
         }
 
+        /// <summary>
+        /// Production-only rows: the recipe the job makes, and its production mode. The recipe
+        /// can be swapped only for what the mod itself offers as an equivalent
+        /// (<c>ComputeRecipeSwapCandidates</c> — e.g. the same blocks cut at a different bench);
+        /// producing something else entirely is a different job, created from the Jobs level.
+        /// </summary>
+        private static void AddProductionSettings(object job)
+        {
+            if (ColonyManagerReflection.GetProductionRecipe(job) != null)
+            {
+                detailSettings.Add(new DetailSetting
+                {
+                    Kind = SettingKind.Choice,
+                    Label = "RimWorldAccess.ColonyManager.SettingProduct".Loc().ToString(),
+                    GetChoiceLabel = () => DefLabel(ColonyManagerReflection.GetProductionRecipe(job)),
+                    OpenChoicePicker = () => OpenRecipeSwapPicker(job)
+                });
+            }
+
+            if (ColonyManagerReflection.HasEnumMember(job, "Mode"))
+            {
+                detailSettings.Add(new DetailSetting
+                {
+                    Kind = SettingKind.Cycle,
+                    Label = "RimWorldAccess.ColonyManager.SettingProductionMode".Loc().ToString(),
+                    GetCycleLabel = () => ProductionModeLabel(
+                        ColonyManagerReflection.GetEnumMemberName(job, "Mode")),
+                    CycleValue = dir => ColonyManagerReflection.CycleEnumMember(job, "Mode", dir)
+                });
+            }
+        }
+
+        private static void OpenRecipeSwapPicker(object job)
+        {
+            var candidates = ColonyManagerReflection.GetRecipeSwapCandidates(
+                ColonyManagerReflection.GetObjectMember(job, "Tab"), job);
+            if (candidates.Count == 0)
+            {
+                TolkHelper.Speak("RimWorldAccess.ColonyManager.RecipeNoAlternatives".Loc());
+                return;
+            }
+            OpenPicker(candidates, PickerPurpose.ChangeRecipe, Level.JobDetail,
+                "RimWorldAccess.ColonyManager.PickerRecipeTitle");
+        }
+
+        /// <summary>
+        /// Speakable name for a production mode. The mod stores these as bare enum values, so we
+        /// translate the ones we know and fall back to the raw name for anything new.
+        /// </summary>
+        private static string ProductionModeLabel(string enumName)
+        {
+            switch (enumName)
+            {
+                case "MaintainStock":
+                    return "RimWorldAccess.ColonyManager.ProductionModeMaintainStock".Loc().ToString();
+                case "ConsumeSurplus":
+                    return "RimWorldAccess.ColonyManager.ProductionModeConsumeSurplus".Loc().ToString();
+                default:
+                    return enumName;
+            }
+        }
+
         private static int CountAllowed(object job, ColonyManagerJobSchema.Spec spec)
         {
             int n = 0;
@@ -912,6 +1075,16 @@ namespace RimWorldAccess
                     setting.CycleArea(direction);
                     AnnounceCurrentDetail(SpeechPriority.Normal);
                     break;
+                case SettingKind.Cycle:
+                    setting.CycleValue(direction);
+                    AnnounceCurrentDetail(SpeechPriority.Normal);
+                    break;
+                case SettingKind.Choice:
+                    if (direction > 0)
+                    {
+                        setting.OpenChoicePicker();
+                    }
+                    break;
                 case SettingKind.DefList:
                     if (direction > 0)
                     {
@@ -936,6 +1109,13 @@ namespace RimWorldAccess
                     break;
                 case SettingKind.DefList:
                     OpenDefList(setting);
+                    break;
+                case SettingKind.Choice:
+                    setting.OpenChoicePicker();
+                    break;
+                case SettingKind.Cycle:
+                    setting.CycleValue(1);
+                    AnnounceCurrentDetail(SpeechPriority.Normal);
                     break;
                 default:
                     AnnounceCurrentDetail(SpeechPriority.Normal);
@@ -993,6 +1173,12 @@ namespace RimWorldAccess
                 case SettingKind.Area:
                     announcement = "RimWorldAccess.ColonyManager.SettingArea2".Loc(setting.Label, setting.GetAreaLabel(), position).ToString();
                     break;
+                case SettingKind.Choice:
+                    announcement = "RimWorldAccess.ColonyManager.SettingChoice".Loc(setting.Label, setting.GetChoiceLabel(), position).ToString();
+                    break;
+                case SettingKind.Cycle:
+                    announcement = "RimWorldAccess.ColonyManager.SettingChoice".Loc(setting.Label, setting.GetCycleLabel(), position).ToString();
+                    break;
                 default: // DefList
                     announcement = "RimWorldAccess.ColonyManager.SettingDefList".Loc(setting.Label, setting.GetAllowedCount(), setting.GetTotalCount(), position).ToString();
                     break;
@@ -1033,14 +1219,7 @@ namespace RimWorldAccess
             typeahead.ClearSearch();
             // Rebuild so the def-list row's allowed-count reflects any changes.
             BuildDetailSettings(detailJob);
-            if (detailIndex >= detailSettings.Count)
-            {
-                detailIndex = detailSettings.Count - 1;
-            }
-            if (detailIndex < 0)
-            {
-                detailIndex = 0;
-            }
+            ClampDetailIndex();
             TolkHelper.Speak("RimWorldAccess.ColonyManager.BackToSettings".Loc());
             AnnounceCurrentDetail(SpeechPriority.Normal);
         }
@@ -1078,6 +1257,124 @@ namespace RimWorldAccess
         private static string DefLabel(object def)
         {
             return (def as Def)?.LabelCap.ToString() ?? (def as Def)?.defName ?? def?.ToString() ?? "";
+        }
+
+        // ---- Picker sub-level (which animal to herd / what to produce) ----
+
+        /// <summary>
+        /// Enter the picker over a list of Defs. Unlike the def-list level — where every entry is
+        /// independently allowed or disallowed — exactly one entry is chosen here, and confirming
+        /// it either creates a job or repoints the open one.
+        /// </summary>
+        private static void OpenPicker(List<object> choices, PickerPurpose purpose, Level returnLevel, string titleKey)
+        {
+            if (choices == null || choices.Count == 0)
+            {
+                TolkHelper.Speak("RimWorldAccess.ColonyManager.PickerEmpty".Loc());
+                return;
+            }
+
+            pickerItems.Clear();
+            pickerItems.AddRange(choices);
+            pickerPurpose = purpose;
+            pickerReturnLevel = returnLevel;
+            pickerIndex = 0;
+            level = Level.Picker;
+            typeahead.ClearSearch();
+
+            ColonyManagerDebug.Log($"OpenPicker: purpose={purpose}, {pickerItems.Count} option(s)");
+            TolkHelper.SpeakData(
+                titleKey.Loc(pickerItems.Count).ToString()
+                + " " + "RimWorldAccess.ColonyManager.PickerHint".Loc().ToString());
+            AnnounceCurrentPickerItem(SpeechPriority.Normal);
+        }
+
+        private static void CancelPicker()
+        {
+            var back = pickerReturnLevel;
+            pickerItems.Clear();
+            pickerIndex = 0;
+            typeahead.ClearSearch();
+            level = back;
+            TolkHelper.Speak("RimWorldAccess.ColonyManager.PickerCancelled".Loc());
+            if (back == Level.JobDetail)
+            {
+                AnnounceCurrentDetail(SpeechPriority.Normal);
+            }
+            else
+            {
+                AnnounceCurrentJob(SpeechPriority.Normal);
+            }
+        }
+
+        private static void ConfirmPicker()
+        {
+            if (pickerIndex < 0 || pickerIndex >= pickerItems.Count)
+            {
+                return;
+            }
+            var choice = pickerItems[pickerIndex];
+            var purpose = pickerPurpose;
+
+            pickerItems.Clear();
+            pickerIndex = 0;
+            typeahead.ClearSearch();
+
+            if (purpose == PickerPurpose.CreateJob)
+            {
+                level = Level.Jobs;
+                var tab = CurrentTab;
+                var job = ColonyManagerReflection.CreateAndAddManagedJob(manager, tab, choice);
+                if (job == null)
+                {
+                    TolkHelper.Speak("RimWorldAccess.ColonyManager.NewJobFailed".Loc());
+                    AnnounceCurrentJob(SpeechPriority.Normal);
+                    return;
+                }
+                SelectAndAnnounceNewJob(tab, job);
+                return;
+            }
+
+            // ChangeRecipe: repoint the open production job. The mod's Recipe setter also re-aims
+            // the job's threshold at the new product, so the detail rows are rebuilt afterwards.
+            level = Level.JobDetail;
+            if (!ColonyManagerReflection.SetProductionRecipe(detailJob, choice))
+            {
+                TolkHelper.Speak("RimWorldAccess.ColonyManager.RecipeChangeFailed".Loc());
+                AnnounceCurrentDetail(SpeechPriority.Normal);
+                return;
+            }
+            BuildDetailSettings(detailJob);
+            ClampDetailIndex();
+            ColonyManagerDebug.Log($"ConfirmPicker: recipe -> '{DefLabel(choice)}'");
+            TolkHelper.SpeakData(
+                "RimWorldAccess.ColonyManager.RecipeChanged".Loc(DefLabel(choice)).ToString());
+            AnnounceCurrentDetail(SpeechPriority.Normal);
+        }
+
+        private static void AnnounceCurrentPickerItem(SpeechPriority priority)
+        {
+            if (pickerIndex < 0 || pickerIndex >= pickerItems.Count)
+            {
+                return;
+            }
+            string position = MenuHelper.FormatPosition(pickerIndex, pickerItems.Count);
+            string announcement = "RimWorldAccess.ColonyManager.PickerItem".Loc(
+                DefLabel(pickerItems[pickerIndex]), position).ToString();
+            ColonyManagerDebug.Log($"announce picker: {announcement}");
+            TolkHelper.SpeakData(typeahead.BuildItemAnnouncement(announcement), priority);
+        }
+
+        private static void ClampDetailIndex()
+        {
+            if (detailIndex >= detailSettings.Count)
+            {
+                detailIndex = detailSettings.Count - 1;
+            }
+            if (detailIndex < 0)
+            {
+                detailIndex = 0;
+            }
         }
 
         /// <summary>
@@ -1186,11 +1483,11 @@ namespace RimWorldAccess
             string status = "";
             if (ColonyManagerReflection.JobIsSuspended(job))
             {
-                status = " " + "RimWorldAccess.ColonyManager.StatusSuspended".Loc().ToString();
+                status = ", " + "RimWorldAccess.ColonyManager.StatusSuspended".Loc().ToString();
             }
             else if (ColonyManagerReflection.JobIsCompleted(job))
             {
-                status = " " + "RimWorldAccess.ColonyManager.StatusCompleted".Loc().ToString();
+                status = ", " + "RimWorldAccess.ColonyManager.StatusCompleted".Loc().ToString();
             }
 
             // Targets text. Livestock's TargetsLabel is a set of raw translation keys, so build a
@@ -1240,6 +1537,10 @@ namespace RimWorldAccess
                         detailIndex = newIndex;
                         AnnounceCurrentDetail(SpeechPriority.Normal);
                         break;
+                    case Level.Picker:
+                        pickerIndex = newIndex;
+                        AnnounceCurrentPickerItem(SpeechPriority.Normal);
+                        break;
                     default:
                         defListIndex = newIndex;
                         AnnounceCurrentDef(SpeechPriority.Normal);
@@ -1273,6 +1574,12 @@ namespace RimWorldAccess
                     foreach (var setting in detailSettings)
                     {
                         labels.Add(setting.Label);
+                    }
+                    break;
+                case Level.Picker:
+                    foreach (var choice in pickerItems)
+                    {
+                        labels.Add(DefLabel(choice));
                     }
                     break;
                 default:

@@ -532,7 +532,12 @@ namespace RimWorldAccess
             }
         }
 
-        /// <summary>True if the current amount already satisfies the job's target ("keep N").</summary>
+        /// <summary>
+        /// True if the current amount already satisfies the job's target ("keep N").
+        /// <c>DoesCountMeetTarget</c> takes the amount to test — feeding it the target instead
+        /// compares the target against itself and is always true, so the current count is what
+        /// must go in.
+        /// </summary>
         public static bool ThresholdMeetsTarget(object job)
         {
             var t = GetThreshold(job);
@@ -542,8 +547,12 @@ namespace RimWorldAccess
             }
             try
             {
-                int target = GetThresholdTarget(job);
-                return thresholdDoesCountMeetTarget.Invoke(t, new object[] { target }) is bool b && b;
+                int current = GetThresholdCurrentCount(job);
+                if (current < 0)
+                {
+                    return false;
+                }
+                return thresholdDoesCountMeetTarget.Invoke(t, new object[] { current }) is bool b && b;
             }
             catch (Exception e)
             {
@@ -905,6 +914,248 @@ namespace RimWorldAccess
             {
                 ColonyManagerDebug.Error($"SetDefAllowed '{setMethod}'", e);
                 return false;
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Job creation that needs an up-front choice (which animal / what to produce)
+        // ---------------------------------------------------------------
+
+        // Colony Manager's Livestock and Production tabs each have an "Available" panel the
+        // player picks from before a job exists: a list of tameable animals, or of recipes
+        // craftable on the map's workbenches. Both are plain Def lists the tab caches in a
+        // private field and repopulates in Refresh(), so we can offer exactly the same choices
+        // as a keyboard list instead of refusing to create these job types.
+        private static readonly Dictionary<string, string> PickerFieldByTab =
+            new Dictionary<string, string>
+            {
+                { "ManagerTab_Livestock", "_availablePawnKinds" },
+                { "ManagerTab_Production", "_availableRecipes" },
+            };
+
+        /// <summary>
+        /// True when creating a job on this tab requires choosing a Def first. Creating one
+        /// blind would add an invalid job (a pawn-kind-less Livestock job even throws when the
+        /// save is reloaded), so these always go through the picker.
+        /// </summary>
+        public static bool TabNeedsChoiceToCreate(object tab) =>
+            tab != null && PickerFieldByTab.ContainsKey(tab.GetType().Name);
+
+        /// <summary>
+        /// The Defs offered for a new job on this tab (tameable animals / craftable recipes),
+        /// refreshed from the map first so the list matches what the mod would draw right now.
+        /// Empty when the tab needs no choice or the mod's API has shifted.
+        /// </summary>
+        public static List<object> GetCreationChoices(object tab)
+        {
+            var result = new List<object>();
+            if (tab == null || !PickerFieldByTab.TryGetValue(tab.GetType().Name, out string fieldName))
+            {
+                return result;
+            }
+            try
+            {
+                // Refresh() is what the tab itself calls before drawing the available list.
+                AccessTools.Method(tab.GetType(), "Refresh")?.Invoke(tab, null);
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("GetCreationChoices: Refresh failed", e);
+            }
+            if (GetObjectMember(tab, fieldName) is IEnumerable list)
+            {
+                foreach (var def in list)
+                {
+                    if (def != null)
+                    {
+                        result.Add(def);
+                    }
+                }
+            }
+            ColonyManagerDebug.Log($"GetCreationChoices({tab.GetType().Name}): {result.Count} option(s)");
+            return result;
+        }
+
+        /// <summary>
+        /// Create a job of the tab's type around the chosen Def, mark it managed and add it to
+        /// the tracker. Mirrors how each tab builds the job itself: Livestock takes the pawn
+        /// kind as a MakeNewJob argument, while Production makes an argument-less job and then
+        /// assigns the recipe — whose setter is what wires the job's threshold to count that
+        /// recipe's product. Returns the new job, or null.
+        /// </summary>
+        public static object CreateAndAddManagedJob(object manager, object tab, object choice)
+        {
+            if (manager == null || tab == null || choice == null
+                || tabMakeNewJob == null || jobTrackerAddMethod == null)
+            {
+                ColonyManagerDebug.Warn("CreateAndAddManagedJob(choice): required members unresolved");
+                return null;
+            }
+            try
+            {
+                bool passAsArgument = tab.GetType().Name == "ManagerTab_Livestock";
+                var job = tabMakeNewJob.Invoke(tab, new object[]
+                {
+                    passAsArgument ? new[] { choice } : new object[0]
+                });
+                if (job == null)
+                {
+                    ColonyManagerDebug.Warn("CreateAndAddManagedJob(choice): MakeNewJob returned null");
+                    return null;
+                }
+
+                if (!passAsArgument && !SetProductionRecipe(job, choice))
+                {
+                    // Without a recipe a production job is meaningless and its threshold counts
+                    // nothing — drop it rather than adding a broken job to the colony.
+                    ColonyManagerDebug.Warn("CreateAndAddManagedJob(choice): could not assign recipe, discarding job");
+                    return null;
+                }
+
+                if (jobIsManagedProp != null && jobIsManagedProp.CanWrite)
+                {
+                    jobIsManagedProp.SetValue(job, true);
+                }
+                var tracker = GetJobTracker(manager);
+                if (tracker == null)
+                {
+                    return null;
+                }
+                jobTrackerAddMethod.Invoke(tracker, new[] { job });
+                return job;
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("CreateAndAddManagedJob(choice) failed", e);
+                return null;
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Production specifics (recipe + mode)
+        // ---------------------------------------------------------------
+
+        public static bool IsProductionJob(object job) =>
+            job != null && job.GetType().Name == "ManagerJob_Production";
+
+        /// <summary>The RecipeDef a production job makes, or null.</summary>
+        public static Def GetProductionRecipe(object job) => GetObjectMember(job, "Recipe") as Def;
+
+        /// <summary>
+        /// Point a production job at a different recipe. The mod's own Recipe setter re-wires
+        /// the job's threshold filter to count the new recipe's product, so this is the whole
+        /// operation — nothing else needs updating.
+        /// </summary>
+        public static bool SetProductionRecipe(object job, object recipe)
+        {
+            var prop = PropOf(job, "Recipe");
+            if (prop == null || !prop.CanWrite || recipe == null)
+            {
+                return false;
+            }
+            try
+            {
+                prop.SetValue(job, recipe);
+                return ReferenceEquals(GetProductionRecipe(job), recipe);
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("SetProductionRecipe failed", e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The recipes the mod itself considers valid substitutes for this job's product
+        /// (its own "swap recipe" list — e.g. the same blocks made at a different bench).
+        /// </summary>
+        public static List<object> GetRecipeSwapCandidates(object tab, object job)
+        {
+            var result = new List<object>();
+            if (tab == null || job == null)
+            {
+                return result;
+            }
+            var m = AccessTools.Method(tab.GetType(), "ComputeRecipeSwapCandidates");
+            if (m == null)
+            {
+                return result;
+            }
+            try
+            {
+                if (m.Invoke(tab, new[] { job }) is IEnumerable list)
+                {
+                    foreach (var r in list)
+                    {
+                        if (r != null)
+                        {
+                            result.Add(r);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error("GetRecipeSwapCandidates failed", e);
+            }
+            return result;
+        }
+
+        // ---- Generic enum member (production mode, and any future single-choice field) ----
+
+        /// <summary>True if the named member exists and holds an enum value.</summary>
+        public static bool HasEnumMember(object obj, string name)
+        {
+            var f = FieldOf(obj, name);
+            if (f != null)
+            {
+                return f.FieldType.IsEnum;
+            }
+            var p = PropOf(obj, name);
+            return p != null && p.PropertyType.IsEnum && p.CanRead && p.CanWrite;
+        }
+
+        /// <summary>The raw enum value name of the member (e.g. "MaintainStock"), or "".</summary>
+        public static string GetEnumMemberName(object obj, string name) =>
+            GetObjectMember(obj, name)?.ToString() ?? "";
+
+        /// <summary>
+        /// Step the enum member to the next/previous declared value, wrapping. Returns the new
+        /// value's name, or "" if the member isn't a settable enum.
+        /// </summary>
+        public static string CycleEnumMember(object obj, string name, int direction)
+        {
+            if (!HasEnumMember(obj, name))
+            {
+                return "";
+            }
+            try
+            {
+                var current = GetObjectMember(obj, name);
+                if (current == null)
+                {
+                    return "";
+                }
+                var enumType = current.GetType();
+                var values = Enum.GetValues(enumType);
+                if (values.Length == 0)
+                {
+                    return "";
+                }
+                int index = Array.IndexOf(values, current);
+                if (index < 0)
+                {
+                    index = 0;
+                }
+                index = ((index + direction) % values.Length + values.Length) % values.Length;
+                var next = values.GetValue(index);
+                SetObjectMember(obj, name, next);
+                return GetEnumMemberName(obj, name);
+            }
+            catch (Exception e)
+            {
+                ColonyManagerDebug.Error($"CycleEnumMember '{name}'", e);
+                return "";
             }
         }
     }

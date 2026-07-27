@@ -57,16 +57,19 @@ mod-settings menu, just applied to a model instead of to widgets.
   text is localized.
 
 ## Navigation model & keys
-Four nested levels; Escape/Left steps back one level (Escape at Tabs closes the window):
+Five nested levels; Escape/Left steps back one level (Escape at Tabs closes the window):
 
 - **Tabs** — Up/Down/Home/End + typeahead; Enter/Right enters a tab.
 - **Jobs** (a tab's job list) — Up/Down/Home/End + typeahead; Enter/Right opens the job detail;
   **Space** suspend/resume; **Ctrl+N** new job; **Delete** delete job; **Ctrl+Up/Down** reorder.
 - **JobDetail** (per-job settings) — Up/Down/Home/End + typeahead between settings; **Left/Right**
   adjusts the current setting (threshold ±nice-step, **Ctrl+Left/Right** = ±1; toggle off/on; area
-  cycles); **Enter/Space** activates (flips a toggle / opens a def-list).
+  and mode cycle); **Enter/Space** activates (flips a toggle / opens a def-list or picker).
 - **DefList** (which animals/trees/plants/minerals) — Up/Down/Home/End + typeahead; **Space/Enter**
-  toggles the selected def allowed/not.
+  toggles the selected def allowed/not. Multi-select: every entry is independent.
+- **Picker** (which animal to herd / what to produce) — Up/Down/Home/End + typeahead;
+  **Enter/Space** confirms the one choice, Escape/Left cancels. Single-select, and confirming is
+  what performs the action (creating the job, or repointing a production job at another recipe).
 
 ## Implemented
 - Tabs + job-list navigation; read job target + status (suspended/target-met). Job-list rows read
@@ -89,24 +92,39 @@ Four nested levels; Escape/Left steps back one level (Escape at Tabs closes the 
     draws, so setting only `CountTargets` is clobbered on the next frame (see
     `ColonyManagerReflection.SyncLivestockCountBuffer`). Threshold sliders bind directly to
     `TargetCount`, so those need no such mirror.
-  - **Production:** threshold ("keep N") + workbench area + invert-area. Recipe picker and
-    production mode are deferred.
-- Covered tabs: **Hunting, Forestry, Foraging, Mining, Livestock, Production** (edit), plus **Power**
-  and any read-only job (announced as read-only status, never a silent dead-end).
+  - **Production:** what the job makes (`Recipe`), production mode (maintain stock / consume
+    surplus), threshold ("keep N"), workbench area + invert-area.
+- Covered tabs: **Hunting, Forestry, Foraging, Mining, Livestock, Production** (create + edit), plus
+  **Power** and any read-only job (announced as read-only status, never a silent dead-end).
 - **Informational tabs** (Overview / Logs / Import & Export) announce as "information" and don't
   drop into an empty job list or offer job creation.
-- **Safe creation guard:** Ctrl+N on Livestock/Production is refused with a spoken explanation —
-  their `MakeNewJob()` with no picker produces an invalid job (a pawn-kind-less Livestock job even
-  throws on save reload), so blind creation would corrupt the colony. Editing existing jobs of
-  those types works fully.
+- **Job creation with a choice:** Livestock and Production jobs are meaningless without an animal
+  or a product — and a pawn-kind-less Livestock job throws when the save is reloaded. Ctrl+N on
+  those tabs opens the **Picker** level over the tab's own available list
+  (`ManagerTab_Livestock._availablePawnKinds` / `ManagerTab_Production._availableRecipes`, both
+  repopulated by the tab's `Refresh()`), and only creates the job once a choice is confirmed.
+  Livestock passes the pawn kind straight to `MakeNewJob`; Production makes an argument-less job
+  and then assigns `Recipe`, whose setter is what aims the job's threshold at that recipe's
+  product. If the recipe can't be assigned the job is discarded rather than added broken.
+- **Changing a production job's product** uses the mod's own `ComputeRecipeSwapCandidates` — the
+  equivalents it considers valid (same product, different bench). Producing something else entirely
+  is a different job, created from the Jobs level.
 
 ## Not yet (follow-up)
-- **Livestock/Production job creation** from the keyboard (needs an animal / recipe picker level).
-- **Production** recipe picker + maintain/consume mode; **Power** has essentially nothing to tune.
 - **Overview / Logs / Import-Export** content (summary tables, history, import/export flows).
+- **Power** has essentially nothing to tune.
 - Polish worth considering: **Alt+I** info card on a selected def/job (RWA has `InfoCardState`);
   **numeric direct entry** for a threshold/target (RWA has a text-input pipeline); a **delete
   confirmation** via `WindowlessConfirmationState`; Hunting's meat-type toggles.
+
+## Gotchas found the hard way
+- `Trigger_Threshold.DoesCountMeetTarget(int count)` takes the **amount to test**. Passing the
+  target into it compares the target with itself and is always true — every job then claims its
+  target is met. Feed it `GetCurrentCount(false)`.
+- A value edited by reflection sticks only if the mod's per-frame draw doesn't re-derive it from a
+  UI buffer. `ManagerTab_Livestock.DoCountField` re-parses `_newCounts` into `CountTargets` every
+  frame, so a population target must be written to both (`SyncLivestockCountBuffer`). Verify
+  persistence live after a few seconds — don't trust the immediate read-back.
 
 ## DO NOT
 - Do not add a hard reference to Colony Manager's assembly — keep everything reflection-based.

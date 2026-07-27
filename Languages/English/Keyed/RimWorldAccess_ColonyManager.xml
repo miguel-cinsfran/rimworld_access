@@ -47,7 +47,6 @@
   <!-- Create / delete / reorder. {0} job label -->
   <RimWorldAccess.ColonyManager.NewJobCreated>New job created: {0}. Press Enter to configure it.</RimWorldAccess.ColonyManager.NewJobCreated>
   <RimWorldAccess.ColonyManager.NewJobFailed>Could not create a new job</RimWorldAccess.ColonyManager.NewJobFailed>
-  <RimWorldAccess.ColonyManager.NewJobNeedsPicker>Creating this job needs an animal or recipe to be chosen, which is not available from here yet. You can still open and edit existing jobs of this type.</RimWorldAccess.ColonyManager.NewJobNeedsPicker>
   <RimWorldAccess.ColonyManager.JobDeleted>{0} deleted</RimWorldAccess.ColonyManager.JobDeleted>
 
   <!-- Job detail level. {0} job label -->
@@ -124,4 +123,20 @@
   <RimWorldAccess.ColonyManager.SettingTrainingArea>Training area</RimWorldAccess.ColonyManager.SettingTrainingArea>
   <!-- Production -->
   <RimWorldAccess.ColonyManager.SettingWorkbenchArea>Workbench area</RimWorldAccess.ColonyManager.SettingWorkbenchArea>
+  <!-- Picker level: choose one animal / product before a job exists -->
+  <RimWorldAccess.ColonyManager.PickerCreateTitle>Choose what this job is for: {0} options.</RimWorldAccess.ColonyManager.PickerCreateTitle>
+  <RimWorldAccess.ColonyManager.PickerRecipeTitle>Choose the product: {0} options.</RimWorldAccess.ColonyManager.PickerRecipeTitle>
+  <RimWorldAccess.ColonyManager.PickerHint>Type to search, Enter to confirm, Escape to cancel.</RimWorldAccess.ColonyManager.PickerHint>
+  <RimWorldAccess.ColonyManager.PickerItem>{0}, {1}</RimWorldAccess.ColonyManager.PickerItem>
+  <RimWorldAccess.ColonyManager.PickerEmpty>Nothing available to choose from here.</RimWorldAccess.ColonyManager.PickerEmpty>
+  <RimWorldAccess.ColonyManager.PickerCancelled>Cancelled.</RimWorldAccess.ColonyManager.PickerCancelled>
+  <!-- Production: product and mode -->
+  <RimWorldAccess.ColonyManager.SettingProduct>Product</RimWorldAccess.ColonyManager.SettingProduct>
+  <RimWorldAccess.ColonyManager.SettingProductionMode>Production mode</RimWorldAccess.ColonyManager.SettingProductionMode>
+  <RimWorldAccess.ColonyManager.SettingChoice>{0}: {1}. {2}</RimWorldAccess.ColonyManager.SettingChoice>
+  <RimWorldAccess.ColonyManager.ProductionModeMaintainStock>keep this much in stock</RimWorldAccess.ColonyManager.ProductionModeMaintainStock>
+  <RimWorldAccess.ColonyManager.ProductionModeConsumeSurplus>use up the surplus</RimWorldAccess.ColonyManager.ProductionModeConsumeSurplus>
+  <RimWorldAccess.ColonyManager.RecipeNoAlternatives>There is no other way to make this product. To produce something else, create a new job.</RimWorldAccess.ColonyManager.RecipeNoAlternatives>
+  <RimWorldAccess.ColonyManager.RecipeChanged>Product changed to {0}.</RimWorldAccess.ColonyManager.RecipeChanged>
+  <RimWorldAccess.ColonyManager.RecipeChangeFailed>The product could not be changed.</RimWorldAccess.ColonyManager.RecipeChangeFailed>
 </LanguageData>
