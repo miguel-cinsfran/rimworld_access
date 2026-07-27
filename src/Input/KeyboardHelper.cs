@@ -274,6 +274,7 @@ namespace RimWorldAccess
                 || QuestMenuState.IsActive
                 // Colony Manager Redux (optional mod) manager window
                 || ColonyManagerState.IsActive
+                || AutoCombatState.IsActive
                 || NotificationMenuState.IsActive
                 || AssignMenuState.IsActive
                 || WorkMenuState.IsActive

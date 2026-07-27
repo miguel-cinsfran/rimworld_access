@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Menú de ajustes en lote para el mod opcional Drafted Auto-Combat (Alt+T). Actúa sobre
+       todos los colonos seleccionados, por eso las filas informan una cuenta y no un sí/no. -->
+  <RimWorldAccess.AutoCombat.Opened>Ajustes de Auto-Combat para {0} seleccionados.</RimWorldAccess.AutoCombat.Opened>
+  <RimWorldAccess.AutoCombat.Hint>Arriba y abajo eligen un ajuste, izquierda lo apaga para todos, derecha lo enciende, Enter lo invierte, Escape cierra.</RimWorldAccess.AutoCombat.Hint>
+  <RimWorldAccess.AutoCombat.Closed>Ajustes de Auto-Combat cerrados.</RimWorldAccess.AutoCombat.Closed>
+  <RimWorldAccess.AutoCombat.NotInstalled>Drafted Auto-Combat no está instalado.</RimWorldAccess.AutoCombat.NotInstalled>
+  <RimWorldAccess.AutoCombat.NoPawns>Primero selecciona al menos un colono.</RimWorldAccess.AutoCombat.NoPawns>
+  <RimWorldAccess.AutoCombat.SelectionLost>Ya no hay nada seleccionado. Ajustes de Auto-Combat cerrados.</RimWorldAccess.AutoCombat.SelectionLost>
+
+  <!-- Nombres de fila, iguales a los de los gizmos del mod. -->
+  <RimWorldAccess.AutoCombat.Row.AutoCombat>Auto-Combat</RimWorldAccess.AutoCombat.Row.AutoCombat>
+  <RimWorldAccess.AutoCombat.Row.TakeCover>Auto-cobertura</RimWorldAccess.AutoCombat.Row.TakeCover>
+  <RimWorldAccess.AutoCombat.Row.MeleeCharge>Carga larga</RimWorldAccess.AutoCombat.Row.MeleeCharge>
+  <RimWorldAccess.AutoCombat.Row.AIControl>Control por IA</RimWorldAccess.AutoCombat.Row.AIControl>
+  <RimWorldAccess.AutoCombat.Row.AutoUseAll>Usar todas las habilidades solo</RimWorldAccess.AutoCombat.Row.AutoUseAll>
+
+  <!-- {0} = nombre, {1} = estado, {2} = posición. -->
+  <RimWorldAccess.AutoCombat.Row>{0}: {1}. {2}</RimWorldAccess.AutoCombat.Row>
+  <RimWorldAccess.AutoCombat.On>activado</RimWorldAccess.AutoCombat.On>
+  <RimWorldAccess.AutoCombat.Off>desactivado</RimWorldAccess.AutoCombat.Off>
+  <RimWorldAccess.AutoCombat.OnAll>activado en todos</RimWorldAccess.AutoCombat.OnAll>
+  <RimWorldAccess.AutoCombat.OffAll>desactivado en todos</RimWorldAccess.AutoCombat.OffAll>
+  <!-- {0} = cuántos lo tienen activado, {1} = cuántos hay seleccionados. -->
+  <RimWorldAccess.AutoCombat.OnSome>activado en {0} de {1}</RimWorldAccess.AutoCombat.OnSome>
+
+  <!-- Al aplicar. {0} = nombre, {1} = estado, {2} = cuántos cambiaron. -->
+  <RimWorldAccess.AutoCombat.Applied>{0} quedó {1} en {2}.</RimWorldAccess.AutoCombat.Applied>
+  <RimWorldAccess.AutoCombat.NoChange>{0} ya estaba {1} en todos.</RimWorldAccess.AutoCombat.NoChange>
+  <RimWorldAccess.AutoCombat.CouldNotApply>No se pudo poner {0} en {1}.</RimWorldAccess.AutoCombat.CouldNotApply>
+  <RimWorldAccess.AutoCombat.RefusedNoAbilities>{0} no tienen ninguna habilidad que esto pueda lanzar solo.</RimWorldAccess.AutoCombat.RefusedNoAbilities>
+  <RimWorldAccess.AutoCombat.RefusedAIControl>Rechazado en {0} porque el control por IA está activado.</RimWorldAccess.AutoCombat.RefusedAIControl>
+  <RimWorldAccess.AutoCombat.RefusedGeneric>{0} no aceptaron el cambio.</RimWorldAccess.AutoCombat.RefusedGeneric>
+
+  <!-- Por qué un ajuste puede no hacer nada, dicho junto con la fila. -->
+  <RimWorldAccess.AutoCombat.CaveatAutoCombatOff>{0} tienen Auto-Combat apagado, así que se guarda pero todavía no les hace nada.</RimWorldAccess.AutoCombat.CaveatAutoCombatOff>
+  <RimWorldAccess.AutoCombat.CaveatAIControl>No disponible en {0} mientras el control por IA esté activado.</RimWorldAccess.AutoCombat.CaveatAIControl>
+  <RimWorldAccess.AutoCombat.CaveatNoAbilities>{0} no tienen ninguna habilidad compatible; los psicocastos no cuentan.</RimWorldAccess.AutoCombat.CaveatNoAbilities>
+
+</LanguageData>

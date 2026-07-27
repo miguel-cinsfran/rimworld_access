@@ -40,6 +40,7 @@ namespace RimWorldAccess
             // 0.285: Colony Manager Redux window (optional mod). Matches its UnifiedKeyboardPatch
             // dispatch priority; searches the current tab list or job list by label.
             TypeaheadDispatcher.Register(0.285, () => ColonyManagerState.IsTypeaheadActive(), c => ColonyManagerState.HandleCharacterInput(c));
+            TypeaheadDispatcher.Register(0.287, () => AutoCombatState.IsTypeaheadActive(), c => AutoCombatState.HandleCharacterInput(c));
 
             // 1.0-3.0: Menus
             TypeaheadDispatcher.Register(1.5, () => SellableItemsState.IsActive, c => SellableItemsState.ProcessTypeaheadCharacter(c));

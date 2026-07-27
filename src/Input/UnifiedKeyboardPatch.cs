@@ -1223,6 +1223,23 @@ namespace RimWorldAccess
                 }
             }
 
+            // ===== PRIORITY 0.287: Drafted Auto-Combat batch menu (optional third-party mod) =====
+            // Windowless menu for setting the mod's per-pawn combat switches across the whole
+            // selection at once (opened with Alt+T below). Ahead of map navigation so arrow keys
+            // drive the menu. Inactive (and zero-cost) when the mod isn't loaded.
+            if (AutoCombatState.IsActive)
+            {
+                bool shift = Event.current.shift;
+                bool ctrl = Event.current.control;
+                bool alt = KeyboardHelper.IsAltHeld;
+
+                if (AutoCombatState.HandleInput(key, shift, ctrl, alt))
+                {
+                    Event.current.Use();
+                    return;
+                }
+            }
+
             // ===== PRIORITY 0.29: Handle area selection menu if active =====
             // This prompts for area selection when an area designator is chosen from Architect
             if (AreaSelectionMenuState.IsActive)
@@ -5984,6 +6001,24 @@ namespace RimWorldAccess
                 }
             }
 
+            // ===== PRIORITY 6.515: Drafted Auto-Combat batch settings with Alt+T =====
+            // Sets the optional mod's combat switches for every selected colonist at once. The
+            // mod's own equivalent is a right-click float menu on a drafted gizmo, which is
+            // mouse-only and reports just one pawn's state.
+            if (key == KeyCode.T && KeyboardHelper.IsAltHeld)
+            {
+                if (Current.ProgramState == ProgramState.Playing &&
+                    Find.CurrentMap != null &&
+                    (Find.WindowStack == null || !Find.WindowStack.WindowsPreventCameraMotion) &&
+                    !ZoneCreationState.IsInCreationMode &&
+                    !KeyboardHelper.IsAnyAccessibilityMenuActive())
+                {
+                    AutoCombatState.Open();
+                    Event.current.Use();
+                    return;
+                }
+            }
+
             // ===== PRIORITY 6.52: Display needs info with Alt+N (if pawn is selected) =====
             if (key == KeyCode.N && KeyboardHelper.IsAltHeld)
             {
@@ -6241,7 +6276,9 @@ namespace RimWorldAccess
 
             // ===== PRIORITY 6.55: Announce time (T) or performance (Alt+T) =====
             // Shift+T is intentionally ignored here so it can reach any gizmo whose hotkey is T.
-            if (key == KeyCode.T && !Event.current.control && !Event.current.shift)
+            // Alt+T is the Auto-Combat batch menu, handled earlier; exclude it here so a T that
+            // falls through this far can never also announce the time.
+            if (key == KeyCode.T && !Event.current.control && !Event.current.shift && !KeyboardHelper.IsAltHeld)
             {
                 // Only announce if:
                 // 1. We're in gameplay (not at main menu)

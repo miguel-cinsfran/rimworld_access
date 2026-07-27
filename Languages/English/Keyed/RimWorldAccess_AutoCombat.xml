@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Batch settings menu for the optional mod Drafted Auto-Combat (Alt+T). Acts on every
+       selected colonist at once, which is why the rows report a count rather than on/off. -->
+  <RimWorldAccess.AutoCombat.Opened>Auto-Combat settings for {0} selected.</RimWorldAccess.AutoCombat.Opened>
+  <RimWorldAccess.AutoCombat.Hint>Up and down choose a setting, left turns it off for everyone, right turns it on, Enter flips it, Escape closes.</RimWorldAccess.AutoCombat.Hint>
+  <RimWorldAccess.AutoCombat.Closed>Auto-Combat settings closed.</RimWorldAccess.AutoCombat.Closed>
+  <RimWorldAccess.AutoCombat.NotInstalled>Drafted Auto-Combat is not installed.</RimWorldAccess.AutoCombat.NotInstalled>
+  <RimWorldAccess.AutoCombat.NoPawns>Select at least one colonist first.</RimWorldAccess.AutoCombat.NoPawns>
+  <RimWorldAccess.AutoCombat.SelectionLost>Nothing is selected any more. Auto-Combat settings closed.</RimWorldAccess.AutoCombat.SelectionLost>
+
+  <!-- Row labels, matching the mod's own gizmo names. -->
+  <RimWorldAccess.AutoCombat.Row.AutoCombat>Auto-Combat</RimWorldAccess.AutoCombat.Row.AutoCombat>
+  <RimWorldAccess.AutoCombat.Row.TakeCover>Auto-Cover</RimWorldAccess.AutoCombat.Row.TakeCover>
+  <RimWorldAccess.AutoCombat.Row.MeleeCharge>Long charge</RimWorldAccess.AutoCombat.Row.MeleeCharge>
+  <RimWorldAccess.AutoCombat.Row.AIControl>AI control</RimWorldAccess.AutoCombat.Row.AIControl>
+  <RimWorldAccess.AutoCombat.Row.AutoUseAll>Auto-use all abilities</RimWorldAccess.AutoCombat.Row.AutoUseAll>
+
+  <!-- {0} = label, {1} = state, {2} = position. -->
+  <RimWorldAccess.AutoCombat.Row>{0}: {1}. {2}</RimWorldAccess.AutoCombat.Row>
+  <RimWorldAccess.AutoCombat.On>on</RimWorldAccess.AutoCombat.On>
+  <RimWorldAccess.AutoCombat.Off>off</RimWorldAccess.AutoCombat.Off>
+  <RimWorldAccess.AutoCombat.OnAll>on for all</RimWorldAccess.AutoCombat.OnAll>
+  <RimWorldAccess.AutoCombat.OffAll>off for all</RimWorldAccess.AutoCombat.OffAll>
+  <!-- {0} = how many are on, {1} = how many are selected. -->
+  <RimWorldAccess.AutoCombat.OnSome>on for {0} of {1}</RimWorldAccess.AutoCombat.OnSome>
+
+  <!-- Applying. {0} = label, {1} = state, {2} = how many changed. -->
+  <RimWorldAccess.AutoCombat.Applied>{0} set to {1} for {2}.</RimWorldAccess.AutoCombat.Applied>
+  <RimWorldAccess.AutoCombat.NoChange>{0} was already {1} for everyone.</RimWorldAccess.AutoCombat.NoChange>
+  <RimWorldAccess.AutoCombat.CouldNotApply>{0} could not be set to {1}.</RimWorldAccess.AutoCombat.CouldNotApply>
+  <RimWorldAccess.AutoCombat.RefusedNoAbilities>{0} have no ability this can auto-cast.</RimWorldAccess.AutoCombat.RefusedNoAbilities>
+  <RimWorldAccess.AutoCombat.RefusedAIControl>Refused for {0} because AI control is on.</RimWorldAccess.AutoCombat.RefusedAIControl>
+  <RimWorldAccess.AutoCombat.RefusedGeneric>{0} did not accept the change.</RimWorldAccess.AutoCombat.RefusedGeneric>
+
+  <!-- Why a setting may not do anything, spoken with the row. -->
+  <RimWorldAccess.AutoCombat.CaveatAutoCombatOff>{0} have Auto-Combat off, so it is stored but does nothing for them yet.</RimWorldAccess.AutoCombat.CaveatAutoCombatOff>
+  <RimWorldAccess.AutoCombat.CaveatAIControl>Unavailable for {0} while AI control is on.</RimWorldAccess.AutoCombat.CaveatAIControl>
+  <RimWorldAccess.AutoCombat.CaveatNoAbilities>{0} have no compatible ability; psycasts do not count.</RimWorldAccess.AutoCombat.CaveatNoAbilities>
+
+</LanguageData>
