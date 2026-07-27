@@ -866,7 +866,9 @@ namespace RimWorldAccess
         /// </summary>
         private static void AnnouncePawn(Pawn pawn, int totalInSection)
         {
-            string task = pawn.GetJobReport();
+            // Through the shared helper so a multi-line report (meditation appends its psyfocus
+            // gain rate) is spoken as one line instead of breaking mid-sentence.
+            string task = PawnHelper.GetPawnActivity(pawn);
             if (string.IsNullOrEmpty(task))
                 task = "RimWorldAccess.Pawns.Bar.Idle".Translate();
 

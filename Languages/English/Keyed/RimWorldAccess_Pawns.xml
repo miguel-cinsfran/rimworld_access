@@ -303,6 +303,12 @@
   <RimWorldAccess.Pawns.Bar.WithPosition>{0}. {1}</RimWorldAccess.Pawns.Bar.WithPosition>
   <RimWorldAccess.Pawns.Bar.Idle>Idle</RimWorldAccess.Pawns.Bar.Idle>
 
+  <!-- Live activity updates for the selected pawn (SelectedPawnActivityWatcher).
+       The name is not repeated — it is the pawn you already have selected.
+       {0} = activity as the game words it, {1} = location (Full level only). -->
+  <RimWorldAccess.Pawns.Activity.Update>{0}</RimWorldAccess.Pawns.Activity.Update>
+  <RimWorldAccess.Pawns.Activity.UpdateWithLocation>{0}, {1}</RimWorldAccess.Pawns.Activity.UpdateWithLocation>
+
   <!-- =================================================================
        Interactive gear actions (InteractiveGearHelper).
        Used by the inspection tree's gear category to drop, consume, or

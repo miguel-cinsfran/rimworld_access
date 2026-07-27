@@ -136,6 +136,16 @@
   <RimWorldAccess.UI.Options.WorkMenuView.TableDesc>Filas de personajes por columnas de tipo de trabajo; refleja el juego original y permite ordenar y pintar.</RimWorldAccess.UI.Options.WorkMenuView.TableDesc>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Label>Anunciar reducciones de velocidad forzadas por amenazas</RimWorldAccess.UI.Options.ForcedSlowdowns.Label>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>Cuando está activado, anuncia cuando el juego fuerza la velocidad Normal por una amenaza cercana, y cuando la reducción termina. Solo se activa si la velocidad que elegiste es más rápida que Normal.</RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>
+  <!-- Actividad en vivo del pawn seleccionado. Cada nivel es un disparador distinto, no una frase más larga. -->
+  <RimWorldAccess.UI.Options.ActivityUpdates.Label>Avisos de actividad del pawn seleccionado</RimWorldAccess.UI.Options.ActivityUpdates.Label>
+  <RimWorldAccess.UI.Options.ActivityUpdates.Off>Desactivado</RimWorldAccess.UI.Options.ActivityUpdates.Off>
+  <RimWorldAccess.UI.Options.ActivityUpdates.OffDesc>No dice nada por su cuenta. Igual escuchas la actividad cuando seleccionas al pawn.</RimWorldAccess.UI.Options.ActivityUpdates.OffDesc>
+  <RimWorldAccess.UI.Options.ActivityUpdates.Minimal>Mínimo</RimWorldAccess.UI.Options.ActivityUpdates.Minimal>
+  <RimWorldAccess.UI.Options.ActivityUpdates.MinimalDesc>Avisa solo cuando el pawn empieza un trabajo realmente distinto. Llevar una pila tras otra no dice nada.</RimWorldAccess.UI.Options.ActivityUpdates.MinimalDesc>
+  <RimWorldAccess.UI.Options.ActivityUpdates.Medium>Medio</RimWorldAccess.UI.Options.ActivityUpdates.Medium>
+  <RimWorldAccess.UI.Options.ActivityUpdates.MediumDesc>Avisa cada vez que cambia la descripción del propio juego, así que también dice el paso de "llevando madera" a "llevando acero".</RimWorldAccess.UI.Options.ActivityUpdates.MediumDesc>
+  <RimWorldAccess.UI.Options.ActivityUpdates.Full>Completo</RimWorldAccess.UI.Options.ActivityUpdates.Full>
+  <RimWorldAccess.UI.Options.ActivityUpdates.FullDesc>Agrega dónde está el pawn, y vuelve a avisar cuando se mueve a otro lugar aunque siga en el mismo trabajo.</RimWorldAccess.UI.Options.ActivityUpdates.FullDesc>
   <RimWorldAccess.UI.Options.AbilityCasts.Label>Anunciar el casteo de habilidades</RimWorldAccess.UI.Options.AbilityCasts.Label>
   <RimWorldAccess.UI.Options.AbilityCasts.Desc>Cuando está activado, avisa cuando uno de tus pawns empieza a lanzar una habilidad, cuando el lanzamiento se completa y cuando se interrumpe. Incluye psicasts, habilidades de título real, poderes de Anomalía y habilidades de mods. El sonido de carga solo es fácil de perder en medio de un tiroteo.</RimWorldAccess.UI.Options.AbilityCasts.Desc>
 
