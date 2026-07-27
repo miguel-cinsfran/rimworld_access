@@ -77,6 +77,33 @@ Both were lost when PR #62 rewrote this method to rely solely on `TipStringExtra
 - Syncs with PawnSelectionState when comma/period used, and vice versa
 - Resets bar position on map change
 
+### SelectedPawnActivityWatcher
+Keeps reporting what the **selected** pawn is doing as it changes, so a colonist doesn't go silent
+between one selection announcement and the next. A `GameComponent` re-checks every 30 ticks.
+
+Deliberately distinct from `AbilityCastAnnouncer` (Combat module): a cast is a deliberate order and
+is announced for every player pawn whether selected or not, because in a fight you queue several and
+need to know which landed. Idle work is the opposite — it only matters for the pawn you are watching,
+so this one follows the selection, names nobody (you already know who is selected), speaks at
+`SpeechPriority.Low`, and stays silent when several pawns are selected, when none is, and while an
+RWA menu or a text field owns the screen.
+
+How much it says is a four-level setting (`ActivityUpdateVerbosity`), where each level is a different
+**trigger**, not a longer sentence:
+
+| Level | Speaks when | Text |
+|-------|-------------|------|
+| Off | never | — |
+| Minimal (default) | the `JobDef` changes | report headline only (drops trailing detail lines such as meditation's psyfocus rate) |
+| Medium | the job report text changes | the game's full wording ("hauling wood" → "hauling steel") |
+| Full | the report **or** the pawn's location changes | report + where it is, mirroring the selection announcement |
+
+Notes worth keeping: job reports can be **multi-line** (meditation appends a psyfocus gain rate), so
+they go through `PawnHelper.GetPawnActivity`, which flattens them into one spoken line — the colonist
+bar announcement now uses the same helper for that reason. And an update suppressed by the throttle
+intentionally does *not* advance the baseline (it is spoken at the next check), while one suppressed
+because a menu is open *does* — no backlog when the menu closes.
+
 ## Dependencies
 **Requires:** ScreenReader/, Input/, Map/ (selected pawn, camera mode)
 **Used by:** Work/, Prisoner/

@@ -303,6 +303,12 @@
   <RimWorldAccess.Pawns.Bar.WithPosition>{0}. {1}</RimWorldAccess.Pawns.Bar.WithPosition>
   <RimWorldAccess.Pawns.Bar.Idle>Ocioso</RimWorldAccess.Pawns.Bar.Idle>
 
+  <!-- Avisos de actividad en vivo del pawn seleccionado (SelectedPawnActivityWatcher).
+       El nombre no se repite: es el pawn que ya tienes seleccionado.
+       {0} = actividad tal como la describe el juego, {1} = ubicación (solo en nivel Completo). -->
+  <RimWorldAccess.Pawns.Activity.Update>{0}</RimWorldAccess.Pawns.Activity.Update>
+  <RimWorldAccess.Pawns.Activity.UpdateWithLocation>{0}, {1}</RimWorldAccess.Pawns.Activity.UpdateWithLocation>
+
   <!-- =================================================================
        Interactive gear actions (InteractiveGearHelper).
        Used by the inspection tree's gear category to drop, consume, or

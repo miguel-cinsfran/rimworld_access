@@ -63,6 +63,13 @@ namespace RimWorldAccess
         public WorkMenuView DefaultWorkMenuView = WorkMenuView.Focused;
 
         /// <summary>
+        /// How much the selected pawn's changing activity is announced while it is selected.
+        /// Independent of ability casts, which are announced for every player pawn regardless of
+        /// selection. Default: Minimal (only a genuinely different job).
+        /// </summary>
+        public ActivityUpdateVerbosity SelectedPawnActivityUpdates = ActivityUpdateVerbosity.Minimal;
+
+        /// <summary>
         /// When true, announces a player pawn starting, finishing or breaking off an ability cast
         /// (psycasts, royal-title abilities, Anomaly powers, modded abilities).
         /// Example: "Mila is casting Word of trust." then "Mila casts Word of trust."
@@ -107,6 +114,7 @@ namespace RimWorldAccess
             Scribe_Values.Look(ref DefaultWorkMenuView, "DefaultWorkMenuView", WorkMenuView.Focused);
             Scribe_Values.Look(ref AnnounceForcedSlowdowns, "AnnounceForcedSlowdowns", false);
             Scribe_Values.Look(ref AnnounceAbilityCasts, "AnnounceAbilityCasts", true);
+            Scribe_Values.Look(ref SelectedPawnActivityUpdates, "SelectedPawnActivityUpdates", ActivityUpdateVerbosity.Minimal);
             Scribe_Values.Look(ref LearningHintShownCount, "LearningHintShownCount", 0);
             Scribe_Collections.Look(ref RetaughtOverriddenConcepts, "RetaughtOverriddenConcepts", LookMode.Value);
             if (Scribe.mode == LoadSaveMode.LoadingVars && RetaughtOverriddenConcepts == null)
@@ -124,6 +132,21 @@ namespace RimWorldAccess
     {
         Focused,
         Table
+    }
+
+    /// <summary>
+    /// How much of the selected pawn's changing activity is spoken while it stays selected.
+    /// Each step is a different trigger, not just a longer sentence:
+    /// Off — nothing; Minimal — only when the job itself changes; Medium — whenever the game's own
+    /// job report changes (so "hauling wood" to "hauling steel" counts); Full — that, plus where
+    /// the pawn is, re-announced when it moves somewhere else.
+    /// </summary>
+    public enum ActivityUpdateVerbosity
+    {
+        Off,
+        Minimal,
+        Medium,
+        Full
     }
 
     /// <summary>

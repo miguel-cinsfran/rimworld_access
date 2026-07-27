@@ -706,6 +706,12 @@ namespace RimWorldAccess
                 () => RimWorldAccessMod_Settings.Settings?.AnnounceForcedSlowdowns ?? false,
                 v => { if (RimWorldAccessMod_Settings.Settings != null) RimWorldAccessMod_Settings.Settings.AnnounceForcedSlowdowns = v; },
                 "RimWorldAccess.UI.Options.ForcedSlowdowns.Desc".Translate()));
+            accessSettings.Settings.Add(new EnumSetting<ActivityUpdateVerbosity>(
+                "RimWorldAccess.UI.Options.ActivityUpdates.Label".Translate().ToString(),
+                () => RimWorldAccessMod_Settings.Settings?.SelectedPawnActivityUpdates ?? ActivityUpdateVerbosity.Minimal,
+                v => { if (RimWorldAccessMod_Settings.Settings != null) RimWorldAccessMod_Settings.Settings.SelectedPawnActivityUpdates = v; },
+                v => ("RimWorldAccess.UI.Options.ActivityUpdates." + v).Translate().ToString(),
+                v => ("RimWorldAccess.UI.Options.ActivityUpdates." + v + "Desc").Translate().ToString()));
             accessSettings.Settings.Add(new CheckboxSetting("RimWorldAccess.UI.Options.AbilityCasts.Label".Translate(),
                 () => RimWorldAccessMod_Settings.Settings?.AnnounceAbilityCasts ?? true,
                 v => { if (RimWorldAccessMod_Settings.Settings != null) RimWorldAccessMod_Settings.Settings.AnnounceAbilityCasts = v; },
