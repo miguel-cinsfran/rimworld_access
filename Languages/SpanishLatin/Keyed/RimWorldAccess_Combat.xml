@@ -29,6 +29,13 @@
   <RimWorldAccess.Combat.Shell.Hit>{0} impactó a {1} en {2}, {3}</RimWorldAccess.Combat.Shell.Hit>
   <RimWorldAccess.Combat.Shell.Landed>{0} cayó en {1}, {2}</RimWorldAccess.Combat.Shell.Landed>
 
+  <!-- Casteo de habilidades (psicasts, poderes de título real, habilidades de Anomalía y de mods).
+       {0} = pawn, {1} = nombre de la habilidad. Verbos en presente para evitar concordancia de
+       género con el nombre de la habilidad ("lanzada" / "lanzado"). -->
+  <RimWorldAccess.Combat.Cast.Started>{0} prepara {1}.</RimWorldAccess.Combat.Cast.Started>
+  <RimWorldAccess.Combat.Cast.Completed>{0} lanza {1}.</RimWorldAccess.Combat.Cast.Completed>
+  <RimWorldAccess.Combat.Cast.Interrupted>{0} deja de lanzar {1}.</RimWorldAccess.Combat.Cast.Interrupted>
+
   <!-- Generic target and location fallbacks. Used when target.HasThing is
        false and a labeled placeholder is needed for sentence composition. -->
   <RimWorldAccess.Combat.Target.GenericTargetLabel>objetivo</RimWorldAccess.Combat.Target.GenericTargetLabel>

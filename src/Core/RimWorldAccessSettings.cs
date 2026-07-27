@@ -63,6 +63,14 @@ namespace RimWorldAccess
         public WorkMenuView DefaultWorkMenuView = WorkMenuView.Focused;
 
         /// <summary>
+        /// When true, announces a player pawn starting, finishing or breaking off an ability cast
+        /// (psycasts, royal-title abilities, Anomaly powers, modded abilities).
+        /// Example: "Mila is casting Word of trust." then "Mila casts Word of trust."
+        /// Default: true — the charge-up sound alone is inaudible in a firefight.
+        /// </summary>
+        public bool AnnounceAbilityCasts = true;
+
+        /// <summary>
         /// When true, announces messages when the game forces Normal speed due to threats
         /// ("Game slowed down by presence of threat." / "Threat passed. Game speed resumed.").
         /// Default: false (silent).
@@ -98,6 +106,7 @@ namespace RimWorldAccess
             Scribe_Values.Look(ref AnnounceTerrain, "AnnounceTerrain", true);
             Scribe_Values.Look(ref DefaultWorkMenuView, "DefaultWorkMenuView", WorkMenuView.Focused);
             Scribe_Values.Look(ref AnnounceForcedSlowdowns, "AnnounceForcedSlowdowns", false);
+            Scribe_Values.Look(ref AnnounceAbilityCasts, "AnnounceAbilityCasts", true);
             Scribe_Values.Look(ref LearningHintShownCount, "LearningHintShownCount", 0);
             Scribe_Collections.Look(ref RetaughtOverriddenConcepts, "RetaughtOverriddenConcepts", LookMode.Value);
             if (Scribe.mode == LoadSaveMode.LoadingVars && RetaughtOverriddenConcepts == null)

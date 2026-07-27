@@ -136,6 +136,8 @@
   <RimWorldAccess.UI.Options.WorkMenuView.TableDesc>Filas de personajes por columnas de tipo de trabajo; refleja el juego original y permite ordenar y pintar.</RimWorldAccess.UI.Options.WorkMenuView.TableDesc>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Label>Anunciar reducciones de velocidad forzadas por amenazas</RimWorldAccess.UI.Options.ForcedSlowdowns.Label>
   <RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>Cuando está activado, anuncia cuando el juego fuerza la velocidad Normal por una amenaza cercana, y cuando la reducción termina. Solo se activa si la velocidad que elegiste es más rápida que Normal.</RimWorldAccess.UI.Options.ForcedSlowdowns.Desc>
+  <RimWorldAccess.UI.Options.AbilityCasts.Label>Anunciar el casteo de habilidades</RimWorldAccess.UI.Options.AbilityCasts.Label>
+  <RimWorldAccess.UI.Options.AbilityCasts.Desc>Cuando está activado, avisa cuando uno de tus pawns empieza a lanzar una habilidad, cuando el lanzamiento se completa y cuando se interrumpe. Incluye psicasts, habilidades de título real, poderes de Anomalía y habilidades de mods. El sonido de carga solo es fácil de perder en medio de un tiroteo.</RimWorldAccess.UI.Options.AbilityCasts.Desc>
 
   <!-- =================================================================
        Generic dialog frame (WindowlessDialogState).
