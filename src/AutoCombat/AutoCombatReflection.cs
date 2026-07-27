@@ -282,6 +282,35 @@ namespace RimWorldAccess
             return false;
         }
 
+        // The mod's own label keys, so a row is spoken with exactly the words its gizmo shows
+        // (and follows the mod's translation, whatever language it ships).
+        private static readonly Dictionary<Flag, string> ModLabelKeys = new Dictionary<Flag, string>
+        {
+            { Flag.Hunt, "BS_DraftHuntLabel" },
+            { Flag.TakeCover, "BS_TakeCoverLabel" },
+            { Flag.MeleeCharge, "BS_MeleeChargeLabel" },
+            { Flag.FullAIControl, "BS_FullAIControlLabel" },
+            { Flag.AutoUseAll, "BS_AutoUseAllAbilitiesLabel" }
+        };
+
+        /// <summary>
+        /// The mod's own name for a switch, or empty if the key is missing so the caller can
+        /// fall back to its own wording.
+        /// </summary>
+        public static string ModLabel(Flag flag)
+        {
+            if (!ModLabelKeys.TryGetValue(flag, out string key))
+            {
+                return "";
+            }
+
+            // Not CanTranslate: the mod ships English only, so that returns false under any other
+            // active language even though Translate still resolves through the English fallback.
+            // A genuinely missing key is the one that comes back as the key itself.
+            string label = key.Translate().ToString();
+            return (string.IsNullOrWhiteSpace(label) || label == key) ? "" : label;
+        }
+
         /// <summary>
         /// The colonists this menu acts on: the current selection, or the single selected pawn.
         /// Mirrors the mod's own batch menu, which walks <c>Find.Selector.SelectedPawns</c>.

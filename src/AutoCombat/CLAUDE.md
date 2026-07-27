@@ -61,7 +61,15 @@ Selections are usually mixed, so this is the module's main design concern:
 - **Input routing:** priority **0.287**, ahead of map navigation.
 - Registered in `KeyboardHelper.IsAnyAccessibilityMenuActive` and `TypeaheadConsumerRegistry`
   (0.287).
-- **Strings:** `Languages/{English,SpanishLatin}/Keyed/RimWorldAccess_AutoCombat.xml`.
+- **Strings:** `Languages/{English,SpanishLatin}/Keyed/RimWorldAccess_AutoCombat.xml`. Row names
+  come from the **mod's own** keys (`BS_DraftHuntLabel`, `BS_TakeCoverLabel`, …) so the menu says
+  exactly what the gizmo shows; our keys are only a fallback. Resolve them with `Translate()` and
+  reject a result equal to the key — **not** `CanTranslate()`, which is false for a mod shipping
+  English only whenever the active language is something else, even though `Translate()` resolves
+  fine through the English fallback.
+
+Announcements stay short: a row is `name: state. position` plus at most a clipped caveat
+("Sin efecto en 2 sin Auto-Combat"), not a sentence explaining the mechanic.
 
 ## DO NOT
 - Do not add a hard assembly reference to the mod.

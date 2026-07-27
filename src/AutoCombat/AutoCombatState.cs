@@ -46,6 +46,16 @@ namespace RimWorldAccess
                 { AutoCombatReflection.Flag.AutoUseAll, "RimWorldAccess.AutoCombat.Row.AutoUseAll" }
             };
 
+        /// <summary>
+        /// A row's name: the mod's own gizmo wording when it can be read, so the menu and the
+        /// gizmo agree, falling back to ours if the mod's key is missing.
+        /// </summary>
+        private static string RowLabel(AutoCombatReflection.Flag flag)
+        {
+            string modLabel = AutoCombatReflection.ModLabel(flag);
+            return string.IsNullOrEmpty(modLabel) ? RowLabelKeys[flag].Loc().ToString() : modLabel;
+        }
+
         public static bool IsActive { get; private set; }
 
         private static readonly List<Pawn> pawns = new List<Pawn>();
@@ -215,7 +225,7 @@ namespace RimWorldAccess
                 SoundDefOf.ClickReject.PlayOneShotOnCamera();
             }
 
-            string label = RowLabelKeys[flag].Loc().ToString();
+            string label = RowLabel(flag);
             string state = (value
                 ? "RimWorldAccess.AutoCombat.On"
                 : "RimWorldAccess.AutoCombat.Off").Loc().ToString();
@@ -285,7 +295,7 @@ namespace RimWorldAccess
             }
 
             var flag = Rows[selectedIndex];
-            string label = RowLabelKeys[flag].Loc().ToString();
+            string label = RowLabel(flag);
             int on = CountOn(flag);
 
             string state;
@@ -401,7 +411,7 @@ namespace RimWorldAccess
             var labels = new List<string>();
             foreach (var flag in Rows)
             {
-                labels.Add(RowLabelKeys[flag].Loc().ToString());
+                labels.Add(RowLabel(flag));
             }
 
             if (typeahead.ProcessCharacterInput(c, labels, out int newIndex))
