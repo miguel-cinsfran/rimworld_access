@@ -523,6 +523,25 @@ namespace RimWorldAccess
         }
 
         /// <summary>
+        /// Whether the RimWorld window currently has focus. Refreshed once per frame from the
+        /// GUI loop rather than read on demand, because speech is also produced from tick code
+        /// and Unity's focus flag is only reliable on the main GUI thread.
+        /// </summary>
+        public static bool GameWindowFocused { get; set; } = true;
+
+        /// <summary>
+        /// The game keeps running (and talking) while the player works in another window. Some
+        /// want to hear the colony from the browser; others find it noise. The setting decides,
+        /// and it applies to every announcement — this is the one point all of them pass through.
+        /// Defaults to speaking, so nothing goes quiet unless it was asked for.
+        /// </summary>
+        private static bool ShouldSpeakForWindowFocus()
+        {
+            return GameWindowFocused
+                   || !(RimWorldAccessMod_Settings.Settings?.SpeakOnlyWhenGameFocused ?? false);
+        }
+
+        /// <summary>
         /// Core speech implementation shared by all public Speak overloads.
         /// </summary>
         /// <param name="text">The text to speak</param>
@@ -537,6 +556,11 @@ namespace RimWorldAccess
             if (!isInitialized)
             {
                 Log.Warning("[RimWorld Access] Speak called but screen reader is not initialized");
+                return;
+            }
+
+            if (!ShouldSpeakForWindowFocus())
+            {
                 return;
             }
 

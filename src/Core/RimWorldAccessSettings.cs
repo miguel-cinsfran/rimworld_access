@@ -63,6 +63,14 @@ namespace RimWorldAccess
         public WorkMenuView DefaultWorkMenuView = WorkMenuView.Focused;
 
         /// <summary>
+        /// When true, nothing is spoken while the RimWorld window is in the background. The colony
+        /// keeps running when you alt-tab, and whether that should keep talking is personal — some
+        /// want to follow it while working elsewhere, others want silence. Applies to every
+        /// announcement, not just one feature. Default: false (speak in the background, as before).
+        /// </summary>
+        public bool SpeakOnlyWhenGameFocused = false;
+
+        /// <summary>
         /// How much the selected pawn's changing activity is announced while it is selected.
         /// Independent of ability casts, which are announced for every player pawn regardless of
         /// selection. Default: Minimal (only a genuinely different job).
@@ -115,6 +123,7 @@ namespace RimWorldAccess
             Scribe_Values.Look(ref AnnounceForcedSlowdowns, "AnnounceForcedSlowdowns", false);
             Scribe_Values.Look(ref AnnounceAbilityCasts, "AnnounceAbilityCasts", true);
             Scribe_Values.Look(ref SelectedPawnActivityUpdates, "SelectedPawnActivityUpdates", ActivityUpdateVerbosity.Minimal);
+            Scribe_Values.Look(ref SpeakOnlyWhenGameFocused, "SpeakOnlyWhenGameFocused", false);
             Scribe_Values.Look(ref LearningHintShownCount, "LearningHintShownCount", 0);
             Scribe_Collections.Look(ref RetaughtOverriddenConcepts, "RetaughtOverriddenConcepts", LookMode.Value);
             if (Scribe.mode == LoadSaveMode.LoadingVars && RetaughtOverriddenConcepts == null)

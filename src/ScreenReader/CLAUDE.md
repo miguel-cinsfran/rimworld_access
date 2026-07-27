@@ -10,6 +10,10 @@ Provides cross-platform screen reader integration via the Prism library and cust
 - **PrismNative.cs** - Low-level Prism C API bindings: delegates, enums, structs, UTF-8 marshaling helpers
 - **NativeLibraryLoader.cs** - Cross-platform native library loader (LoadLibraryW on Windows, dlopen on Unix)
 
+### Window Focus (1 file)
+- **WindowFocusWatcher.cs** - Answers "is RimWorld the window the player is looking at?", for the global `SpeakOnlyWhenGameFocused` setting gated inside `TolkHelper.SpeakInternal`.
+  **Do not switch this to Unity's `Application.isFocused`**: measured live, it stays `true` with another application in the foreground *and* while RimWorld is minimised, so gating speech on it silently does nothing. It compares the foreground window's owning **process id** against our own — not a window handle, because Unity's `Process.MainWindowHandle` does not reliably point at the game's window (that comparison reported "not focused" with the game in front). Windows-only and fails **open**: on macOS/Linux, or if the P/Invoke throws, it reports focused so speech is never lost to a check that cannot be answered.
+
 ### Speech Sanitization (1 file)
 - **SpeechSanitizer.cs** - Centralized text cleanup pipeline (tag stripping, punctuation fixes, whitespace normalization). Runs automatically in TolkHelper.Speak() before text reaches the screen reader.
 
