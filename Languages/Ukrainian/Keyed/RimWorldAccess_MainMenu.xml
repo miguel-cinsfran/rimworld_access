@@ -764,4 +764,19 @@
   <RimWorldAccess.StartingPawn.MovedToSection>{0} переміщено до {1}</RimWorldAccess.StartingPawn.MovedToSection>
   <RimWorldAccess.StartingPawn.MoveToLeftBehind>Перемістити до залишених</RimWorldAccess.StartingPawn.MoveToLeftBehind>
   <RimWorldAccess.StartingPawn.MoveToSelected>Перемістити до вибраних</RimWorldAccess.StartingPawn.MoveToSelected>
+  <RimWorldAccess.ModSettings.OpeningWithItem>{0} ... {1}</RimWorldAccess.ModSettings.OpeningWithItem>
+  <RimWorldAccess.ModSettings.Menu.NoSettings>Не вдалося прочитати налаштування цього мода. Можливо, він використовує елементи керування, які ця функція ще не підтримує.</RimWorldAccess.ModSettings.Menu.NoSettings>
+  <RimWorldAccess.ModSettings.Menu.Checkbox>прапорець</RimWorldAccess.ModSettings.Menu.Checkbox>
+  <RimWorldAccess.ModSettings.Menu.Button>кнопка</RimWorldAccess.ModSettings.Menu.Button>
+  <RimWorldAccess.ModSettings.Menu.RadioButton>перемикач</RimWorldAccess.ModSettings.Menu.RadioButton>
+  <RimWorldAccess.ModSettings.Menu.Slider>повзунок</RimWorldAccess.ModSettings.Menu.Slider>
+  <RimWorldAccess.ModSettings.Menu.TextField>текстове поле</RimWorldAccess.ModSettings.Menu.TextField>
+  <RimWorldAccess.ModSettings.Menu.IntEntry>число</RimWorldAccess.ModSettings.Menu.IntEntry>
+  <RimWorldAccess.ModSettings.Menu.On>увімк</RimWorldAccess.ModSettings.Menu.On>
+  <RimWorldAccess.ModSettings.Menu.Off>вимк</RimWorldAccess.ModSettings.Menu.Off>
+  <RimWorldAccess.ModSettings.Menu.Selected>вибрано</RimWorldAccess.ModSettings.Menu.Selected>
+  <RimWorldAccess.ModSettings.Menu.NotSelected>не вибрано</RimWorldAccess.ModSettings.Menu.NotSelected>
+  <RimWorldAccess.ModSettings.Menu.CheckboxToggled>{0}, {1}</RimWorldAccess.ModSettings.Menu.CheckboxToggled>
+  <RimWorldAccess.ModSettings.Menu.Activated>{0}, активовано</RimWorldAccess.ModSettings.Menu.Activated>
+  <RimWorldAccess.ModSettings.Menu.RadioSelected>{0}, вибрано</RimWorldAccess.ModSettings.Menu.RadioSelected>
 </LanguageData>
