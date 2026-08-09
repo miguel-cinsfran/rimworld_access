@@ -761,4 +761,8 @@
 
   <RimWorldAccess.PawnFilter.TraitEffects>Эффекты: {0}.</RimWorldAccess.PawnFilter.TraitEffects>
   <RimWorldAccess.PawnFilter.TraitCannotDo>Не может: {0}</RimWorldAccess.PawnFilter.TraitCannotDo>
+  <RimWorldAccess.StartingPawn.MinimumSelectedPawns>Минимум выбрано: {0}</RimWorldAccess.StartingPawn.MinimumSelectedPawns>
+  <RimWorldAccess.StartingPawn.MovedToSection>{0} перемещён в {1}</RimWorldAccess.StartingPawn.MovedToSection>
+  <RimWorldAccess.StartingPawn.MoveToLeftBehind>Переместить в оставшихся</RimWorldAccess.StartingPawn.MoveToLeftBehind>
+  <RimWorldAccess.StartingPawn.MoveToSelected>Переместить в выбранные</RimWorldAccess.StartingPawn.MoveToSelected>
 </LanguageData>

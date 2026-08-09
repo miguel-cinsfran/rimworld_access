@@ -760,4 +760,8 @@
   <RimWorldAccess.StartingPawn.RemovePawn>Видалити персонажа</RimWorldAccess.StartingPawn.RemovePawn>
   <RimWorldAccess.PawnFilter.TraitEffects>Ефекти: {0}.</RimWorldAccess.PawnFilter.TraitEffects>
   <RimWorldAccess.PawnFilter.TraitCannotDo>Не може: {0}</RimWorldAccess.PawnFilter.TraitCannotDo>
+  <RimWorldAccess.StartingPawn.MinimumSelectedPawns>Мінімум вибрано: {0}</RimWorldAccess.StartingPawn.MinimumSelectedPawns>
+  <RimWorldAccess.StartingPawn.MovedToSection>{0} переміщено до {1}</RimWorldAccess.StartingPawn.MovedToSection>
+  <RimWorldAccess.StartingPawn.MoveToLeftBehind>Перемістити до залишених</RimWorldAccess.StartingPawn.MoveToLeftBehind>
+  <RimWorldAccess.StartingPawn.MoveToSelected>Перемістити до вибраних</RimWorldAccess.StartingPawn.MoveToSelected>
 </LanguageData>
